@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f9faf8" />
+  <title>Bito — Ada yang nemenin.</title>
+  <meta name="description" content="Teman kecil di desktopmu. Ngobrol dengan caramu, pasang pengingat, dan bikin keseharian terasa lebih ringan bersama Bito." />
+  <meta property="og:title" content="Bito — Ada yang nemenin." />
+  <meta property="og:description" content="Teman ngobrol, teman mikir, teman di desktopmu. Kenalan sama Bito." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://bito-companion-studio.feboyfierlyan10.chatgpt.site/assets/social.png" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preload" href="assets/bito-sans.ttf" as="font" type="font/ttf" crossorigin />
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="assets/vendor/gsap.min.js"></script>
+  <script defer src="assets/vendor/ScrollTrigger.min.js"></script>
+  <script defer src="assets/vendor/rive.js"></script>
+  <script defer src="site.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Langsung ke konten</a>
+  <div class="scroll-progress" aria-hidden="true"></div>
+  <header class="header">
+    <a class="wordmark" href="#" aria-label="Bito, kembali ke atas"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 19C1 23 1 0 18 12L20 15C32-3 48 15 23 20" fill="#78bf4f"/><path d="M20 17v15" stroke="#226d40" stroke-width="5" stroke-linecap="round"/></svg>Bito<span class="brand-dot">✳</span></a>
+    <nav aria-label="Navigasi utama"><a href="#kenalan">Kenalan</a><a href="#gaya">Gaya ngobrol</a><a class="nav-download" href="#download">Download Bito <span aria-hidden="true">↗</span></a></nav>
+  </header>
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow hero-in"><span class="status-dot"></span> LITTLE COMPANION. REAL COMPANY.</p>
+        <h1 id="hero-title"><span class="line"><span>Hari biasa.</span></span><span class="line"><span>Ada <em>Bito.</em></span></span></h1>
+        <p class="hero-description hero-in">Buat cerita random, mikir bareng,<br />atau sekadar ditemenin.</p>
+        <a class="button primary hero-in" href="#download"><span>Kenalan sama Bito</span><span class="button-icon" aria-hidden="true">↗</span></a>
+        <p class="platform-note hero-in"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="3" width="16" height="11" rx="2"/><path d="M6 18h8M10 14v4"/></svg>Hadir di macOS & Windows</p>
+      </div>
+      <div class="hero-scene" aria-label="Bito, karakter hijau kecil dengan dua daun di kepala">
+        <div class="scene-orbit orbit-one" aria-hidden="true"></div><div class="scene-orbit orbit-two" aria-hidden="true"></div>
+        <span class="scene-spark spark-one" aria-hidden="true">✳</span><span class="scene-spark spark-two" aria-hidden="true">+</span>
+        <div class="hero-greeting bubble received">heii, lagi ngapain?<span class="small-sprout" aria-hidden="true">🌱</span></div>
+        <button class="mascot-button" id="mascot-button" aria-label="Sapa Bito">
+          <span class="mascot-viewport"><img src="assets/bito.png" width="1024" height="1024" alt="Bito" fetchpriority="high" /><canvas id="bito-canvas" aria-hidden="true"></canvas></span>
+        </button>
+        <div class="mascot-shadow" aria-hidden="true"></div>
+        <span class="floating-tag"><span class="status-dot"></span> teman desktopmu</span>
+        <svg class="orbit-doodle" viewBox="0 0 160 80" fill="none" aria-hidden="true"><path d="M5 58C51 3 107 4 141 26M127 6l18 22-27 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="hero-bottom"><span>Untuk hari sibuk.<br />Juga hari yang gitu-gitu aja.</span><a href="#kenalan" class="scroll-cue">Scroll buat kenalan <span aria-hidden="true">↓</span></a></div>
+    </section>
+
+    <section class="intro wrap" id="kenalan" aria-labelledby="intro-title">
+      <p class="section-index reveal">01 / SAY HELLO</p>
+      <h2 class="statement reveal" id="intro-title">Dari satu <span class="serif">“hai”</span>,<br />jadi teman <span class="blue">sehari-hari.</span></h2>
+      <p class="intro-description reveal">Bito tinggal di desktopmu. Dekat saat dibutuhkan,<br class="desktop-br" />kasih ruang saat kamu lagi fokus.</p>
+    </section>
+
+    <section class="journey" aria-label="Perjalanan dari kenalan sampai hadir di desktop">
+      <div class="journey-stage">
+        <div class="journey-top wrap"><p class="section-index">KENALAN SEBENTAR. LANJUT SEHARIAN.</p><span class="journey-counter"><b id="journey-number">01</b> / 03</span></div>
+        <div class="desktop-preview" id="desktop-preview">
+          <div class="desktop-toolbar"><span class="traffic-lights" aria-hidden="true"><i></i><i></i><i></i></span><span>desktop kamu</span><span aria-hidden="true">☀</span></div>
+          <div class="desktop-wallpaper"><div class="wallpaper-orb orb-a"></div><div class="wallpaper-orb orb-b"></div><div class="wallpaper-line"></div><span class="desktop-note">your space.<br /><i>a little less lonely.</i></span></div>
+          <div class="setup-preview" id="setup-preview"><span class="setup-label">Bito</span><p class="setup-title">Hai, aku Bito.</p><p class="setup-description">Aku panggil kamu siapa?</p><div class="fake-composer"><span>Nama panggilanmu</span><span class="send-mini" aria-hidden="true">↑</span></div></div>
+          <div class="journey-mascot" id="journey-mascot"><img src="assets/bito.png" alt="" width="1024" height="1024" loading="lazy" /></div>
+          <div class="journey-chat" id="journey-chat"><div class="bubble received">udah nyampe!<br />mau cerita apa hari ini?</div><div class="bubble sent">kayaknya butuh teman mikir deh</div><div class="preview-composer"><span>iMessage, tapi sama Bito.</span><span class="send-mini" aria-hidden="true">↑</span></div></div>
+          <div class="desktop-dock" aria-hidden="true"><span></span><span></span><span></span><span class="dock-bito">🌱</span><span></span></div>
+        </div>
+        <div class="journey-bottom wrap"><div class="journey-copy"><p id="journey-kicker">KENALAN DULU</p><h3 id="journey-title">Satu nama. Satu teman baru.</h3><p id="journey-description">Login Google, pilih nama panggilanmu, lalu gaya ngobrol yang kamu suka.</p></div><div class="journey-dots" aria-label="Tahapan ilustrasi"><span class="active"></span><span></span><span></span></div><span class="preview-label">Ilustrasi pengalaman aplikasi</span></div>
+      </div>
+    </section>
+
+    <section class="tones wrap" id="gaya" aria-labelledby="tones-title">
+      <div class="tones-copy"><p class="section-index reveal">02 / YOUR KIND OF COMPANY</p><h2 class="reveal" id="tones-title">Satu <span class="serif">“bro”.</span><br />Beda <span class="blue">vibe.</span></h2><p class="section-description reveal">Kamu punya caramu sendiri.<br />Bito bisa ngikutin.</p>
+        <div class="tone-options reveal" role="group" aria-label="Coba gaya ngobrol Bito">
+          <button data-tone="direct" aria-pressed="false"><span>01</span>To the point<span class="tone-check" aria-hidden="true">↗</span></button>
+          <button data-tone="chill" aria-pressed="true"><span>02</span>Chill<span class="tone-check" aria-hidden="true">↗</span></button>
+          <button data-tone="humor" aria-pressed="false"><span>03</span>Humoris<span class="tone-check" aria-hidden="true">↗</span></button>
+          <button data-tone="care" aria-pressed="false"><span>04</span>Care<span class="tone-check" aria-hidden="true">↗</span></button>
+        </div>
+      </div>
+      <div class="tone-demo reveal"><div class="tone-demo-header"><span class="mini-avatar"><img src="assets/bito.png" alt="" width="1024" height="1024" loading="lazy" /></span><span>Bito<small><span class="status-dot"></span> di sini</small></span><span class="tone-label" id="tone-label">CHILL</span></div><div class="tone-conversation"><span class="conversation-day">Contoh percakapan</span><div class="bubble sent">bro</div><div class="tone-reply-area"><div class="typing bubble received" id="typing" hidden aria-hidden="true"><i></i><i></i><i></i></div><div class="bubble received" id="tone-reply" aria-live="polite">wut</div></div></div><p id="tone-caption">Santai aja. Nggak harus ada topik besar.</p><div class="tone-composer" aria-hidden="true"><span>Cerita aja...</span><span class="send-mini">↑</span></div></div>
+    </section>
+
+    <section class="everyday" id="bantuan" aria-labelledby="everyday-title">
+      <div class="wrap"><div class="everyday-heading"><p class="section-index reveal">03 / LITTLE THINGS, LIGHTER DAYS</p><h2 class="reveal" id="everyday-title">Hal kecil.<br /><span class="serif">Lumayan berarti.</span></h2><p class="section-description reveal">Ngobrol boleh.<br />Minta tolong juga boleh.</p></div>
+        <div class="help-row reveal"><div class="help-number">01</div><div class="help-copy"><h3>“Nanti ingetin, ya.”</h3><p>Pengingat dan timer yang kamu minta,<br />muncul lewat bubble di desktop.</p></div><div class="reminder-card sample-card"><div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></div><div><small>PENGINGAT · CONTOH</small><strong>Minum air dulu</strong><span>15.30</span></div><span class="reminder-dot" aria-hidden="true"></span></div></div>
+        <div class="help-row reveal"><div class="help-number">02</div><div class="help-copy"><h3>“Bantu pecah jadi langkah.”</h3><p>Rencana yang tadinya numpuk,<br />jadi checklist yang bisa dicentang.</p></div><fieldset class="checklist-card sample-card"><legend>CONTOH CHECKLIST</legend><label><input type="checkbox" checked /><span>Kumpulin referensi</span></label><label><input type="checkbox" /><span>Susun outline</span></label><label><input type="checkbox" /><span>Kirim draft pertama</span></label></fieldset></div>
+        <div class="help-row reveal"><div class="help-number">03</div><div class="help-copy"><h3>“Bikinin file ini, dong.”</h3><p>TXT, Markdown, CSV, atau satu folder.<br />Kamu tetap pilih tempat menyimpannya.</p></div><div class="file-card sample-card"><div class="file-sheet" aria-hidden="true">md</div><div><small>CONTOH HASIL</small><strong>ide-hari-ini.md</strong><span>Catatan kecil, jadi file beneran.</span></div><span class="file-arrow" aria-hidden="true">↗</span></div></div>
+      </div>
+    </section>
+
+    <section class="space wrap" aria-labelledby="space-title"><div><p class="section-index reveal">YOUR DESKTOP. YOUR RULES.</p><h2 class="reveal" id="space-title">Dekat,<br /><span class="serif">secukupnya.</span></h2></div><div class="space-copy reveal"><p>Klik untuk ngobrol. Seret ke tempat yang nyaman. Lagi butuh tenang? Ada Jangan Ganggu.</p><p>Profil dan riwayat disimpan di perangkat. Kamu bisa mengelola memori dan menghapus chat kapan pun. Saat ngobrol, konteks dikirim ke layanan AI.</p><a class="text-link" href="https://github.com/feboyfierlyan/bito-desktop#kamu-tetap-punya-kendali" target="_blank" rel="noopener noreferrer">Kenali cara Bito bekerja <span aria-hidden="true">↗</span></a></div></section>
+
+    <section class="questions wrap" aria-labelledby="questions-title"><p class="section-index reveal" id="questions-title">SEBELUM KENALAN</p><div class="faq-list reveal">
+      <details><summary>Bisa langsung dipakai siapa saja?<span aria-hidden="true">+</span></summary><p>Installer dan source code bisa diunduh. Layanan AI saat ini masih demo untuk akun Google yang diizinkan pemilik. Pengguna demo tidak perlu memasukkan API key sendiri.</p></details>
+      <details><summary>Bito bisa bantu apa saja sekarang?<span aria-hidden="true">+</span></summary><p>Ngobrol, timer, pengingat, checklist, memori yang kamu minta, dan membuat file teks atau satu folder. Pengingat bekerja saat aplikasi berjalan. Kalender, pencarian web, konversi PDF/Office, dan voice belum tersedia.</p></details>
+      <details><summary>Bagaimana cara memasangnya?<span aria-hidden="true">+</span></summary><p>Pilih unduhan yang sesuai perangkatmu. Paket demo belum memiliki sertifikat penerbit/notarization Apple, jadi sistem mungkin menampilkan peringatan. <a href="https://github.com/feboyfierlyan/bito-desktop/blob/main/docs/INSTALL.md" target="_blank" rel="noopener noreferrer">Ikuti panduan instalasi tim.</a></p></details>
+    </div></section>
+
+    <section class="download-world" id="download" aria-labelledby="download-title"><div class="world-art" aria-hidden="true"></div><div class="download-panel"><p class="section-index">A LITTLE COMPANY GOES A LONG WAY.</p><h2 id="download-title">Ada tempat<br />buat <span class="blue serif">Bito?</span></h2><p>Teman kecilmu, satu download lagi.</p><div class="download-links">
+        <a href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-macOS-arm64.dmg"><span class="os-icon" aria-hidden="true">↙</span><span>Mac<small>Apple Silicon · M1 atau lebih baru</small></span><span aria-hidden="true">↗</span></a>
+        <a href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-macOS-x64.dmg"><span class="os-icon" aria-hidden="true">↙</span><span>Mac<small>Intel</small></span><span aria-hidden="true">↗</span></a>
+        <a href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-Windows-x64-Setup.exe"><span class="os-icon" aria-hidden="true">↙</span><span>Windows<small>64-bit</small></span><span aria-hidden="true">↗</span></a>
+      </div><p class="download-note">v0.5.1 · Akses AI khusus akun demo yang diizinkan.</p><a class="text-link" href="https://github.com/feboyfierlyan/bito-desktop/releases/latest" target="_blank" rel="noopener noreferrer">Semua unduhan & catatan rilis <span aria-hidden="true">↗</span></a></div></section>
+  </main>
+  <footer class="footer wrap"><a class="wordmark" href="#">Bito<span class="brand-dot">✳</span></a><p>Teman kecil untuk menemani harimu.<small>Sebuah proyek kuliah. Dibuat untuk terus tumbuh.</small></p><div><a href="https://github.com/feboyfierlyan/bito-desktop" target="_blank" rel="noopener noreferrer">GitHub ↗</a><button id="motion-toggle" aria-pressed="false">Kurangi gerakan</button><span>© 2026 Bito Project</span></div></footer>
+</body>
+</html>
