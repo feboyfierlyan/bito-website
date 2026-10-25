@@ -4,3 +4,6 @@
 - Rive Canvas 2.45.0: MIT license. Full text: dist/assets/RIVE-LICENSE.txt. https://github.com/rive-app/rive-wasm
 - Google Sans: SIL Open Font License 1.1. Full text: dist/assets/FONT-LICENSE.txt.
 - Bito character, original pattern artwork, poster and .riv animation: supplied by the Bito project; original project licensing applies.
+
+- Plus Jakarta Sans: SIL Open Font License 1.1. Full text: dist/assets/JAKARTA-LICENSE.txt. https://github.com/tokotype/PlusJakartaSans
+- GSAP Flip and Draggable 3.15.0 are included under the same GSAP standard license; original headers preserved.

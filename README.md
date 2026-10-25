@@ -1,7 +1,9 @@
-# Bito — Ada yang nemenin.
+# Bito — Hai. Aku Bito.
 
-Standalone static Bito landing page. GSAP and ScrollTrigger are vendored locally; the original Bito Rive file and poster come from the Bito desktop project. No AI keys, sign-in, analytics, or backend requests are included. Conversation cards are labeled illustrative examples.
+A character-led website for Bito. One persistent Rive character moves from the opening greeting into an interactive desktop scene. Drag Bito, open its chat, try four conversation styles, explore small helpful actions, and find the macOS or Windows download.
 
-Serve `dist/` with a static HTTP server. Source: HTML, CSS, and JavaScript; no build step. `.openai/hosting.json` identifies the Sites deployment. Respect reduced motion; the footer also offers a motion toggle.
+Serve `dist/` with a static HTTP server. No build step or dependency installation is needed. Run `node scripts/check.cjs` for geometry, asset, anchor and source checks.
 
-Download links point to the published v0.5.1 desktop release. The desktop AI demo remains restricted to invited accounts. Artwork/code licensing follows the original Bito project; third-party notices are in `THIRD_PARTY.md` and `dist/assets/`.
+GSAP 3.15.0, ScrollTrigger, Flip and Draggable are vendored. Plus Jakarta Sans is stored locally. The original Bito poster stays visible until the Rive canvas has painted, and the same runtime remains mounted throughout the scroll story. The page respects reduced motion and has a footer motion toggle. The interactive scenes are explicitly illustrative, stay inside the webpage and do not call AI or collect messages.
+
+All downloads point to the existing v0.5.1 desktop release. AI access in the desktop app remains limited to invited demo accounts. See THIRD_PARTY.md and dist/assets/ for third-party licenses.

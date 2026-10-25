@@ -1,192 +1,114 @@
-/* Bito presentation: local GSAP/Rive assets, no AI or account calls. */
+/* Bito: one Rive instance through the scene; every demo stays browser-local. */
 (() => {
-  const $ = (selector) => document.querySelector(selector);
-  const $$ = (selector) => [...document.querySelectorAll(selector)];
-  const gsap = window.gsap;
-  const ScrollTrigger = window.ScrollTrigger;
-  let manualReduced = false;
-  try { manualReduced = localStorage.getItem('bito-reduced-motion') === 'true'; } catch {}
-  let reduced = manualReduced || matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let riveInstance, rivePainted = false, riveFrame = 0, toneTimer, toneVersion = 0;
-  let motionContext;
-  const motionButton = $('#motion-toggle');
-  const chapters = [
-    ['01', 'KENALAN DULU', 'Satu nama. Satu teman baru.', 'Login Google, pilih nama panggilanmu, lalu gaya ngobrol yang kamu suka.'],
-    ['02', 'BAWA KE DESKTOP', 'Dari sini, ikut harimu.', 'Tahan dan seret Bito keluar jendela perkenalan. Cari tempat yang nyaman.'],
-    ['03', 'TINGGAL PANGGIL', 'Klik. Ngobrol. Lanjut lagi.', 'Chat muncul di dekat Bito. Seret karakternya untuk pindah, atau klik kanan untuk pilihan.'],
-  ];
-  let chapter = -1;
-  function paintChapter(index) {
-    if (chapter === index) return;
-    chapter = index;
-    const item = chapters[index];
-    $('#journey-number').textContent = item[0];
-    $('#journey-kicker').textContent = item[1];
-    $('#journey-title').textContent = item[2];
-    $('#journey-description').textContent = item[3];
-    $$('.journey-dots span').forEach((dot, i) => dot.classList.toggle('active', i === index));
-    $('.setup-title').textContent = index === 0 ? 'Hai, aku Bito.' : 'Enaknya ngobrol gimana?';
-    $('.setup-description').textContent = index === 0 ? 'Aku panggil kamu siapa?' : 'To the point · Chill · Humoris · Care';
-    $('.fake-composer > span').textContent = index === 0 ? 'Nama panggilanmu' : 'Chill';
+  'use strict';
+  const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+  const gsap=window.gsap, Flip=window.Flip, ScrollTrigger=window.ScrollTrigger, Draggable=window.Draggable;
+  const {clamp,geometry,dragBounds,chatPlacement}=window.BitoScene;
+  const stage=$('#stage'), anchor=$('#actor-anchor'), drag=$('#actor-drag'), sway=$('#actor-sway'), mascot=$('#mascot');
+  const shell=$('#desktop-shell'), chat=$('#demo-chat'), messages=$('#demo-messages'), greeting=$('#demo-greeting');
+  const systemMotion=matchMedia('(prefers-reduced-motion: reduce)');
+  let manualMotion=false;
+  try{manualMotion=localStorage.getItem('bito-reduced-motion')==='true';}catch{}
+  let quiet=manualMotion||systemMotion.matches, context, draggable, storyTimeline;
+  let interactive=false, chatOpen=false, opening=false, currentChapter=-1, sceneProgress=0, disposed=false, introPlayed=false;
+  let rive, rig, painted=false, paintFrame=0, dragging=false, talking=false, stageVisible=true;
+  let gaze={active:false,x:.5,y:.5}, lastPointerX=0, lastPointerAt=0, waveAt=0;
+  let desktopTimers=[], personalityTimers=[], helpTimers=[], helpVersion=0;
+  let demoBusy=false, currentHelp='reminder', currentTone='chill', currentScenario='greet';
+  const motionButton=$('#motion-toggle');
+  const clearTimers=list=>{list.forEach(clearTimeout);list.length=0;};
+  const later=(list,fn,ms)=>{const t=setTimeout(()=>{if(!disposed)fn();},ms);list.push(t);return t;};
+  function animateBubble(el){if(gsap&&!quiet)gsap.fromTo(el,{y:7,scaleX:.86,scaleY:.92,opacity:0},{y:0,scaleX:1,scaleY:1,opacity:1,duration:.44,ease:'back.out(1.05)',transformOrigin:el.classList.contains('sent')?'100% 100%':'0% 100%'});}
+  function boolean(name,value){try{const p=rive?.viewModelInstance?.boolean(name);if(p)p.value=value;}catch{}}
+  function setTalking(value){talking=value;boolean('isTalking',value&&!quiet&&!dragging);}
+  function wave(){if(quiet||performance.now()-waveAt<900)return;waveAt=performance.now();try{rive?.viewModelInstance?.trigger('wave')?.trigger();}catch{}if(gsap)gsap.fromTo(sway,{y:0},{y:-7,duration:.19,repeat:1,yoyo:true,ease:'power2.out',overwrite:'auto'});}
+  function fitRive(){if(!rive)return;const c=$('#bito-canvas'),rect=c.getBoundingClientRect();if(!rect.width)return;const density=Math.min(devicePixelRatio||1,2)*c.offsetWidth/rect.width;rive.resizeDrawingSurfaceToCanvas(density);}
+  function syncRive(){if(!rive)return;if(document.hidden||quiet||!stageVisible)rive.pause();else rive.play();boolean('isTalking',talking&&!quiet);}
+  function createEyes(){try{
+    const artboard=rive.artboard,nodes=['Pupil_L','Pupil_R'].map(n=>artboard?.node(n));if(nodes.some(n=>!n))return null;
+    const pupils=nodes.map(node=>({node,x:node.x,y:node.y})),b=rive.bounds;
+    const centers=pupils.map(p=>{const m=p.node.worldTransform(),v={x:m.tx-m.xx*p.x-m.yx*p.y,y:m.ty-m.xy*p.x-m.yy*p.y};m.delete();return v;});
+    const cx=((centers[0].x+centers[1].x)/2-b.minX)/(b.maxX-b.minX),cy=((centers[0].y+centers[1].y)/2-b.minY)/(b.maxY-b.minY);
+    let mix=0,x=0,y=0;const approach=(a,b,s,t=.075)=>b+(a-b)*Math.exp(-Math.max(0,s)/t);
+    return {advance(seconds){const active=gaze.active&&!quiet&&!dragging&&!talking;mix=approach(mix,active?1:0,seconds,.065);if(mix<.001&&!active)return;const dx=(gaze.x-cx)/.55,dy=(gaze.y-cy)/.55,r=Math.max(1,Math.hypot(dx,dy));x=approach(x,dx/r*11,seconds);y=approach(y,dy/r*7,seconds);pupils.forEach(p=>{p.node.x=p.x*(1-mix)+x*mix;p.node.y=p.y+y*mix;});artboard.advance(0);},restore(){pupils.forEach(p=>{p.node.x=p.x;p.node.y=p.y;});artboard.advance(0);}};
+  }catch{return null;}}
+  function verifyPaint(){if(painted||paintFrame||disposed)return;paintFrame=requestAnimationFrame(()=>{paintFrame=0;try{const c=$('#bito-canvas'),ctx=c.getContext('2d');if(!ctx||!c.width)return;const p=ctx.getImageData(0,0,c.width,c.height).data;let visible=0;for(let i=3;i<p.length;i+=128)if(p[i]>45)visible++;if(visible>100){painted=true;$('#mascot-art').classList.add('ready');syncRive();}}catch{}});}
+  function startRive(){if(!window.rive)return;try{window.rive.RuntimeLoader.setWasmUrl(new URL('assets/rive.wasm',location.href).href);rive=new window.rive.Rive({src:'assets/bito.riv',canvas:$('#bito-canvas'),autoplay:true,stateMachine:'State Machine 1',autoBind:true,enableRiveAssetCDN:false,layout:new window.rive.Layout({fit:window.rive.Fit.Contain,alignment:window.rive.Alignment.Center}),onLoad(){fitRive();rig=createEyes();verifyPaint();},onAdvance(event){rig?.advance(event.data);verifyPaint();}});}catch{/* Matching poster remains visible; no loading box. */}}
+  function sceneGeometry(){return geometry(stage.clientWidth,stage.clientHeight,anchor.offsetWidth,{x:shell.offsetLeft,y:shell.offsetTop,w:shell.offsetWidth,h:shell.offsetHeight},innerWidth<=760);}
+  function positionPanels(){if(!interactive)return;const a=mascot.getBoundingClientRect(),f=shell.getBoundingClientRect(),mobile=innerWidth<=760;const actor={x:a.left-f.left,y:a.top-f.top,w:a.width,h:a.height};const frame={w:f.width,h:f.height};
+    const c=chatPlacement(actor,frame,chat.offsetWidth,chat.offsetHeight,mobile);gsap?.set(chat,{left:c.x,top:c.y,right:'auto',bottom:'auto'});
+    if(!chatOpen){const p=chatPlacement(actor,frame,greeting.offsetWidth,greeting.offsetHeight,false);gsap?.set(greeting,{left:p.x,top:mobile?Math.min(actor.y+actor.h+12,frame.h-greeting.offsetHeight-70):p.y,right:'auto'});greeting.dataset.side=p.side;}
   }
-  paintChapter(0);
-  const tones = {
-    direct: { label: 'TO THE POINT', reply: 'apa?', caption: 'Langsung ke inti. Kadang satu kata udah cukup.' },
-    chill: { label: 'CHILL', reply: 'wut', caption: 'Santai aja. Nggak harus ada topik besar.' },
-    humor: { label: 'HUMORIS', reply: 'hadir, ketua', caption: 'Ada aja celetukannya. Lihat situasi juga, tentunya.' },
-    care: { label: 'CARE', reply: 'iyaa, kenapa?', caption: 'Perhatian, tanpa buru-buru kasih nasihat.' },
-  };
-  $$('.tone-options button').forEach((button) => {
-    button.addEventListener('click', () => {
-      const tone = tones[button.dataset.tone];
-      if (!tone || button.getAttribute('aria-pressed') === 'true') return;
-      const version = ++toneVersion;
-      clearTimeout(toneTimer);
-      $$('.tone-options button').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
-      $('#tone-label').textContent = tone.label;
-      $('#tone-caption').textContent = tone.caption;
-      const response = $('#tone-reply');
-      const typing = $('#typing');
-      gsap?.killTweensOf([response, typing]);
-      response.hidden = true;
-      typing.hidden = false;
-      if (gsap && !reduced) gsap.fromTo(typing, { scale: .85, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: .25, transformOrigin: '0% 100%', ease: 'power2.out' });
-      toneTimer = setTimeout(() => {
-        if (version !== toneVersion) return;
-        typing.hidden = true;
-        response.textContent = tone.reply;
-        response.hidden = false;
-        if (gsap && !reduced) gsap.fromTo(response, { scaleX: .7, scaleY: .85, opacity: 0 }, { scaleX: 1, scaleY: 1, opacity: 1, duration: .45, transformOrigin: '0% 100%', ease: 'back.out(1.1)' });
-      }, 900);
-    });
-  });
+  function updateBounds(){if(!draggable)return;const g=sceneGeometry(),r=g.desktop,f={x:shell.offsetLeft,y:shell.offsetTop,w:shell.offsetWidth,h:shell.offsetHeight};draggable.applyBounds(dragBounds(r,f,anchor.offsetWidth,r.scale));}
+  function resetPosition(){if(!gsap)return;gsap.to(drag,{x:0,y:0,duration:quiet?0:.55,ease:'power3.out',onUpdate:positionPanels,onComplete:updateBounds});gsap.to(sway,{rotation:0,duration:.6,ease:'elastic.out(1,.5)'});}
+  function closeChat(immediate=false){if(!chatOpen&&!opening)return;Flip?.killFlipsOf(greeting);chatOpen=false;opening=false;chat.inert=true;chat.setAttribute('aria-hidden','true');mascot.setAttribute('aria-expanded','false');const finish=()=>{if(chatOpen)return;greeting.classList.add('desktop-greeting');shell.append(greeting);gsap?.set(greeting,{clearProps:'all'});positionPanels();if(interactive)gsap?.to(greeting,{autoAlpha:1,duration:quiet?0:.2});};
+    if(gsap){gsap.killTweensOf(chat);gsap.to(chat,{autoAlpha:0,scale:.97,duration:quiet||immediate?0:.23,ease:'power2.in',onComplete:finish});}else{chat.style.visibility='hidden';finish();}}
+  function openChat(){if(!interactive||chatOpen||opening)return;chatOpen=true;opening=true;wave();positionPanels();const state=Flip&&!quiet?Flip.getState(greeting):null;gsap?.killTweensOf([chat,greeting]);gsap?.set(chat,{autoAlpha:1,scale:1});chat.inert=false;chat.setAttribute('aria-hidden','false');greeting.classList.remove('desktop-greeting');greeting.removeAttribute('style');messages.prepend(greeting);mascot.setAttribute('aria-expanded','true');positionPanels();
+    if(state){Flip.from(state,{duration:.55,ease:'power3.inOut',absolute:true,scale:false,onComplete(){opening=false;}});gsap.fromTo(chat,{clipPath:'inset(0% 0% 0% 0% round 50px)',backgroundColor:'#ffffff00'},{clipPath:'inset(0% 0% 0% 0% round 24px)',backgroundColor:'#fffffff7',duration:.5});gsap.fromTo(['.demo-chat-top','.demo-choices','.composer'],{opacity:0,y:5},{opacity:1,y:0,duration:.3,stagger:.03,delay:.15});}else opening=false;
+  }
+  function setInteractive(value){if(interactive===value)return;interactive=value;stage.classList.toggle('story-interactive',value);if(value){draggable?.enable();updateBounds();positionPanels();if(!chatOpen)gsap?.to(greeting,{autoAlpha:1,duration:quiet?0:.3});mascot.setAttribute('aria-label','Buka atau tutup contoh chat Bito');mascot.setAttribute('aria-expanded',String(chatOpen));}else{dragging=false;boolean('isDragging',false);draggable?.disable();closeChat(true);gsap?.set(greeting,{autoAlpha:0});gsap?.set(drag,{x:0,y:0});gsap?.set(sway,{rotation:0});mascot.setAttribute('aria-label','Sapa Bito');mascot.removeAttribute('aria-expanded');}}
+  function chapter(progress){const n=progress<.23?0:progress<.66?1:2;if(n===currentChapter)return;currentChapter=n;$('#chapter-number').textContent=`0${n+1} / 03`;$('#chapter-copy').textContent=['Kenalan sebentar.','Bawa aku ke harimu.','Seret. Klik. Ngobrol.'][n];}
+  function setupDrag(){if(!Draggable||!gsap)return;draggable=Draggable.create(drag,{type:'x,y',minimumMovement:6,dragResistance:.04,edgeResistance:.8,allowContextMenu:true,onPress(){if(!interactive)return;dragging=true;boolean('isDragging',true);boolean('isTalking',false);stage.classList.add('is-dragging');lastPointerX=this.x;lastPointerAt=performance.now();gsap.killTweensOf(sway);gsap.to(sway,{scale:1.025,duration:.16,ease:'power2.out'});},onDrag(){const now=performance.now(),velocity=(this.x-lastPointerX)/Math.max(8,now-lastPointerAt);lastPointerX=this.x;lastPointerAt=now;gsap.to(sway,{rotation:quiet?0:clamp(velocity*8,-14,14),duration:.18,ease:'power2.out',overwrite:'auto'});positionPanels();},onRelease(){dragging=false;boolean('isDragging',false);boolean('isTalking',talking&&!quiet);stage.classList.remove('is-dragging');gsap.to(sway,{scale:1,rotation:0,duration:quiet?0:1,ease:'elastic.out(1,.36)',overwrite:'auto'});positionPanels();},onClick(){if(interactive)chatOpen?closeChat():openChat();}})[0];draggable.disable();}
+  mascot.addEventListener('click',()=>{if(!interactive)wave();if(!draggable&&interactive)(chatOpen?closeChat():openChat());});
+  mascot.addEventListener('keydown',event=>{if(interactive&&(event.key==='Enter'||event.key===' ')){event.preventDefault();chatOpen?closeChat():openChat();}});
+  greeting.addEventListener('click',()=>{if(!chatOpen)openChat();});$('#close-chat').addEventListener('click',()=>closeChat());$('#reset-demo').addEventListener('click',resetPosition);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&chatOpen){closeChat();mascot.focus({preventScroll:true});}});
+  document.addEventListener('pointermove',event=>{const rect=$('#bito-canvas').getBoundingClientRect();gaze={active:true,x:(event.clientX-rect.left)/rect.width,y:(event.clientY-rect.top)/rect.height};},{passive:true});
+  const resetGaze=()=>{gaze.active=false;};document.documentElement.addEventListener('pointerleave',resetGaze);window.addEventListener('blur',resetGaze);document.addEventListener('visibilitychange',()=>{resetGaze();syncRive();});
+  function appendBubble(parent,text,kind='received'){const el=document.createElement('div');el.className=`bubble ${kind}`;el.textContent=text;parent.append(el);animateBubble(el);return el;}
+  function typing(parent){const el=document.createElement('div');el.className='bubble received typing';el.setAttribute('aria-label','Bito sedang mengetik');el.innerHTML='<i></i><i></i><i></i>';parent.append(el);animateBubble(el);return el;}
+  function demoReply(value){if(demoBusy||!value.trim())return;demoBusy=true;clearTimers(desktopTimers);$('#demo-input').value='';if(messages.children.length>6)[...messages.children].filter(n=>n!==greeting).slice(0,2).forEach(n=>n.remove());appendBubble(messages,value.trim(),'sent');$('#demo-choices').hidden=true;const t=typing(messages);messages.scrollTop=messages.scrollHeight;positionPanels();const lower=value.toLowerCase();const reply=/capek|lelah/.test(lower)?'duh, hari panjang ya. mau cerita bagian paling capeknya?':/halo|hai|sapa|bro|hello/.test(lower)?'heii. seneng kamu mampir :)':'aku dengerin. di aplikasi nanti, kita bisa ngobrol lebih jauh.';
+    later(desktopTimers,()=>{t.remove();setTalking(true);appendBubble(messages,reply);messages.scrollTop=messages.scrollHeight;positionPanels();later(desktopTimers,()=>{setTalking(false);demoBusy=false;},1100);},1000);
+  }
+  $('#demo-form').addEventListener('submit',event=>{event.preventDefault();demoReply($('#demo-input').value);});$$('[data-demo]').forEach(b=>b.addEventListener('click',()=>demoReply(b.dataset.demo==='day'?'hari ini capek banget':'halo Bito')));
 
-  function fitRive() {
-    if (riveInstance) riveInstance.resizeDrawingSurfaceToCanvas(Math.min(devicePixelRatio || 1, 2));
+  function configureScene(){if(!gsap||!ScrollTrigger){shell.style.cssText='opacity:1;visibility:visible';anchor.style.cssText='left:65%;top:48%;transform:translate(-50%,-50%)';return;}
+    context?.revert();draggable?.kill();draggable=null;interactive=false;chatOpen=false;opening=false;currentChapter=-1;chat.inert=true;chat.setAttribute('aria-hidden','true');greeting.classList.add('desktop-greeting');shell.append(greeting);greeting.removeAttribute('style');gsap.set([drag,sway],{clearProps:'all'});gsap.set(chat,{autoAlpha:0});
+    quiet=manualMotion||systemMotion.matches;document.documentElement.classList.toggle('motion-paused',quiet);motionButton.textContent=quiet?'Gerakan dikurangi':'Kurangi gerakan';motionButton.setAttribute('aria-pressed',String(quiet));gsap.registerPlugin(ScrollTrigger,Flip,Draggable);context=gsap.matchMedia();
+    context.add({wide:'(min-width: 761px)',narrow:'(max-width: 760px)',systemQuiet:'(prefers-reduced-motion: reduce)'},media=>{
+      quiet=manualMotion||media.conditions.systemQuiet;document.documentElement.classList.toggle('motion-paused',quiet);motionButton.setAttribute('aria-pressed',String(quiet));motionButton.textContent=quiet?'Gerakan dikurangi':'Kurangi gerakan';syncRive();setInteractive(false);draggable?.kill();setupDrag();
+      const g=sceneGeometry();gsap.set(anchor,{left:0,top:0,bottom:'auto',xPercent:0,yPercent:0,...g.hero});gsap.set(greeting,{autoAlpha:0});
+      if(quiet){gsap.set('.hero-copy',{autoAlpha:0});gsap.set(['.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0});gsap.set(shell,{autoAlpha:1,scale:1});gsap.set('#setup-window',{autoAlpha:0});gsap.set(anchor,g.desktop);gsap.set(['#desktop-hint','.stage-caption'],{autoAlpha:1});gsap.set('#chapter-progress',{scaleX:1});stage.style.height=innerWidth<=760?'760px':'850px';$('.story').style.height='auto';chapter(1);setInteractive(true);return()=>{setInteractive(false);stage.style.height='';$('.story').style.height='';draggable?.kill();draggable=null;};}
+      const tl=gsap.timeline({defaults:{ease:'none'},onUpdate(){const p=this.progress();chapter(p);setInteractive(p>.76);if(interactive&&!dragging)positionPanels();},scrollTrigger:{trigger:'.story',start:'top top',end:'bottom bottom',scrub:.45,invalidateOnRefresh:true,onRefreshInit:()=>gsap.set(anchor,sceneGeometry().hero),onUpdate:self=>{sceneProgress=self.progress;},onRefresh:()=>{if(interactive){resetPosition();updateBounds();positionPanels();}fitRive();}}});storyTimeline=tl;
+      tl.to('.hero-copy',{y:-50,autoAlpha:0,duration:.2},.02)
+        .to(['.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0,duration:.12},.03)
+        .to(shell,{scale:1,autoAlpha:1,duration:.25,ease:'power2.inOut'},.09)
+        .to(anchor,{x:()=>sceneGeometry().setup.x,y:()=>sceneGeometry().setup.y,scale:()=>sceneGeometry().setup.scale,duration:.28,ease:'power2.inOut'},.08)
+        .to('.stage-caption',{autoAlpha:1,duration:.09},.2)
+        .to('#setup-window',{width:()=>shell.clientWidth*.9,height:()=>shell.clientHeight*.86,duration:.19,ease:'power2.inOut'},.37)
+        .to('.setup-card',{backgroundColor:'#ffffff',duration:.1},.4)
+        .to('#setup-window',{autoAlpha:0,duration:.15},.52)
+        .to(anchor,{x:()=>sceneGeometry().desktop.x,y:()=>sceneGeometry().desktop.y,scale:()=>sceneGeometry().desktop.scale,duration:.24,ease:'power2.inOut'},.5)
+        .fromTo('.paper-window',{y:35,opacity:0},{y:0,opacity:1,duration:.2,stagger:.03},.55)
+        .to('#desktop-hint',{autoAlpha:1,duration:.1},.7)
+        .to('#chapter-progress',{scaleX:1,duration:1},0)
+        .to({},{duration:.25},.75);
+      if(!introPlayed){introPlayed=true;gsap.from('.title-line>span',{yPercent:110,duration:1,ease:'power3.out',stagger:.1,delay:.05});gsap.from('.hero-item',{y:12,opacity:0,duration:.65,ease:'power3.out',stagger:.07,delay:.3});gsap.from('#hero-speech',{scale:.7,opacity:0,duration:.6,ease:'back.out(1.1)',transformOrigin:'0 100%',delay:.75});}
+      $$('.line-reveal').forEach(el=>gsap.from(el,{y:28,opacity:0,duration:.8,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%',once:true}}));
+      gsap.from('.conversation-stage',{y:35,opacity:0,duration:.8,ease:'power3.out',scrollTrigger:{trigger:'.personality',start:'top 70%',once:true}});
+      gsap.fromTo('.download-art',{yPercent:-3},{yPercent:3,ease:'none',scrollTrigger:{trigger:'.download',start:'top bottom',end:'bottom top',scrub:.5}});
+      gsap.from('.download-card',{y:40,opacity:0,duration:.9,ease:'power3.out',scrollTrigger:{trigger:'.download',start:'top 80%',once:true}});
+      return()=>{draggable?.kill();draggable=null;setInteractive(false);};
+    });ScrollTrigger.refresh();
   }
-  function syncRive() {
-    if (!riveInstance) return;
-    if (document.hidden || reduced) riveInstance.pause();
-    else riveInstance.play();
-  }
-  function checkRiveFrame() {
-    if (rivePainted || riveFrame) return;
-    riveFrame = requestAnimationFrame(() => {
-      riveFrame = 0;
-      const canvas = $('#bito-canvas');
-      const context = canvas.getContext('2d');
-      if (!context || !canvas.width || !canvas.height) return;
-      try {
-        const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-        let occupied = 0;
-        for (let i = 3; i < pixels.length; i += 64) if (pixels[i] > 40) occupied++;
-        // A blank loading frame never replaces the matching local poster.
-        if (occupied > 100) {
-          rivePainted = true;
-          $('.mascot-viewport').classList.add('ready');
-          syncRive();
-        }
-      } catch { /* Keep the poster if pixels cannot be inspected. */ }
-    });
-  }
-  async function startRive() {
-    if (!window.rive) return;
-    try {
-      window.rive.RuntimeLoader.setWasmUrl(new URL('assets/rive.wasm', location.href).href);
-      riveInstance = new window.rive.Rive({
-        src: 'assets/bito.riv', canvas: $('#bito-canvas'), autoplay: true,
-        stateMachines: 'State Machine 1', autoBind: true, enableRiveAssetCDN: false,
-        layout: new window.rive.Layout({ fit: window.rive.Fit.Contain, alignment: window.rive.Alignment.Center }),
-        onLoad() { fitRive(); checkRiveFrame(); }, onAdvance: checkRiveFrame,
-        onLoadError() { /* Original branded poster remains visible. */ },
-      });
-    } catch { /* WebAssembly unsupported: keep a complete static experience. */ }
-  }
-  $('#mascot-button').addEventListener('click', () => {
-    if (reduced) return;
-    try { riveInstance?.viewModelInstance?.trigger('wave')?.trigger(); } catch {}
-    if (gsap) {
-      gsap.killTweensOf('.mascot-button');
-      gsap.fromTo('.mascot-button', { y: 0, rotation: 0 }, { y: -10, rotation: -3, duration: .2, repeat: 1, yoyo: true, ease: 'power2.out', overwrite: true });
-      gsap.fromTo('.hero-greeting', { y: 0, scale: 1 }, { y: -5, scale: 1.035, duration: .25, repeat: 1, yoyo: true, ease: 'power2.out' });
-    }
-  });
-  document.addEventListener('visibilitychange', syncRive);
-  new ResizeObserver(fitRive).observe($('#bito-canvas'));
+  motionButton.addEventListener('click',()=>{if(systemMotion.matches){motionButton.textContent='Mengikuti pengaturan perangkat';return;}manualMotion=!manualMotion;try{localStorage.setItem('bito-reduced-motion',String(manualMotion));}catch{}configureScene();});
 
-  function configureMotion() {
-    motionContext?.revert();
-    if (!gsap || !ScrollTrigger) { paintChapter(0); return; }
-    gsap.registerPlugin(ScrollTrigger);
-    reduced = manualReduced || matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document.documentElement.classList.toggle('motion-paused', reduced);
-    motionButton.setAttribute('aria-pressed', String(reduced));
-    motionButton.textContent = reduced ? 'Gerakan dikurangi' : 'Kurangi gerakan';
-    motionContext = gsap.matchMedia();
-    motionContext.add({ wide: '(min-width: 761px)', narrow: '(max-width: 760px)', systemReduced: '(prefers-reduced-motion: reduce)' }, (context) => {
-      const quiet = manualReduced || context.conditions.systemReduced;
-      const desktop = context.conditions.wide;
-      reduced = quiet;
-      document.documentElement.classList.toggle('motion-paused', quiet);
-      motionButton.setAttribute('aria-pressed', String(quiet));
-      motionButton.textContent = quiet ? 'Gerakan dikurangi' : 'Kurangi gerakan';
-      gsap.set('.journey-mascot', { x: 0, y: 0, xPercent: -50, yPercent: -100 });
-      syncRive();
-      if (quiet) {
-        gsap.set('.setup-preview', { autoAlpha: 0 });
-        gsap.set('.journey-mascot', { left: desktop ? '25%' : '22%', top: '67%', xPercent: -50, yPercent: -50, width: desktop ? 250 : 140, height: desktop ? 250 : 140 });
-        gsap.set('.journey-chat', { autoAlpha: 1 });
-        paintChapter(2);
-        return;
-      }
-      const enter = gsap.timeline({ defaults: { ease: 'power3.out' } });
-      enter.from('.line > span', { yPercent: 110, duration: 1, stagger: .1 }, .05)
-        .from('.hero-in', { opacity: 0, y: 15, duration: .65, stagger: .07 }, .35)
-        .from('.hero-scene', { opacity: 0, y: 32, duration: 1 }, .3)
-        .from('.hero-greeting', { scale: .4, opacity: 0, duration: .7, transformOrigin: '15% 100%', ease: 'back.out(1.2)' }, .8)
-        .from('.floating-tag', { opacity: 0, y: 15, duration: .6 }, 1.05);
-      gsap.to('.hero-greeting', { y: -8, rotation: -3, duration: 2.5, repeat: -1, yoyo: true, ease: 'sine.inOut' });
-      gsap.to('.floating-tag', { y: 7, rotation: 4, duration: 3, repeat: -1, yoyo: true, ease: 'sine.inOut' });
-      gsap.to('.spark-one', { rotation: 100, duration: 18, repeat: -1, ease: 'none' });
-      gsap.to('.scroll-progress', { width: '100%', ease: 'none', scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: .1 } });
-      $$('.reveal').forEach((element) => gsap.from(element, { y: 30, opacity: 0, duration: .8, ease: 'power3.out', scrollTrigger: { trigger: element, start: 'top 92%', once: true } }));
-      if (desktop) {
-        paintChapter(0);
-        const frame = $('#desktop-preview');
-        const story = gsap.timeline({ defaults: { ease: 'power2.inOut' }, scrollTrigger: {
-          trigger: '.journey', start: 'top top', end: () => '+=' + Math.round(innerHeight * 1.9),
-          pin: '.journey-stage', scrub: .65, invalidateOnRefresh: true,
-          onUpdate: (self) => paintChapter(self.progress < .28 ? 0 : self.progress < .65 ? 1 : 2),
-        } });
-        story.to('.setup-preview', { width: () => frame.clientWidth * .87, height: () => frame.clientHeight * .82, duration: .8 }, .1)
-          .to('.journey-mascot', { left: '27%', top: '49%', xPercent: -50, yPercent: -50, width: 230, height: 230, duration: .8 }, .1)
-          .to('.setup-preview', { autoAlpha: 0, scale: .94, duration: .6 }, 1.1)
-          .to('.journey-mascot', { left: '25%', top: '65%', width: 250, height: 250, duration: .9 }, 1.1)
-          .fromTo('.journey-chat', { x: -20, scale: .94, autoAlpha: 0 }, { x: 0, scale: 1, autoAlpha: 1, duration: .65, transformOrigin: '0% 100%' }, 1.7)
-          .to({}, { duration: .45 });
-      } else {
-        paintChapter(2);
-        gsap.set('.setup-preview', { autoAlpha: 0 });
-        gsap.set('.journey-mascot', { left: '22%', top: '67%', width: 140, height: 140, xPercent: -50, yPercent: -50 });
-        gsap.set('.journey-chat', { autoAlpha: 1 });
-        gsap.from('.desktop-preview', { y: 20, opacity: 0, duration: .8, scrollTrigger: { trigger: '.desktop-preview', start: 'top 90%', once: true } });
-      }
-      gsap.fromTo('.world-art', { yPercent: -3 }, { yPercent: 3, ease: 'none', scrollTrigger: { trigger: '.download-world', start: 'top bottom', end: 'bottom top', scrub: .5 } });
-      gsap.from('.download-panel', { y: 45, opacity: 0, duration: 1, scrollTrigger: { trigger: '.download-world', start: 'top 80%', once: true } });
-      return () => { chapter = -1; };
-    });
-    ScrollTrigger.refresh();
-  }
-  motionButton.addEventListener('click', () => {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      motionButton.textContent = 'Mengikuti pengaturan perangkat';
-      return;
-    }
-    manualReduced = !manualReduced;
-    try { localStorage.setItem('bito-reduced-motion', String(manualReduced)); } catch {}
-    configureMotion();
-  });
-  window.addEventListener('pagehide', (event) => { if (event.persisted) return; clearTimeout(toneTimer); cancelAnimationFrame(riveFrame); motionContext?.revert(); riveInstance?.cleanup(); }, { once: true });
-  document.fonts.ready.then(configureMotion).catch(configureMotion);
-  startRive();
+  const personas={direct:{description:'Singkat, jelas. Langsung ke intinya.',greet:['apa?'],tired:['istirahat dulu.','yang paling bikin capek apa?'],idea:['apa idenya?']},chill:{description:'Santai. Nggak perlu mikirin cara mulainya.',greet:['wut'],tired:['duh, hari panjang ya','mau cerita?'],idea:['spill','gue dengerin']},humor:{description:'Ada aja celetukannya. Tetap lihat situasi.',greet:['hadir, ketua'],tired:['hari ini kayak buka 38 tab ya','mau ngeluh dulu? sini'],idea:['awas aja kalo garing','oke spill wkwk']},care:{description:'Dengerin dulu. Nggak buru-buru kasih nasihat.',greet:['iyaa, kenapa?'],tired:['kedengerannya kamu udah ngeluarin banyak tenaga hari ini.','mau aku temenin cerita dulu?'],idea:['aku penasaran. ceritain, dong.']}};
+  const prompts={greet:'bro',tired:'capek banget hari ini',idea:'ada ide random nih'};
+  function moveToneTrack(immediate=false){const b=$(`[data-tone="${currentTone}"]`),track=$('#tone-track');if(gsap)gsap.to(track,{x:b.offsetLeft,width:b.offsetWidth,duration:quiet||immediate?0:.4,ease:'power3.inOut',overwrite:true});else{track.style.left=b.offsetLeft+'px';track.style.width=b.offsetWidth+'px';}}
+  function showConversation(){clearTimers(personalityTimers);const parent=$('#conversation');parent.replaceChildren();const user=appendBubble(parent,prompts[currentScenario],'sent');const reply=personas[currentTone][currentScenario];$('#tone-description').textContent=personas[currentTone].description;let t=typing(parent);let elapsed=950;reply.forEach((line,i)=>{later(personalityTimers,()=>{t.remove();appendBubble(parent,line);if(i<reply.length-1)later(personalityTimers,()=>{t=typing(parent);},350);},elapsed);elapsed+=1400+Math.min(line.length*12,500);});}
+  $$('[data-tone]').forEach(b=>b.addEventListener('click',()=>{if(currentTone===b.dataset.tone)return;currentTone=b.dataset.tone;$$('[data-tone]').forEach(el=>el.setAttribute('aria-pressed',String(el===b)));moveToneTrack();showConversation();}));
+  $$('[data-scenario]').forEach(b=>b.addEventListener('click',()=>{if(currentScenario===b.dataset.scenario)return;currentScenario=b.dataset.scenario;$$('[data-scenario]').forEach(el=>el.setAttribute('aria-pressed',String(el===b)));showConversation();}));
+  const helpExamples={reminder:{request:'nanti ingetin minum air, ya',response:'siap. nanti aku colek, ya.',result:'<div class="result-top"><span class="result-icon" aria-hidden="true">◷</span><div><small>PENGINGAT</small><strong>Minum air dulu</strong></div><time>15.30</time></div><span class="result-sub">Contoh notifikasi Bito saat aplikasi berjalan.</span>'},checklist:{request:'bantu pecah kerjaanku, dong',response:'boleh. mulai dari yang paling ringan dulu.',result:'<div class="sample-checks"><label><input type="checkbox" checked><span>Kumpulin referensi</span></label><label><input type="checkbox"><span>Susun outline</span></label><label><input type="checkbox"><span>Kirim draft pertama</span></label></div>'},file:{request:'catatan ini jadiin file markdown, ya',response:'beres. tinggal pilih mau simpan di mana.',result:'<div class="result-file"><span class="result-icon">md</span><div><strong>ide-hari-ini.md</strong><small>File contoh · Markdown</small></div><a class="file-download" download="ide-hari-ini.md" href="data:text/markdown;charset=utf-8,%23%20Ide%20hari%20ini%0A%0A-%20Kumpulin%20referensi%0A-%20Susun%20outline%0A-%20Kirim%20draft%20pertama%0A" aria-label="Unduh file Markdown contoh">↓</a></div>'}};
+  let helpHasPlayed=false;
+  function showHelp(animated=true){if(animated)helpHasPlayed=true;clearTimers(helpTimers);const version=++helpVersion,parent=$('#help-content');parent.className='help-content';parent.replaceChildren();const ex=helpExamples[currentHelp];appendBubble(parent,ex.request,'sent');if(!animated){appendBubble(parent,ex.response);const result=document.createElement('div');result.className='help-result';result.innerHTML=ex.result;parent.append(result);return;}const t=typing(parent);later(helpTimers,()=>{if(version!==helpVersion)return;t.remove();appendBubble(parent,ex.response);later(helpTimers,()=>{if(version!==helpVersion)return;const result=document.createElement('div');result.className='help-result';result.innerHTML=ex.result;parent.append(result);if(gsap&&!quiet)gsap.from(result,{y:12,opacity:0,scale:.96,duration:.5,ease:'power3.out'});},650);},1100);}
+  $$('[data-help]').forEach(b=>b.addEventListener('click',()=>{if(currentHelp===b.dataset.help)return;currentHelp=b.dataset.help;$$('[data-help]').forEach(el=>el.setAttribute('aria-pressed',String(el===b)));showHelp();}));$('#replay-help').addEventListener('click',()=>showHelp());showHelp(false);
+  let helpObserver,stageObserver;
+  if('IntersectionObserver' in window){helpObserver=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){if(!helpHasPlayed)showHelp();helpObserver.disconnect();}},{threshold:.35});helpObserver.observe($('#help-stage'));stageObserver=new IntersectionObserver(entries=>{stageVisible=entries[0].isIntersecting;syncRive();});stageObserver.observe(stage);}
+  $('#other-downloads').addEventListener('click',()=>{const el=$('#download-options'),b=$('#other-downloads'),open=b.getAttribute('aria-expanded')!=='true';gsap?.killTweensOf(el);b.setAttribute('aria-expanded',String(open));if(open){el.hidden=false;if(gsap&&!quiet)gsap.fromTo(el,{height:0,opacity:0},{height:'auto',opacity:1,duration:.35,ease:'power3.out'});}else if(gsap&&!quiet){gsap.to(el,{height:0,opacity:0,duration:.23,onComplete:()=>{el.hidden=true;gsap.set(el,{clearProps:'height,opacity'});}});}else el.hidden=true;});
+  $$('details summary').forEach(summary=>summary.addEventListener('click',event=>{if(!gsap||quiet)return;event.preventDefault();const d=summary.parentElement,expand=!d.open||d.dataset.closing==='true',start=d.offsetHeight;gsap.killTweensOf(d);if(expand){delete d.dataset.closing;d.style.height='';d.open=true;const end=d.scrollHeight;gsap.fromTo(d,{height:start,overflow:'hidden'},{height:end,duration:.32,ease:'power3.out',onComplete:()=>gsap.set(d,{clearProps:'height,overflow'})});}else{d.dataset.closing='true';gsap.to(d,{height:summary.offsetHeight,overflow:'hidden',duration:.24,ease:'power2.inOut',onComplete:()=>{if(d.dataset.closing==='true'){d.open=false;delete d.dataset.closing;}gsap.set(d,{clearProps:'height,overflow'});}});}}));
+  if(/Windows/i.test(navigator.userAgent)){const a=$('#primary-download');a.href='https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-Windows-x64-Setup.exe';$('#primary-download-label').textContent='Download untuk Windows';}
+  let resizeFrame=0;window.addEventListener('resize',()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{moveToneTrack(true);fitRive();if(interactive){updateBounds();positionPanels();}});},{passive:true});
+  window.addEventListener('pagehide',event=>{if(event.persisted)return;disposed=true;[desktopTimers,personalityTimers,helpTimers].forEach(clearTimers);cancelAnimationFrame(paintFrame);cancelAnimationFrame(resizeFrame);helpObserver?.disconnect();stageObserver?.disconnect();context?.revert();draggable?.kill();rig?.restore();rive?.cleanup();});
+  configureScene();moveToneTrack(true);document.fonts.ready.then(()=>{ScrollTrigger?.refresh();moveToneTrack(true);fitRive();}).catch(()=>{});startRive();
 })();
