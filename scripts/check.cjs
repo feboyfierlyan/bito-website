@@ -84,7 +84,13 @@ for(const [w,h]of [[320,800],[375,812],[430,932],[768,760],[1024,768],[1440,900]
     assert(f.x>=l.screen.x-.01&&f.x+f.w<=l.screen.x+l.screen.w+.01);
     assert(f.y>=l.screen.y-.01&&f.y+f.h<=l.screen.y+l.screen.h+.01);
     if(zoom!==1)continue;
-    const p=companionPose(f,size,mobile),b=companionBounds(p,f,size),extent=size*p.scale;
+    if(!mobile){
+      assert(l.screen.x<0&&l.screen.y<0,'Final camera must crop the left and top of the laptop');
+      assert(Math.abs(l.screen.x+l.screen.w-w*.78)<.01,'Camera must retain the right bezel near 78% of the viewport');
+      assert(Math.abs(l.screen.y+l.screen.h-(h-140))<.01,'Camera must focus on the bottom-right workspace');
+      assert(l.image.w>laptopLayout(w,h,0,1,mobile).image.w*1.5,'Final camera must visibly zoom into the laptop');
+    }
+    const p=companionPose(f,size,mobile,l.screen.h),b=companionBounds(p,f,size),extent=size*p.scale;
     assert(p.x>f.x+f.w/2&&p.y>f.y+f.h/2,'Bito must land at bottom right');
     for(const x of [b.minX,0,b.maxX])for(const y of [b.minY,0,b.maxY]){
       const a={x:p.x+x*p.scale,y:p.y+y*p.scale,w:extent,h:extent};
@@ -101,4 +107,4 @@ for(const [w,h]of [[320,800],[375,812],[430,932],[768,760],[1024,768],[1440,900]
 for(const id of ['laptop-device','laptop-image','laptop-backdrop','laptop-demo-label'])assert(ids.includes(id));
 assert(!html.includes('id="setup-window"'),'Old onboarding illustration must be removed');
 assert(!js.includes("$('#setup-window')"));
-console.log(`PASS: ${laptopCases} laptop corner/chat cases, 35 zoom layouts, correct image ratio, bottom-right landing, responsive screen clipping`);
+console.log(`PASS: ${laptopCases} laptop corner/chat cases, 35 zoom layouts, bottom-right camera crop, original image ratio, responsive screen clipping`);

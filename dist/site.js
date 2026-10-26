@@ -37,7 +37,7 @@
   }catch{return null;}}
   function verifyPaint(){if(painted||paintFrame||disposed)return;paintFrame=requestAnimationFrame(()=>{paintFrame=0;try{const c=$('#bito-canvas'),ctx=c.getContext('2d');if(!ctx||!c.width)return;const p=ctx.getImageData(0,0,c.width,c.height).data;let visible=0;for(let i=3;i<p.length;i+=128)if(p[i]>45)visible++;if(visible>100){painted=true;$('#mascot-art').classList.add('ready');syncRive();}}catch{}});}
   function startRive(){if(!window.rive)return;try{window.rive.RuntimeLoader.setWasmUrl(new URL('assets/rive.wasm',location.href).href);rive=new window.rive.Rive({src:'assets/bito.riv',canvas:$('#bito-canvas'),autoplay:true,stateMachine:'State Machine 1',autoBind:true,enableRiveAssetCDN:false,layout:new window.rive.Layout({fit:window.rive.Fit.Contain,alignment:window.rive.Alignment.Center}),onLoad(){fitRive();rig=createEyes();verifyPaint();},onAdvance(event){rig?.advance(event.data);verifyPaint();}});}catch{/* Matching poster remains visible; no loading box. */}}
-  function sceneGeometry(){const w=stage.clientWidth,h=stage.clientHeight,size=anchor.offsetWidth;const view=laptop||laptopLayout(w,h,flight.zoom,flight.reveal);return {hero:geometry(w,h,size,view.screen,w<=760).hero,desktop:companionPose(view.visible,size,w<=760)};}
+  function sceneGeometry(){const w=stage.clientWidth,h=stage.clientHeight,size=anchor.offsetWidth;const view=laptop||laptopLayout(w,h,flight.zoom,flight.reveal);return {hero:geometry(w,h,size,view.screen,w<=760).hero,desktop:companionPose(view.visible,size,w<=760,view.screen.h)};}
   function renderLaptop(){
     if(!gsap)return;
     laptop=laptopLayout(stage.clientWidth,stage.clientHeight,flight.zoom,flight.reveal,innerWidth<=760);
