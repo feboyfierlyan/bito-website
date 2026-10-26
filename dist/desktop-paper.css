@@ -300,3 +300,41 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
   .notes-sticker { left: 76px; top: 559px; width: 30px; }
   .pdf-sticker { right: 76px; top: 556px; width: 27px; }
 }
+
+/* Three small windows share a spotlight. Fade their surfaces, never their hit
+   areas or the GSAP-controlled roots, so dragging and scroll stay independent. */
+.hero-desk { --sticker-visibility: 1; }
+.hero-desk [data-sticker] > .sticker-art {
+  opacity: var(--sticker-visibility);
+  transition: opacity .32s ease, scale .42s var(--ease), translate .42s var(--ease);
+}
+.mascot-art { transition: opacity .32s ease; }
+.hero-speech, .hero-invite { transition: filter .32s ease; }
+.floating-file .mini-window, .floating-file .hello-note {
+  transition: box-shadow .35s ease, border-color .35s ease;
+}
+.stage:has(.floating-file:is(:focus-visible, .sticker-held)) .hero-desk { --sticker-visibility: .24; z-index: 10; }
+.stage:has(.floating-file:is(:focus-visible, .sticker-held)) .mascot-art { opacity: .4; }
+.stage:has(.floating-file:is(:focus-visible, .sticker-held)) :is(.hero-speech, .hero-invite) { filter: opacity(.4); }
+.hero-desk .floating-file:is(:focus-visible, .sticker-held) { z-index: 10000!important; }
+.floating-file:is(:focus-visible, .sticker-held) > .sticker-art { opacity: 1; scale: 1.035; translate: 0 -5px; }
+.floating-file:is(:focus-visible, .sticker-held) :is(.mini-window, .hello-note) {
+  border-color: #8ba2c0;
+  box-shadow: 0 18px 38px #263d6325, 0 3px 8px #263d6312;
+}
+@media(hover: hover) and (pointer: fine) {
+  .stage:has(.floating-file:hover) .hero-desk { --sticker-visibility: .24; z-index: 10; }
+  .stage:has(.floating-file:hover) .mascot-art { opacity: .4; }
+  .stage:has(.floating-file:hover) :is(.hero-speech, .hero-invite) { filter: opacity(.4); }
+  .hero-desk .floating-file:hover { z-index: 10000!important; }
+  .floating-file:hover > .sticker-art { opacity: 1; scale: 1.035; translate: 0 -5px; }
+  .floating-file:hover :is(.mini-window, .hello-note) {
+    border-color: #8ba2c0;
+    box-shadow: 0 18px 38px #263d6325, 0 3px 8px #263d6312;
+  }
+}
+@media(prefers-reduced-motion: reduce) {
+  .hero-desk [data-sticker] > .sticker-art, .mascot-art,
+  .hero-speech, .hero-invite, .floating-file :is(.mini-window, .hello-note) { transition-duration: 0s; }
+  .floating-file > .sticker-art { scale: 1!important; translate: none!important; }
+}
