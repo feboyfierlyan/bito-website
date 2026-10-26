@@ -70,5 +70,6 @@ for(const name of ['word.svg','excel.svg','notes.svg','trash.png','coffee.png','
   else if(name.endsWith('.png'))assert.equal(file.subarray(1,4).toString(),'PNG');
   else assert.equal(file.subarray(0,3).toString(),'GIF');
 }
-assert((html.match(/data-sticker\b/g)||[]).length>=17);
+assert((html.match(/data-sticker\b/g)||[]).length>=14);
+for(const tag of html.match(/<(?:a|button)\b[^>]*class="(?:floating-file [^"]+|scene-peek)"[^>]*>/g)||[]){assert(!tag.includes('data-sticker'),'Windows must not be draggable');assert(tag.includes('draggable="false"'),'Disable native window drag');}
 console.log('PASS: sticker bounds across 135 viewport/position cases; all requested icons, GIF and reduced-motion poster bundled');
