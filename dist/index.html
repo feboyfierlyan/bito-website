@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#fafbf8" />
-  <title>Bito — Hai. Aku Bito.</title>
+  <meta name="theme-color" content="#ffffff" />
+  <title>Bito — a little buddy for your everyday.</title>
   <meta name="description" content="Teman kecil di desktopmu. Kenalan, coba ngobrol, dan bawa Bito ke harimu. Tersedia untuk macOS dan Windows." />
   <meta property="og:title" content="Bito — Hai. Aku Bito." />
   <meta property="og:description" content="Buat cerita random, mikir bareng, atau sekadar ditemenin." />
@@ -13,6 +13,7 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="preload" href="assets/jakarta-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="desktop-paper.css" />
   <script defer src="assets/vendor/gsap.min.js"></script>
   <script defer src="assets/vendor/ScrollTrigger.min.js"></script>
   <script defer src="assets/vendor/Flip.min.js"></script>
@@ -24,20 +25,34 @@
 <body>
   <a class="skip" href="#main">Langsung ke konten</a>
   <header class="site-header">
-    <a class="logo" href="#main" aria-label="Bito, kembali ke awal"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 19C1 23 1 0 18 12L20 15C32-3 48 15 23 20" fill="#7fc35a"/><path d="M20 17v15" stroke="#226d40" stroke-width="5" stroke-linecap="round"/></svg>Bito<span class="logo-period">.</span></a>
-    <nav aria-label="Navigasi utama"><a href="#gaya">Gaya ngobrol</a><a href="#bantuan">Bisa bantu</a><a href="#download" class="nav-cta"><span>Download</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></nav>
+    <a class="logo" href="#main" aria-label="Bito, kembali ke awal"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 19C1 23 1 0 18 12L20 15C32-3 48 15 23 20" fill="#7fc35a"/><path d="M20 17v15" stroke="#226d40" stroke-width="5" stroke-linecap="round"/></svg>bito<span class="logo-period">.</span></a>
+    <nav aria-label="Navigasi utama"><a href="#gaya">features</a><a href="#tentang">about</a><a href="#download" class="nav-cta"><span>get bito</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a></nav>
   </header>
   <main id="main">
     <section class="story" id="kenalan" aria-label="Kenalan dengan Bito">
       <div class="stage" id="stage">
         <div class="hero-copy">
-          <p class="eyebrow hero-item">TEMAN KECIL DI DESKTOPMU</p>
-          <h1><span class="title-line"><span>Hai.</span></span><span class="title-line"><span>Aku <em>Bito.</em></span></span></h1>
-          <div class="hero-bottom hero-item"><p>Buat cerita random, mikir bareng,<br />atau sekadar ditemenin.</p><a href="#download" class="button blue-button"><span>Temenin hariku</span><span class="arrow" aria-hidden="true">↗</span></a><span class="platform">macOS & Windows</span></div>
+          <h1><span class="title-line"><span>meet bito<span class="blue-text">.</span></span></span></h1>
+          <div class="hero-bottom hero-item"><p>a little buddy for your everyday.</p>
+            <div class="hero-downloads"><a class="button hero-mac" href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-macOS-arm64.dmg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.7 12.7c0-2 1.6-3 1.7-3.1-1-1.5-2.6-1.7-3.2-1.7-1.4-.2-2.7.8-3.4.8s-1.8-.8-3-.8c-1.6 0-3 .9-3.8 2.2-1.6 2.8-.4 6.9 1.2 9.1.8 1.1 1.6 2.2 2.8 2.1 1.1 0 1.5-.7 2.9-.7s1.8.7 3 .7 2-1.1 2.7-2.1c.9-1.3 1.3-2.5 1.3-2.6-.1 0-2.2-.9-2.2-3.9ZM14.5 6.3c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.2 1.8-1.1 2.9 1.1.1 2.2-.5 2.9-1.3Z"/></svg><span>get bito for mac</span><span class="download-down" aria-hidden="true">↓</span></a><a class="button hero-windows" href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-Windows-x64-Setup.exe"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#f35325" d="M2 2h9v9H2z"/><path fill="#81bc06" d="M13 2h9v9h-9z"/><path fill="#05a6f0" d="M2 13h9v9H2z"/><path fill="#ffba08" d="M13 13h9v9h-9z"/></svg><span>get bito for windows</span><span class="download-down" aria-hidden="true">↓</span></a></div>
+            <span class="platform"><a href="#download">macOS & Windows · v0.5.1</a></span>
+          </div>
         </div>
-        <div class="hero-aside hero-item"><span class="tiny-line"></span><p>Hari yang sibuk.<br />Hari yang biasa aja.<br /><b>Aku di sini.</b></p></div>
-        <div class="hero-speech bubble received" id="hero-speech">heii, akhirnya ketemu :)</div>
-        <div class="hero-invite hero-item"><span>coba klik aku</span><svg viewBox="0 0 90 60" aria-hidden="true"><path d="M5 8c39-1 45 9 55 32M46 34l15 11 5-18"/></svg></div>
+        <div class="hero-desk" id="hero-desk">
+          <a class="floating-file feature-file" href="#bantuan" aria-label="Lihat contoh pengingat dan bantuan Bito">
+            <div class="mini-window blue-window"><div class="mini-chrome"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>reminder</span><span aria-hidden="true">↗</span></div><div class="mini-content"><span class="reminder-icon" aria-hidden="true">◷</span><strong>minum air dulu?</strong><span>aku ingetin, kok.</span><div class="mini-reminder"><span class="tiny-check" aria-hidden="true">✓</span> a little care, every day.</div></div></div><span class="file-caption">a-little-reminder.demo</span>
+          </a>
+          <button class="floating-file hello-file" id="hello-sticker" aria-label="Sapa Bito"><span class="hello-note"><span class="hello-sprout" aria-hidden="true">✳</span><span class="hello-label">HELLO<br/><small>my name is</small></span><strong>bito :)</strong></span><span class="file-caption">say hello!</span></button>
+          <a class="floating-file chat-file" href="#gaya" aria-label="Coba empat gaya ngobrol Bito"><div class="mini-window chat-window"><div class="mini-chrome"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>bito chat</span><span aria-hidden="true">↗</span></div><div class="mini-chat"><span>bro</span><span>wut</span><span>ada cerita nih</span><span>spill</span></div></div><span class="file-caption">cerita-random.demo</span></a>
+          <span class="desk-sticker heart-sticker" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M20 32S5 23 5 13c0-9 12-10 15-2 4-8 15-7 15 2 0 10-15 19-15 19Z"/></svg></span>
+          <span class="desk-sticker smile-sticker" aria-hidden="true"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14"/><path d="M12 22q8 10 16 0M14 15v1M26 15v1"/></svg></span>
+          <span class="desk-doodle doodle-one" aria-hidden="true">^ ᴗ ^</span><span class="desk-doodle doodle-two" aria-hidden="true">a little closer ↴</span>
+          <a class="folder-sticker" href="#bantuan" aria-label="Lihat contoh file Bito"><svg viewBox="0 0 62 49" aria-hidden="true"><path d="M3 12V7a4 4 0 0 1 4-4h16l6 6h25a4 4 0 0 1 4 4v29a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" fill="#94d2fa" stroke="#61ade1"/><path d="M3 17a4 4 0 0 1 4-4h47a4 4 0 0 1 4 4v25a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" fill="#75bcec" stroke="#61ade1"/></svg><span>little things</span></a>
+          <button class="scene-peek" id="play-scene" aria-label="Coba Bito di ilustrasi desktop interaktif"><span class="peek-chrome"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Bito in action</span><span aria-hidden="true">↗</span></span><span class="peek-desktop"><span class="peek-paper"><span>today.md</span><strong>satu hal dulu.</strong><i></i><i></i><i></i></span><img src="assets/bito.png" alt="" width="1024" height="1024" class="peek-bito"/><span class="peek-chat"><span>capek juga ya hari ini</span><span>sini cerita. aku dengerin.</span></span><span class="peek-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg> coba langsung</span><span class="peek-label">a small friend. a softer day.</span></span></button>
+        </div>
+        <div class="hero-aside" aria-hidden="true"></div>
+        <div class="hero-speech bubble received" id="hero-speech">heii, ketemu juga :)</div>
+        <div class="hero-invite hero-item"><span>coba klik aku</span></div>
         <div class="desktop-shell" id="desktop-shell">
           <div class="desktop-topbar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>desktop kamu</span><span aria-hidden="true">Bito ✳</span></div>
           <div class="desktop-bounds" id="desktop-bounds">
@@ -68,13 +83,13 @@
       <div class="help-experience"><div class="help-options" role="group" aria-label="Pilih contoh bantuan Bito"><button data-help="reminder" aria-pressed="true"><span>01</span><strong>Ingetin aku.</strong><span class="help-arrow" aria-hidden="true">↗</span></button><button data-help="checklist" aria-pressed="false"><span>02</span><strong>Pelan-pelan, satu-satu.</strong><span class="help-arrow" aria-hidden="true">↗</span></button><button data-help="file" aria-pressed="false"><span>03</span><strong>Jadiin file, dong.</strong><span class="help-arrow" aria-hidden="true">↗</span></button></div><div class="help-stage" id="help-stage"><span class="example-label">CONTOH INTERAKSI</span><div id="help-content" aria-live="polite"></div><button class="replay" id="replay-help" aria-label="Putar ulang contoh bantuan"><span aria-hidden="true">↺</span> Ulangi</button></div></div>
     </section>
 
-    <section class="quiet section-pad" aria-labelledby="quiet-title"><span class="eyebrow">DEKAT, SECUKUPNYA.</span><h2 id="quiet-title">Ada saat kamu butuh.<br /><span>Sisanya, kasih ruang.</span></h2><div class="quiet-bottom"><p>Seret ke tempat yang nyaman. Klik saat mau ngobrol.<br />Lagi butuh tenang? Aktifkan Jangan Ganggu.</p><p>Profil dan riwayat ada di perangkatmu. Saat ngobrol,<br />konteks dikirim ke layanan AI. Kamu tetap bisa<br />mengelola memori dan menghapus percakapan.</p></div></section>
+    <section class="quiet section-pad" id="tentang" aria-labelledby="quiet-title"><span class="eyebrow">DEKAT, SECUKUPNYA.</span><h2 id="quiet-title">Ada saat kamu butuh.<br /><span>Sisanya, kasih ruang.</span></h2><div class="quiet-bottom"><p>Seret ke tempat yang nyaman. Klik saat mau ngobrol.<br />Lagi butuh tenang? Aktifkan Jangan Ganggu.</p><p>Profil dan riwayat ada di perangkatmu. Saat ngobrol,<br />konteks dikirim ke layanan AI. Kamu tetap bisa<br />mengelola memori dan menghapus percakapan.</p></div></section>
 
     <section class="download" id="download" aria-labelledby="download-title"><div class="download-art" aria-hidden="true"></div><div class="download-card"><span class="eyebrow">KITA LANJUT DI DESKTOP?</span><img src="assets/bito.png" class="download-mascot" alt="" width="1024" height="1024" loading="lazy" /><h2 id="download-title">Ada tempat<br />buat <span class="blue-text">Bito?</span></h2><p>Teman kecilmu, satu download lagi.</p><div class="download-buttons"><a class="button blue-button" id="primary-download" href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-macOS-arm64.dmg"><span id="primary-download-label">Mac · Apple Silicon</span><span class="arrow" aria-hidden="true">↓</span></a><button id="other-downloads" aria-expanded="false" aria-controls="download-options">Pilih perangkat lain <span aria-hidden="true">⌄</span></button></div><div class="download-options" id="download-options" hidden><a href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-macOS-arm64.dmg">Mac · Apple Silicon <span>↓</span></a><a href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-macOS-x64.dmg">Mac · Intel <span>↓</span></a><a href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-Windows-x64-Setup.exe">Windows · 64-bit <span>↓</span></a></div><span class="download-note">v0.5.1 · Akses AI saat ini khusus akun demo yang diizinkan.</span></div></section>
 
     <section class="faq section-pad" aria-label="Pertanyaan tentang Bito"><span class="eyebrow">SEBELUM KETEMU</span><div class="faq-list"><details><summary>Siapa saja bisa pakai Bito?<span aria-hidden="true">+</span></summary><p>Installer dan source code bisa diunduh. Layanan AI saat ini tersedia untuk akun Google yang diizinkan pemilik demo. Pengguna demo tidak perlu memasukkan API key sendiri.</p></details><details><summary>Apa yang sudah bisa dibantu?<span aria-hidden="true">+</span></summary><p>Ngobrol, timer, pengingat, checklist, memori yang kamu minta, dan membuat file TXT, Markdown, CSV, atau satu folder. Pengingat bekerja saat aplikasi berjalan. Kalender, pencarian web, konversi PDF/Office, dan voice belum tersedia.</p></details><details><summary>Bagaimana cara memasangnya?<span aria-hidden="true">+</span></summary><p>Pilih installer sesuai perangkatmu. Paket demo belum memiliki sertifikat penerbit atau notarization Apple, jadi sistem mungkin menampilkan peringatan. <a href="https://github.com/feboyfierlyan/bito-desktop/blob/main/docs/INSTALL.md" target="_blank" rel="noopener noreferrer">Buka panduan instalasi.</a></p></details></div></section>
   </main>
-  <footer class="footer section-pad"><a class="logo" href="#main">Bito<span class="logo-period">.</span></a><p>Teman kecil untuk menemani harimu.<span>Proyek kuliah. Terus tumbuh.</span></p><div><a href="https://github.com/feboyfierlyan/bito-desktop" target="_blank" rel="noopener noreferrer">GitHub ↗</a><button id="motion-toggle" aria-pressed="false">Kurangi gerakan</button><span>© 2026 Bito Project</span></div></footer>
+  <footer class="footer section-pad"><a class="logo" href="#main">bito<span class="logo-period">.</span></a><p>Teman kecil untuk menemani harimu.<span>Proyek kuliah. Terus tumbuh.</span></p><div><a href="https://github.com/feboyfierlyan/bito-desktop" target="_blank" rel="noopener noreferrer">GitHub ↗</a><button id="motion-toggle" aria-pressed="false">Kurangi gerakan</button><span>© 2026 Bito Project</span></div></footer>
   <noscript><p class="noscript-note">Animasi dan demo interaktif membutuhkan JavaScript. Semua informasi dan pilihan download tetap tersedia.</p></noscript>
 </body>
 </html>

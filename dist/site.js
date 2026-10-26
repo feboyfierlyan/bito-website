@@ -68,10 +68,10 @@
     context.add({wide:'(min-width: 761px)',narrow:'(max-width: 760px)',systemQuiet:'(prefers-reduced-motion: reduce)'},media=>{
       quiet=manualMotion||media.conditions.systemQuiet;document.documentElement.classList.toggle('motion-paused',quiet);motionButton.setAttribute('aria-pressed',String(quiet));motionButton.textContent=quiet?'Gerakan dikurangi':'Kurangi gerakan';syncRive();setInteractive(false);draggable?.kill();setupDrag();
       const g=sceneGeometry();gsap.set(anchor,{left:0,top:0,bottom:'auto',xPercent:0,yPercent:0,...g.hero});gsap.set(greeting,{autoAlpha:0});
-      if(quiet){gsap.set('.hero-copy',{autoAlpha:0});gsap.set(['.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0});gsap.set(shell,{autoAlpha:1,scale:1});gsap.set('#setup-window',{autoAlpha:0});gsap.set(anchor,g.desktop);gsap.set(['#desktop-hint','.stage-caption'],{autoAlpha:1});gsap.set('#chapter-progress',{scaleX:1});stage.style.height=innerWidth<=760?'760px':'850px';$('.story').style.height='auto';chapter(1);setInteractive(true);return()=>{setInteractive(false);stage.style.height='';$('.story').style.height='';draggable?.kill();draggable=null;};}
+      if(quiet){gsap.set('.hero-copy',{autoAlpha:0});gsap.set(['#hero-desk','.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0});gsap.set(shell,{autoAlpha:1,scale:1});gsap.set('#setup-window',{autoAlpha:0});gsap.set(anchor,g.desktop);gsap.set(['#desktop-hint','.stage-caption'],{autoAlpha:1});gsap.set('#chapter-progress',{scaleX:1});stage.style.height=innerWidth<=760?'760px':'850px';$('.story').style.height='auto';chapter(1);setInteractive(true);return()=>{setInteractive(false);stage.style.height='';$('.story').style.height='';draggable?.kill();draggable=null;};}
       const tl=gsap.timeline({defaults:{ease:'none'},onUpdate(){const p=this.progress();chapter(p);setInteractive(p>.76);if(interactive&&!dragging)positionPanels();},scrollTrigger:{trigger:'.story',start:'top top',end:'bottom bottom',scrub:.45,invalidateOnRefresh:true,onRefreshInit:()=>gsap.set(anchor,sceneGeometry().hero),onUpdate:self=>{sceneProgress=self.progress;},onRefresh:()=>{if(interactive){resetPosition();updateBounds();positionPanels();}fitRive();}}});storyTimeline=tl;
       tl.to('.hero-copy',{y:-50,autoAlpha:0,duration:.2},.02)
-        .to(['.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0,duration:.12},.03)
+        .to(['#hero-desk','.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0,duration:.12},.03)
         .to(shell,{scale:1,autoAlpha:1,duration:.25,ease:'power2.inOut'},.09)
         .to(anchor,{x:()=>sceneGeometry().setup.x,y:()=>sceneGeometry().setup.y,scale:()=>sceneGeometry().setup.scale,duration:.28,ease:'power2.inOut'},.08)
         .to('.stage-caption',{autoAlpha:1,duration:.09},.2)
@@ -83,7 +83,7 @@
         .to('#desktop-hint',{autoAlpha:1,duration:.1},.7)
         .to('#chapter-progress',{scaleX:1,duration:1},0)
         .to({},{duration:.25},.75);
-      if(!introPlayed){introPlayed=true;gsap.from('.title-line>span',{yPercent:110,duration:1,ease:'power3.out',stagger:.1,delay:.05});gsap.from('.hero-item',{y:12,opacity:0,duration:.65,ease:'power3.out',stagger:.07,delay:.3});gsap.from('#hero-speech',{scale:.7,opacity:0,duration:.6,ease:'back.out(1.1)',transformOrigin:'0 100%',delay:.75});}
+      if(!introPlayed){introPlayed=true;gsap.from('.title-line>span',{yPercent:110,duration:1,ease:'power3.out',stagger:.1,delay:.05});gsap.from('.floating-file,.desk-sticker,.folder-sticker,.scene-peek',{y:18,opacity:0,duration:.75,ease:'power3.out',stagger:.08,delay:.15});gsap.from('.hero-item',{y:12,opacity:0,duration:.65,ease:'power3.out',stagger:.07,delay:.3});gsap.from('#hero-speech',{scale:.7,opacity:0,duration:.6,ease:'back.out(1.1)',transformOrigin:'0 100%',delay:.75});}
       $$('.line-reveal').forEach(el=>gsap.from(el,{y:28,opacity:0,duration:.8,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%',once:true}}));
       gsap.from('.conversation-stage',{y:35,opacity:0,duration:.8,ease:'power3.out',scrollTrigger:{trigger:'.personality',start:'top 70%',once:true}});
       gsap.fromTo('.download-art',{yPercent:-3},{yPercent:3,ease:'none',scrollTrigger:{trigger:'.download',start:'top bottom',end:'bottom top',scrub:.5}});
@@ -91,6 +91,8 @@
       return()=>{draggable?.kill();draggable=null;setInteractive(false);};
     });ScrollTrigger.refresh();
   }
+  $('#hello-sticker').addEventListener('click',()=>{wave();const label=$('#hero-speech');label.textContent='heii, seneng ketemu kamu :)';if(gsap&&!quiet)gsap.fromTo(label,{scaleX:.9,scaleY:.94},{scaleX:1,scaleY:1,duration:.4,ease:'power3.out',overwrite:true});});
+  $('#play-scene').addEventListener('click',()=>{const start=$('.story').offsetTop,travel=$('.story').offsetHeight-stage.offsetHeight;window.scrollTo({top:quiet?start:start+Math.max(0,travel)*.93,behavior:quiet?'instant':'smooth'});if(quiet){mascot.focus({preventScroll:true});}else later(desktopTimers,()=>{if(interactive)mascot.focus({preventScroll:true});},1200);});
   motionButton.addEventListener('click',()=>{if(systemMotion.matches){motionButton.textContent='Mengikuti pengaturan perangkat';return;}manualMotion=!manualMotion;try{localStorage.setItem('bito-reduced-motion',String(manualMotion));}catch{}configureScene();});
 
   const personas={direct:{description:'Singkat, jelas. Langsung ke intinya.',greet:['apa?'],tired:['istirahat dulu.','yang paling bikin capek apa?'],idea:['apa idenya?']},chill:{description:'Santai. Nggak perlu mikirin cara mulainya.',greet:['wut'],tired:['duh, hari panjang ya','mau cerita?'],idea:['spill','gue dengerin']},humor:{description:'Ada aja celetukannya. Tetap lihat situasi.',greet:['hadir, ketua'],tired:['hari ini kayak buka 38 tab ya','mau ngeluh dulu? sini'],idea:['awas aja kalo garing','oke spill wkwk']},care:{description:'Dengerin dulu. Nggak buru-buru kasih nasihat.',greet:['iyaa, kenapa?'],tired:['kedengerannya kamu udah ngeluarin banyak tenaga hari ini.','mau aku temenin cerita dulu?'],idea:['aku penasaran. ceritain, dong.']}};

@@ -3,7 +3,7 @@
   const clamp=(n,min,max)=>Math.max(min,Math.min(Math.max(min,max),n));
   function geometry(w,h,size,frame,mobile) {
     return {
-      hero:{x:mobile?(w-size)/2:w*.74-size/2,y:mobile?h-size-38:h*.59-size/2,scale:1},
+      hero:{x:(w-size*(mobile?.53:.46))/2,y:mobile?110:Math.max(102,h*.125),scale:mobile?.53:.46},
       setup:{x:w/2-size*.48/2,y:frame.y+frame.h/2-145,scale:.48},
       desktop:{x:frame.x+frame.w*(mobile?.5:.27)-size*(mobile?.55:.72)/2,y:frame.y+frame.h*(mobile?.27:.61)-size*(mobile?.55:.72)/2,scale:mobile?.55:.72}
     };

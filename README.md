@@ -7,3 +7,5 @@ Serve `dist/` with a static HTTP server. No build step or dependency installatio
 GSAP 3.15.0, ScrollTrigger, Flip and Draggable are vendored. Plus Jakarta Sans is stored locally. The original Bito poster stays visible until the Rive canvas has painted, and the same runtime remains mounted throughout the scroll story. The page respects reduced motion and has a footer motion toggle. The interactive scenes are explicitly illustrative, stay inside the webpage and do not call AI or collect messages.
 
 All downloads point to the existing v0.5.1 desktop release. AI access in the desktop app remains limited to invited demo accounts. See THIRD_PARTY.md and dist/assets/ for third-party licenses.
+
+The October 26 desktop-paper revision centers the hero on a white, light gray dotted canvas. Small native-style preview windows and pastel stickers surround the persistent animated Bito. Mac and Windows have direct download links; the action preview jumps into the original interactive desktop story. The existing Site identity and URL are preserved. CSS/assets/anchors/geometry checks run automatically; visual browser review is left to the owner.

@@ -33,8 +33,20 @@ const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Se
 assert.equal((html.match(/<canvas /g)||[]).length,1,'The scroll scene must retain one Rive canvas');
 for(const ref of [...html.matchAll(/(?:src|href)="([^"#]+)"/g)].map(m=>m[1]))if(!/^(https?:|data:|mailto:)/.test(ref))assert(fs.existsSync(path.join(root,ref)),`Missing asset ${ref}`);
 for(const ref of [...html.matchAll(/href="#([^"]+)"/g)].map(m=>m[1]))assert(ids.includes(ref),`Missing anchor ${ref}`);
-const css=fs.readFileSync(path.join(root,'style.css'),'utf8');
+const css=['style.css','desktop-paper.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');
 for(const [,ref]of css.matchAll(/url\(['"]?([^'"\)]+)['"]?\)/g))assert(fs.existsSync(path.join(root,ref)),`Missing CSS asset ${ref}`);
 for(const file of ['site.js','scene-math.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
 assert(!/fetch\(|XMLHttpRequest|api[_-]?key/i.test(fs.readFileSync(path.join(root,'site.js'),'utf8')),'Demo must remain local');
+assert(css.includes('radial-gradient(circle, #d8dce2 1px'), 'Dotted white canvas missing');
+for(const id of ['hero-desk','hello-sticker','play-scene','tentang'])assert(ids.includes(id));
+const js=fs.readFileSync(path.join(root,'site.js'),'utf8');
+for(const [,id]of js.matchAll(/\$\('#([a-z0-9-]+)'\)/g))assert(ids.includes(id),`Missing scripted element ${id}`);
+for(const [w,h]of [[320,800],[375,812],[430,932],[768,760],[1024,768],[1440,900],[1920,1080]]){
+  const mobile=w<=760,size=mobile?260:w>1700?440:w<=1100?310:370;
+  const g=geometry(w,h,size,{x:0,y:90,w,h:h-160},mobile).hero;
+  assert(Math.abs(g.x+size*g.scale/2-w/2)<.01,'Hero mascot must be centered');
+  assert(g.y>=90&&g.y+size*g.scale<h*.4,'Hero mascot overlaps headline');
+}
+assert(html.includes('get bito for mac')&&html.includes('get bito for windows'));
+assert.equal(JSON.parse(fs.readFileSync(path.join(__dirname,'../.openai/hosting.json'),'utf8')).project_id,'appgprj_6ade497ddd44819195b35aae3ee1d06a','Existing Site identity must be retained');
 console.log(`PASS: ${tests} corner/viewport placement cases, chat side switching, unique IDs, one persistent canvas, local assets, section anchors, JS syntax, browser-local demo`);
