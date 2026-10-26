@@ -70,8 +70,8 @@
       const g=sceneGeometry();gsap.set(anchor,{left:0,top:0,bottom:'auto',xPercent:0,yPercent:0,...g.hero});gsap.set(greeting,{autoAlpha:0});
       if(quiet){gsap.set('.hero-copy',{autoAlpha:0});gsap.set(['#hero-desk','.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0});gsap.set(shell,{autoAlpha:1,scale:1});gsap.set('#setup-window',{autoAlpha:0});gsap.set(anchor,g.desktop);gsap.set(['#desktop-hint','.stage-caption'],{autoAlpha:1});gsap.set('#chapter-progress',{scaleX:1});stage.style.height=innerWidth<=760?'760px':'850px';$('.story').style.height='auto';chapter(1);setInteractive(true);return()=>{setInteractive(false);stage.style.height='';$('.story').style.height='';draggable?.kill();draggable=null;};}
       const tl=gsap.timeline({defaults:{ease:'none'},onUpdate(){const p=this.progress();chapter(p);setInteractive(p>.76);if(interactive&&!dragging)positionPanels();},scrollTrigger:{trigger:'.story',start:'top top',end:'bottom bottom',scrub:.45,invalidateOnRefresh:true,onRefreshInit:()=>gsap.set(anchor,sceneGeometry().hero),onUpdate:self=>{sceneProgress=self.progress;},onRefresh:()=>{if(interactive){resetPosition();updateBounds();positionPanels();}fitRive();}}});storyTimeline=tl;
-      tl.to('.hero-copy',{y:-50,autoAlpha:0,duration:.2},.02)
-        .to(['#hero-desk','.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0,duration:.12},.03)
+      tl.to(['.hero-copy','#hero-desk'],{y:-50,autoAlpha:0,duration:.2},.02)
+        .to(['.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0,duration:.12},.03)
         .to(shell,{scale:1,autoAlpha:1,duration:.25,ease:'power2.inOut'},.09)
         .to(anchor,{x:()=>sceneGeometry().setup.x,y:()=>sceneGeometry().setup.y,scale:()=>sceneGeometry().setup.scale,duration:.28,ease:'power2.inOut'},.08)
         .to('.stage-caption',{autoAlpha:1,duration:.09},.2)

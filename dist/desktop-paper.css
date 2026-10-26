@@ -306,6 +306,10 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
   opacity: var(--sticker-visibility);
   transition: opacity .32s ease, scale .42s var(--ease), rotate .42s var(--ease);
 }
+.hero-desk .floating-file > .sticker-art {
+  transform-origin: 50% 50%;
+  transition: opacity .32s ease, scale .48s cubic-bezier(.16, 1, .3, 1), rotate .42s var(--ease);
+}
 .mascot-art { transition: opacity .32s ease; }
 .hero-speech, .hero-invite { transition: filter .32s ease; }
 .floating-file .mini-window, .floating-file .hello-note {
@@ -315,7 +319,7 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
 .stage:has(.floating-file:focus-visible) .mascot-art { opacity: .4; }
 .stage:has(.floating-file:focus-visible) :is(.hero-speech, .hero-invite) { filter: opacity(.4); }
 .hero-desk .floating-file:focus-visible { z-index: 10000!important; }
-.floating-file:focus-visible > .sticker-art { opacity: 1; scale: 1.035; rotate: 0deg; }
+.floating-file:focus-visible > .sticker-art { opacity: 1; scale: 1.075; rotate: 0deg; }
 .floating-file:focus-visible :is(.mini-window, .hello-note) {
   border-color: #8ba2c0;
   box-shadow: 0 18px 38px #263d6325, 0 3px 8px #263d6312;
@@ -325,7 +329,7 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
   .stage:has(.floating-file:hover) .mascot-art { opacity: .4; }
   .stage:has(.floating-file:hover) :is(.hero-speech, .hero-invite) { filter: opacity(.4); }
   .hero-desk .floating-file:hover { z-index: 10000!important; }
-  .floating-file:hover > .sticker-art { opacity: 1; scale: 1.035; rotate: 0deg; }
+  .floating-file:hover > .sticker-art { opacity: 1; scale: 1.075; rotate: 0deg; }
   .floating-file:hover :is(.mini-window, .hello-note) {
     border-color: #8ba2c0;
     box-shadow: 0 18px 38px #263d6325, 0 3px 8px #263d6312;
