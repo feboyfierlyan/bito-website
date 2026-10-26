@@ -14,6 +14,7 @@
   <link rel="preload" href="assets/jakarta-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="desktop-paper.css" />
+  <link rel="stylesheet" href="laptop-scene.css" />
   <script defer src="assets/vendor/gsap.min.js"></script>
   <script defer src="assets/vendor/ScrollTrigger.min.js"></script>
   <script defer src="assets/vendor/Flip.min.js"></script>
@@ -63,19 +64,14 @@
         <div class="hero-aside" aria-hidden="true"></div>
         <div class="hero-speech bubble received" id="hero-speech">heii, ketemu juga :)</div>
         <div class="hero-invite hero-item"><span>coba klik aku</span></div>
+        <div class="laptop-backdrop" id="laptop-backdrop" aria-hidden="true"></div>
+        <div class="laptop-device" id="laptop-device"><img id="laptop-image" src="assets/laptop-workspace.png" width="1920" height="1440" alt="Laptop dengan dokumen terbuka; Bito menemanimu di sudut layar." decoding="async" draggable="false" /></div>
         <div class="desktop-shell" id="desktop-shell">
-          <div class="desktop-topbar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>desktop kamu</span><span aria-hidden="true">Bito ✳</span></div>
-          <div class="desktop-bounds" id="desktop-bounds">
-            <div class="desktop-watermark" aria-hidden="true">sedikit<br /><span>lebih dekat.</span></div>
-            <div class="paper-window paper-one" aria-hidden="true"><span>ide-hari-ini.md</span><i></i><i></i><i></i><i></i></div>
-            <div class="paper-window paper-two" aria-hidden="true"><span>hari ini</span><p>satu hal dulu.</p><i></i><i></i></div>
-          </div>
-          <div class="setup-window" id="setup-window"><div class="setup-art"></div><div class="setup-card"><span class="setup-mini">Bito</span><p>Kenalan dulu, yuk.</p><span>Aku panggil kamu siapa?</span><div class="name-preview">kamu<span aria-hidden="true">↑</span></div></div></div>
-          <div class="desktop-hint" id="desktop-hint"><span class="hint-dot"></span><span>Seret Bito. Klik untuk ngobrol.</span><button id="reset-demo" aria-label="Kembalikan posisi Bito">↺</button></div>
-          <button class="bubble received desktop-greeting" id="demo-greeting">nah, di sini lebih enak.<br />klik aku, kita ngobrol.</button>
-          <div class="demo-chat" id="demo-chat" inert aria-hidden="true"><div class="demo-chat-top"><span>Bito</span><span class="demo-label">DEMO</span><button id="close-chat" aria-label="Tutup contoh chat">×</button></div><div class="demo-messages" id="demo-messages" aria-live="polite"></div><div class="demo-choices" id="demo-choices"><button data-demo="hello">sapa dulu</button><button data-demo="day">hari ini capek</button></div><form class="composer" id="demo-form"><input id="demo-input" maxlength="160" placeholder="Coba sapa Bito…" aria-label="Tulis pesan untuk demo Bito" autocomplete="off" /><button aria-label="Kirim contoh pesan" type="submit">↑</button></form></div>
-          <span class="desktop-demo-label">Ilustrasi interaktif · berjalan di halaman ini</span>
+          <button class="bubble received desktop-greeting" id="demo-greeting">heii, aku di sini.<br />mau ditemenin?</button>
+          <div class="demo-chat" id="demo-chat" inert aria-hidden="true"><div class="demo-chat-top"><span>Bito</span><span class="demo-label">DEMO</span><button id="close-chat" aria-label="Tutup contoh chat">×</button></div><div class="demo-messages" id="demo-messages" aria-live="polite"></div><div class="demo-choices" id="demo-choices"><button data-demo="hello">sapa dulu</button><button data-demo="reminder">ingetin istirahat</button></div><form class="composer" id="demo-form"><input id="demo-input" maxlength="160" placeholder="Coba sapa Bito…" aria-label="Tulis pesan untuk demo Bito" autocomplete="off" /><button aria-label="Kirim contoh pesan" type="submit">↑</button></form></div>
         </div>
+        <div class="desktop-hint" id="desktop-hint"><span class="hint-dot"></span><span>Seret Bito. Klik untuk ngobrol.</span><button id="reset-demo" aria-label="Kembalikan posisi Bito">↺</button></div>
+        <span class="desktop-demo-label laptop-demo-label" id="laptop-demo-label">Ilustrasi interaktif · berjalan di halaman ini</span>
         <div class="actor-anchor" id="actor-anchor"><div class="actor-drag" id="actor-drag"><div class="actor-sway" id="actor-sway"><button class="mascot" id="mascot" aria-label="Sapa Bito"><span class="mascot-art" id="mascot-art"><img src="assets/bito.png" alt="Bito, karakter hijau kecil dengan dua daun" width="1024" height="1024" fetchpriority="high" /><canvas id="bito-canvas" aria-hidden="true"></canvas></span></button></div></div></div>
         <div class="stage-caption" id="stage-caption"><span class="chapter-number" id="chapter-number">01 / 03</span><p id="chapter-copy">Kenalan sebentar.</p><span class="chapter-rule"><i id="chapter-progress"></i></span></div>
         <a class="scroll-note" href="#gaya"><span>SCROLL, KITA KENALAN</span><span aria-hidden="true">↓</span></a>

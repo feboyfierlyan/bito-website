@@ -3,9 +3,12 @@
   'use strict';
   const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
   const gsap=window.gsap, Flip=window.Flip, ScrollTrigger=window.ScrollTrigger, Draggable=window.Draggable;
-  const {clamp,geometry,dragBounds,chatPlacement}=window.BitoScene;
+  const {clamp,geometry,laptopLayout,companionPose,companionPanel,companionBounds}=window.BitoScene;
   const stage=$('#stage'), anchor=$('#actor-anchor'), drag=$('#actor-drag'), sway=$('#actor-sway'), mascot=$('#mascot');
   const shell=$('#desktop-shell'), chat=$('#demo-chat'), messages=$('#demo-messages'), greeting=$('#demo-greeting');
+  const device=$('#laptop-device'),backdrop=$('#laptop-backdrop');
+  const flight={reveal:0,zoom:0,arrival:0};
+  let laptop;
   const systemMotion=matchMedia('(prefers-reduced-motion: reduce)');
   let manualMotion=false;
   try{manualMotion=localStorage.getItem('bito-reduced-motion')==='true';}catch{}
@@ -34,21 +37,36 @@
   }catch{return null;}}
   function verifyPaint(){if(painted||paintFrame||disposed)return;paintFrame=requestAnimationFrame(()=>{paintFrame=0;try{const c=$('#bito-canvas'),ctx=c.getContext('2d');if(!ctx||!c.width)return;const p=ctx.getImageData(0,0,c.width,c.height).data;let visible=0;for(let i=3;i<p.length;i+=128)if(p[i]>45)visible++;if(visible>100){painted=true;$('#mascot-art').classList.add('ready');syncRive();}}catch{}});}
   function startRive(){if(!window.rive)return;try{window.rive.RuntimeLoader.setWasmUrl(new URL('assets/rive.wasm',location.href).href);rive=new window.rive.Rive({src:'assets/bito.riv',canvas:$('#bito-canvas'),autoplay:true,stateMachine:'State Machine 1',autoBind:true,enableRiveAssetCDN:false,layout:new window.rive.Layout({fit:window.rive.Fit.Contain,alignment:window.rive.Alignment.Center}),onLoad(){fitRive();rig=createEyes();verifyPaint();},onAdvance(event){rig?.advance(event.data);verifyPaint();}});}catch{/* Matching poster remains visible; no loading box. */}}
-  function sceneGeometry(){return geometry(stage.clientWidth,stage.clientHeight,anchor.offsetWidth,{x:shell.offsetLeft,y:shell.offsetTop,w:shell.offsetWidth,h:shell.offsetHeight},innerWidth<=760);}
-  function positionPanels(){if(!interactive)return;const a=mascot.getBoundingClientRect(),f=shell.getBoundingClientRect(),mobile=innerWidth<=760;const actor={x:a.left-f.left,y:a.top-f.top,w:a.width,h:a.height};const frame={w:f.width,h:f.height};
-    const c=chatPlacement(actor,frame,chat.offsetWidth,chat.offsetHeight,mobile);gsap?.set(chat,{left:c.x,top:c.y,right:'auto',bottom:'auto'});
-    if(!chatOpen){const p=chatPlacement(actor,frame,greeting.offsetWidth,greeting.offsetHeight,false);gsap?.set(greeting,{left:p.x,top:mobile?Math.min(actor.y+actor.h+12,frame.h-greeting.offsetHeight-70):p.y,right:'auto'});greeting.dataset.side=p.side;}
+  function sceneGeometry(){const w=stage.clientWidth,h=stage.clientHeight,size=anchor.offsetWidth;const view=laptop||laptopLayout(w,h,flight.zoom,flight.reveal);return {hero:geometry(w,h,size,view.screen,w<=760).hero,desktop:companionPose(view.visible,size,w<=760)};}
+  function renderLaptop(){
+    if(!gsap)return;
+    laptop=laptopLayout(stage.clientWidth,stage.clientHeight,flight.zoom,flight.reveal,innerWidth<=760);
+    const {image,screen}=laptop;
+    gsap.set(device,{x:image.x,y:image.y,scale:image.w/1920,autoAlpha:flight.reveal});
+    gsap.set(backdrop,{autoAlpha:flight.reveal});
+    gsap.set(shell,{x:screen.x,y:screen.y,width:screen.w,height:screen.h,scale:1,autoAlpha:flight.reveal});
+    const {hero,desktop}=sceneGeometry(),t=clamp(flight.arrival,0,1),arc=Math.sin(t*Math.PI);
+    gsap.set(anchor,{x:hero.x+(desktop.x-hero.x)*t+arc*24,y:hero.y+(desktop.y-hero.y)*t-arc*18,scale:hero.scale+(desktop.scale-hero.scale)*t});
   }
-  function updateBounds(){if(!draggable)return;const g=sceneGeometry(),r=g.desktop,f={x:shell.offsetLeft,y:shell.offsetTop,w:shell.offsetWidth,h:shell.offsetHeight};draggable.applyBounds(dragBounds(r,f,anchor.offsetWidth,r.scale));}
+  function positionPanels(){if(!interactive||!laptop)return;
+    const a=mascot.getBoundingClientRect(),s=stage.getBoundingClientRect(),mobile=innerWidth<=760;
+    const actor={x:a.left-s.left,y:a.top-s.top,w:a.width,h:a.height},frame=laptop.visible;
+    chat.style.width=Math.min(mobile?300:340,frame.w-24)+'px';
+    chat.style.setProperty('--chat-room',Math.max(90,Math.min(230,frame.h-(mobile?actor.h:0)-160))+'px');
+    const c=companionPanel(actor,frame,chat.offsetWidth,chat.offsetHeight,mobile);
+    gsap?.set(chat,{left:c.x-laptop.screen.x,top:c.y-laptop.screen.y,right:'auto',bottom:'auto'});
+    if(!chatOpen){const p=companionPanel(actor,frame,greeting.offsetWidth,greeting.offsetHeight,false);gsap?.set(greeting,{left:p.x-laptop.screen.x,top:p.y-laptop.screen.y,right:'auto'});greeting.dataset.side=p.side;}
+  }
+  function updateBounds(){if(!draggable||!laptop)return;draggable.applyBounds(companionBounds(sceneGeometry().desktop,laptop.visible,anchor.offsetWidth));}
   function resetPosition(){if(!gsap)return;gsap.to(drag,{x:0,y:0,duration:quiet?0:.55,ease:'power3.out',onUpdate:positionPanels,onComplete:updateBounds});gsap.to(sway,{rotation:0,duration:.6,ease:'elastic.out(1,.5)'});}
   function closeChat(immediate=false){if(!chatOpen&&!opening)return;Flip?.killFlipsOf(greeting);chatOpen=false;opening=false;chat.inert=true;chat.setAttribute('aria-hidden','true');mascot.setAttribute('aria-expanded','false');const finish=()=>{if(chatOpen)return;greeting.classList.add('desktop-greeting');shell.append(greeting);gsap?.set(greeting,{clearProps:'all'});positionPanels();if(interactive)gsap?.to(greeting,{autoAlpha:1,duration:quiet?0:.2});};
     if(gsap){gsap.killTweensOf(chat);gsap.to(chat,{autoAlpha:0,scale:.97,duration:quiet||immediate?0:.23,ease:'power2.in',onComplete:finish});}else{chat.style.visibility='hidden';finish();}}
   function openChat(){if(!interactive||chatOpen||opening)return;chatOpen=true;opening=true;wave();positionPanels();const state=Flip&&!quiet?Flip.getState(greeting):null;gsap?.killTweensOf([chat,greeting]);gsap?.set(chat,{autoAlpha:1,scale:1});chat.inert=false;chat.setAttribute('aria-hidden','false');greeting.classList.remove('desktop-greeting');greeting.removeAttribute('style');messages.prepend(greeting);mascot.setAttribute('aria-expanded','true');positionPanels();
     if(state){Flip.from(state,{duration:.55,ease:'power3.inOut',absolute:true,scale:false,onComplete(){opening=false;}});gsap.fromTo(chat,{clipPath:'inset(0% 0% 0% 0% round 50px)',backgroundColor:'#ffffff00'},{clipPath:'inset(0% 0% 0% 0% round 24px)',backgroundColor:'#fffffff7',duration:.5});gsap.fromTo(['.demo-chat-top','.demo-choices','.composer'],{opacity:0,y:5},{opacity:1,y:0,duration:.3,stagger:.03,delay:.15});}else opening=false;
   }
-  function setInteractive(value){if(interactive===value)return;interactive=value;stage.classList.toggle('story-interactive',value);if(value){draggable?.enable();updateBounds();positionPanels();if(!chatOpen)gsap?.to(greeting,{autoAlpha:1,duration:quiet?0:.3});mascot.setAttribute('aria-label','Buka atau tutup contoh chat Bito');mascot.setAttribute('aria-expanded',String(chatOpen));}else{dragging=false;boolean('isDragging',false);draggable?.disable();closeChat(true);gsap?.set(greeting,{autoAlpha:0});gsap?.set(drag,{x:0,y:0});gsap?.set(sway,{rotation:0});mascot.setAttribute('aria-label','Sapa Bito');mascot.removeAttribute('aria-expanded');}}
-  function chapter(progress){const n=progress<.23?0:progress<.66?1:2;if(n===currentChapter)return;currentChapter=n;$('#chapter-number').textContent=`0${n+1} / 03`;$('#chapter-copy').textContent=['Kenalan sebentar.','Bawa aku ke harimu.','Seret. Klik. Ngobrol.'][n];}
-  function setupDrag(){if(!Draggable||!gsap)return;draggable=Draggable.create(drag,{type:'x,y',minimumMovement:6,dragResistance:.04,edgeResistance:.8,allowContextMenu:true,onPress(){if(!interactive)return;dragging=true;boolean('isDragging',true);boolean('isTalking',false);stage.classList.add('is-dragging');lastPointerX=this.x;lastPointerAt=performance.now();gsap.killTweensOf(sway);gsap.to(sway,{scale:1.025,duration:.16,ease:'power2.out'});},onDrag(){const now=performance.now(),velocity=(this.x-lastPointerX)/Math.max(8,now-lastPointerAt);lastPointerX=this.x;lastPointerAt=now;gsap.to(sway,{rotation:quiet?0:clamp(velocity*8,-14,14),duration:.18,ease:'power2.out',overwrite:'auto'});positionPanels();},onRelease(){dragging=false;boolean('isDragging',false);boolean('isTalking',talking&&!quiet);stage.classList.remove('is-dragging');gsap.to(sway,{scale:1,rotation:0,duration:quiet?0:1,ease:'elastic.out(1,.36)',overwrite:'auto'});positionPanels();},onClick(){if(interactive)chatOpen?closeChat():openChat();}})[0];draggable.disable();}
+  function setInteractive(value){if(interactive===value)return;interactive=value;stage.classList.toggle('story-interactive',value);if(value){draggable?.enable();updateBounds();positionPanels();wave();if(!chatOpen)gsap?.to(greeting,{autoAlpha:1,duration:quiet?0:.3});mascot.setAttribute('aria-label','Buka atau tutup contoh chat Bito');mascot.setAttribute('aria-expanded',String(chatOpen));}else{dragging=false;boolean('isDragging',false);draggable?.disable();closeChat(true);gsap?.set(greeting,{autoAlpha:0});gsap?.set(drag,{x:0,y:0});gsap?.set(sway,{rotation:0});mascot.setAttribute('aria-label','Sapa Bito');mascot.removeAttribute('aria-expanded');}}
+  function chapter(progress){const n=progress<.2?0:progress<.72?1:2;if(n===currentChapter)return;currentChapter=n;$('#chapter-number').textContent=`0${n+1} / 03`;$('#chapter-copy').textContent=['Kenalan sebentar.','Ada tempat buat Bito?','Aku di sini. Klik untuk ngobrol.'][n];}
+  function setupDrag(){if(!Draggable||!gsap)return;draggable=Draggable.create(drag,{type:'x,y',dragClickables:true,minimumMovement:6,dragResistance:.04,edgeResistance:.8,allowContextMenu:true,onPress(){if(!interactive)return;dragging=true;boolean('isDragging',true);boolean('isTalking',false);stage.classList.add('is-dragging');lastPointerX=this.x;lastPointerAt=performance.now();gsap.killTweensOf(sway);gsap.to(sway,{scale:1.025,duration:.16,ease:'power2.out'});},onDrag(){const now=performance.now(),velocity=(this.x-lastPointerX)/Math.max(8,now-lastPointerAt);lastPointerX=this.x;lastPointerAt=now;gsap.to(sway,{rotation:quiet?0:clamp(velocity*8,-14,14),duration:.18,ease:'power2.out',overwrite:'auto'});positionPanels();},onRelease(){dragging=false;boolean('isDragging',false);boolean('isTalking',talking&&!quiet);stage.classList.remove('is-dragging');gsap.to(sway,{scale:1,rotation:0,duration:quiet?0:1,ease:'elastic.out(1,.36)',overwrite:'auto'});positionPanels();},onClick(){if(interactive)chatOpen?closeChat():openChat();}})[0];draggable.disable();}
   mascot.addEventListener('click',()=>{if(!interactive)wave();if(!draggable&&interactive)(chatOpen?closeChat():openChat());});
   mascot.addEventListener('keydown',event=>{if(interactive&&(event.key==='Enter'||event.key===' ')){event.preventDefault();chatOpen?closeChat():openChat();}});
   greeting.addEventListener('click',()=>{if(!chatOpen)openChat();});$('#close-chat').addEventListener('click',()=>closeChat());$('#reset-demo').addEventListener('click',resetPosition);
@@ -57,32 +75,32 @@
   const resetGaze=()=>{gaze.active=false;};document.documentElement.addEventListener('pointerleave',resetGaze);window.addEventListener('blur',resetGaze);document.addEventListener('visibilitychange',()=>{resetGaze();syncRive();});
   function appendBubble(parent,text,kind='received'){const el=document.createElement('div');el.className=`bubble ${kind}`;el.textContent=text;parent.append(el);animateBubble(el);return el;}
   function typing(parent){const el=document.createElement('div');el.className='bubble received typing';el.setAttribute('aria-label','Bito sedang mengetik');el.innerHTML='<i></i><i></i><i></i>';parent.append(el);animateBubble(el);return el;}
-  function demoReply(value){if(demoBusy||!value.trim())return;demoBusy=true;clearTimers(desktopTimers);$('#demo-input').value='';if(messages.children.length>6)[...messages.children].filter(n=>n!==greeting).slice(0,2).forEach(n=>n.remove());appendBubble(messages,value.trim(),'sent');$('#demo-choices').hidden=true;const t=typing(messages);messages.scrollTop=messages.scrollHeight;positionPanels();const lower=value.toLowerCase();const reply=/capek|lelah/.test(lower)?'duh, hari panjang ya. mau cerita bagian paling capeknya?':/halo|hai|sapa|bro|hello/.test(lower)?'heii. seneng kamu mampir :)':'aku dengerin. di aplikasi nanti, kita bisa ngobrol lebih jauh.';
-    later(desktopTimers,()=>{t.remove();setTalking(true);appendBubble(messages,reply);messages.scrollTop=messages.scrollHeight;positionPanels();later(desktopTimers,()=>{setTalking(false);demoBusy=false;},1100);},1000);
+  function demoReply(value){if(demoBusy||!value.trim())return;demoBusy=true;clearTimers(desktopTimers);$('#demo-input').value='';if(messages.children.length>6)[...messages.children].filter(n=>n!==greeting).slice(0,2).forEach(n=>n.remove());appendBubble(messages,value.trim(),'sent');$('#demo-choices').hidden=true;const t=typing(messages);messages.scrollTop=messages.scrollHeight;positionPanels();const lower=value.toLowerCase(),reminder=/inget|ingat|reminder|istirahat/.test(lower);const reply=reminder?'siap. nanti aku colek, ya.':/capek|lelah/.test(lower)?'duh, hari panjang ya. mau cerita bagian paling capeknya?':/halo|hai|sapa|bro|hello/.test(lower)?'heii. seneng kamu mampir :)':'aku dengerin. di aplikasi nanti, kita bisa ngobrol lebih jauh.';
+    later(desktopTimers,()=>{t.remove();setTalking(true);appendBubble(messages,reply);if(reminder)later(desktopTimers,()=>{const card=document.createElement('div');card.className='demo-reminder';card.innerHTML='<span aria-hidden="true">◷</span><div><strong>Istirahat sebentar</strong><small>15 menit lagi · Contoh pengingat</small></div>';messages.append(card);animateBubble(card);messages.scrollTop=messages.scrollHeight;positionPanels();},650);messages.scrollTop=messages.scrollHeight;positionPanels();later(desktopTimers,()=>{setTalking(false);demoBusy=false;},1100);},1000);
   }
-  $('#demo-form').addEventListener('submit',event=>{event.preventDefault();demoReply($('#demo-input').value);});$$('[data-demo]').forEach(b=>b.addEventListener('click',()=>demoReply(b.dataset.demo==='day'?'hari ini capek banget':'halo Bito')));
+  $('#demo-form').addEventListener('submit',event=>{event.preventDefault();demoReply($('#demo-input').value);});$$('[data-demo]').forEach(b=>b.addEventListener('click',()=>demoReply(b.dataset.demo==='reminder'?'ingetin aku istirahat 15 menit lagi':'halo Bito')));
 
-  function configureScene(){if(!gsap||!ScrollTrigger){shell.style.cssText='opacity:1;visibility:visible';anchor.style.cssText='left:65%;top:48%;transform:translate(-50%,-50%)';return;}
+  function configureScene(){if(!gsap||!ScrollTrigger){device.style.cssText='opacity:1;visibility:visible;left:50%;top:160px;transform:translateX(-50%) scale(.45)';return;}
     context?.revert();draggable?.kill();draggable=null;interactive=false;chatOpen=false;opening=false;currentChapter=-1;chat.inert=true;chat.setAttribute('aria-hidden','true');greeting.classList.add('desktop-greeting');shell.append(greeting);greeting.removeAttribute('style');gsap.set([drag,sway],{clearProps:'all'});gsap.set(chat,{autoAlpha:0});
     quiet=manualMotion||systemMotion.matches;document.documentElement.classList.toggle('motion-paused',quiet);motionButton.textContent=quiet?'Gerakan dikurangi':'Kurangi gerakan';motionButton.setAttribute('aria-pressed',String(quiet));gsap.registerPlugin(ScrollTrigger,Flip,Draggable);context=gsap.matchMedia();
     context.add({wide:'(min-width: 761px)',narrow:'(max-width: 760px)',systemQuiet:'(prefers-reduced-motion: reduce)'},media=>{
       quiet=manualMotion||media.conditions.systemQuiet;document.documentElement.classList.toggle('motion-paused',quiet);motionButton.setAttribute('aria-pressed',String(quiet));motionButton.textContent=quiet?'Gerakan dikurangi':'Kurangi gerakan';syncRive();setInteractive(false);draggable?.kill();setupDrag();
-      const g=sceneGeometry();gsap.set(anchor,{left:0,top:0,bottom:'auto',xPercent:0,yPercent:0,...g.hero});gsap.set(greeting,{autoAlpha:0});
-      if(quiet){gsap.set('.hero-copy',{autoAlpha:0});gsap.set(['#hero-desk','.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0});gsap.set(shell,{autoAlpha:1,scale:1});gsap.set('#setup-window',{autoAlpha:0});gsap.set(anchor,g.desktop);gsap.set(['#desktop-hint','.stage-caption'],{autoAlpha:1});gsap.set('#chapter-progress',{scaleX:1});stage.style.height=innerWidth<=760?'760px':'850px';$('.story').style.height='auto';chapter(1);setInteractive(true);return()=>{setInteractive(false);stage.style.height='';$('.story').style.height='';draggable?.kill();draggable=null;};}
-      const tl=gsap.timeline({defaults:{ease:'none'},onUpdate(){const p=this.progress();chapter(p);setInteractive(p>.76);if(interactive&&!dragging)positionPanels();},scrollTrigger:{trigger:'.story',start:'top top',end:'bottom bottom',scrub:.45,invalidateOnRefresh:true,onRefreshInit:()=>gsap.set(anchor,sceneGeometry().hero),onUpdate:self=>{sceneProgress=self.progress;},onRefresh:()=>{if(interactive){resetPosition();updateBounds();positionPanels();}fitRive();}}});storyTimeline=tl;
-      tl.to(['.hero-copy','#hero-desk'],{y:-50,autoAlpha:0,duration:.2},.02)
+      Object.assign(flight,{reveal:0,zoom:0,arrival:0});gsap.set(anchor,{left:0,top:0,bottom:'auto',xPercent:0,yPercent:0});renderLaptop();gsap.set(greeting,{autoAlpha:0});
+      if(quiet){gsap.set(['.hero-copy','#hero-desk','.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0});stage.style.height=innerWidth<=760?'800px':'900px';$('.story').style.height='auto';Object.assign(flight,{reveal:1,zoom:1,arrival:1});renderLaptop();gsap.set(['#desktop-hint','#laptop-demo-label','.stage-caption'],{autoAlpha:1});gsap.set('#chapter-progress',{scaleX:1});chapter(1);setInteractive(true);return()=>{setInteractive(false);stage.style.height='';$('.story').style.height='';draggable?.kill();draggable=null;};}
+      const tl=gsap.timeline({defaults:{ease:'none'},onUpdate(){renderLaptop();const p=this.progress();chapter(p);setInteractive(p>.72);if(interactive&&!dragging)positionPanels();},scrollTrigger:{trigger:'.story',start:'top top',end:'bottom bottom',scrub:.4,invalidateOnRefresh:true,onUpdate:self=>{sceneProgress=self.progress;},onRefresh(){renderLaptop();if(interactive){updateBounds();positionPanels();}fitRive();}}});storyTimeline=tl;
+      tl.addLabel('hello',0)
+        .to(['.hero-copy','#hero-desk'],{y:-50,autoAlpha:0,duration:.2},.02)
         .to(['.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0,duration:.12},.03)
-        .to(shell,{scale:1,autoAlpha:1,duration:.25,ease:'power2.inOut'},.09)
-        .to(anchor,{x:()=>sceneGeometry().setup.x,y:()=>sceneGeometry().setup.y,scale:()=>sceneGeometry().setup.scale,duration:.28,ease:'power2.inOut'},.08)
-        .to('.stage-caption',{autoAlpha:1,duration:.09},.2)
-        .to('#setup-window',{width:()=>shell.clientWidth*.9,height:()=>shell.clientHeight*.86,duration:.19,ease:'power2.inOut'},.37)
-        .to('.setup-card',{backgroundColor:'#ffffff',duration:.1},.4)
-        .to('#setup-window',{autoAlpha:0,duration:.15},.52)
-        .to(anchor,{x:()=>sceneGeometry().desktop.x,y:()=>sceneGeometry().desktop.y,scale:()=>sceneGeometry().desktop.scale,duration:.24,ease:'power2.inOut'},.5)
-        .fromTo('.paper-window',{y:35,opacity:0},{y:0,opacity:1,duration:.2,stagger:.03},.55)
-        .to('#desktop-hint',{autoAlpha:1,duration:.1},.7)
+        .addLabel('laptop',.12)
+        .fromTo(flight,{reveal:0},{reveal:1,duration:.22,ease:'power2.inOut',immediateRender:false},.12)
+        .to('.stage-caption',{autoAlpha:1,duration:.09},.22)
+        .addLabel('closer',.3)
+        .fromTo(flight,{zoom:0},{zoom:1,duration:.32,ease:'power2.inOut',immediateRender:false},.3)
+        .fromTo(flight,{arrival:0},{arrival:1,duration:.34,ease:'power2.inOut',immediateRender:false},.3)
+        .addLabel('together',.72)
+        .to(['#desktop-hint','#laptop-demo-label'],{autoAlpha:1,duration:.1},.69)
         .to('#chapter-progress',{scaleX:1,duration:1},0)
-        .to({},{duration:.25},.75);
+        .to({},{duration:.27},.73);
       if(!introPlayed){introPlayed=true;gsap.from('.title-line>span',{yPercent:110,duration:1,ease:'power3.out',stagger:.1,delay:.05});gsap.from('.floating-file,.desk-sticker,.folder-sticker,.internet-sticker,.desktop-icon,.scene-peek',{y:18,opacity:0,duration:.75,ease:'power3.out',stagger:.035,delay:.15});gsap.from('.hero-item',{y:12,opacity:0,duration:.65,ease:'power3.out',stagger:.07,delay:.3});gsap.from('#hero-speech',{scale:.7,opacity:0,duration:.6,ease:'back.out(1.1)',transformOrigin:'0 100%',delay:.75});}
       $$('.line-reveal').forEach(el=>gsap.from(el,{y:28,opacity:0,duration:.8,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%',once:true}}));
       gsap.from('.conversation-stage',{y:35,opacity:0,duration:.8,ease:'power3.out',scrollTrigger:{trigger:'.personality',start:'top 70%',once:true}});
@@ -110,7 +128,7 @@
   $('#other-downloads').addEventListener('click',()=>{const el=$('#download-options'),b=$('#other-downloads'),open=b.getAttribute('aria-expanded')!=='true';gsap?.killTweensOf(el);b.setAttribute('aria-expanded',String(open));if(open){el.hidden=false;if(gsap&&!quiet)gsap.fromTo(el,{height:0,opacity:0},{height:'auto',opacity:1,duration:.35,ease:'power3.out'});}else if(gsap&&!quiet){gsap.to(el,{height:0,opacity:0,duration:.23,onComplete:()=>{el.hidden=true;gsap.set(el,{clearProps:'height,opacity'});}});}else el.hidden=true;});
   $$('details summary').forEach(summary=>summary.addEventListener('click',event=>{if(!gsap||quiet)return;event.preventDefault();const d=summary.parentElement,expand=!d.open||d.dataset.closing==='true',start=d.offsetHeight;gsap.killTweensOf(d);if(expand){delete d.dataset.closing;d.style.height='';d.open=true;const end=d.scrollHeight;gsap.fromTo(d,{height:start,overflow:'hidden'},{height:end,duration:.32,ease:'power3.out',onComplete:()=>gsap.set(d,{clearProps:'height,overflow'})});}else{d.dataset.closing='true';gsap.to(d,{height:summary.offsetHeight,overflow:'hidden',duration:.24,ease:'power2.inOut',onComplete:()=>{if(d.dataset.closing==='true'){d.open=false;delete d.dataset.closing;}gsap.set(d,{clearProps:'height,overflow'});}});}}));
   if(/Windows/i.test(navigator.userAgent)){const a=$('#primary-download');a.href='https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-Windows-x64-Setup.exe';$('#primary-download-label').textContent='Download untuk Windows';}
-  let resizeFrame=0;window.addEventListener('resize',()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{moveToneTrack(true);fitRive();if(interactive){updateBounds();positionPanels();}});},{passive:true});
+  let resizeFrame=0;window.addEventListener('resize',()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{moveToneTrack(true);renderLaptop();fitRive();if(interactive){updateBounds();positionPanels();}});},{passive:true});
   window.addEventListener('pagehide',event=>{if(event.persisted)return;disposed=true;[desktopTimers,personalityTimers,helpTimers].forEach(clearTimers);cancelAnimationFrame(paintFrame);cancelAnimationFrame(resizeFrame);helpObserver?.disconnect();stageObserver?.disconnect();context?.revert();draggable?.kill();rig?.restore();rive?.cleanup();});
   configureScene();moveToneTrack(true);document.fonts.ready.then(()=>{ScrollTrigger?.refresh();moveToneTrack(true);fitRive();}).catch(()=>{});startRive();
 })();

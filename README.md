@@ -1,6 +1,6 @@
 # Bito — Hai. Aku Bito.
 
-A character-led website for Bito. One persistent Rive character moves from the opening greeting into an interactive desktop scene. Drag Bito, open its chat, try four conversation styles, explore small helpful actions, and find the macOS or Windows download.
+A character-led website for Bito. One persistent Rive character moves from the opening greeting into the bottom-right corner of a laptop screen. Drag Bito, open its chat, try four conversation styles, explore small helpful actions, and find the macOS or Windows download.
 
 Serve `dist/` with a static HTTP server. No build step or dependency installation is needed. Run `node scripts/check.cjs` for geometry, asset, anchor and source checks.
 
@@ -15,3 +15,7 @@ Desktop objects can be freely dragged using mouse or touch. Stickers, a locally 
 Hovering the reminder, hello note, or small chat window spotlights that window and gently fades the other desktop objects. Keyboard focus produces the same treatment. Hover straightens the small window around its center without moving its anchor. The headline and download controls remain readable. Opacity and pickup effects run on inner surfaces, separate from drag coordinates and the scroll timeline. Fine-pointer hover is excluded on touch screens; reduced-motion preferences remove the lift transitions.
 
 The small windows scale to 107.5% over 480ms on hover, returning smoothly from their current size when interrupted. During scroll, the full desktop-object group shares the hero title's upward movement and fade on the same timeline. Individual sticker drag offsets remain local to that group.
+
+The laptop story uses the supplied 1920×1440 mockup (dist/assets/laptop-workspace.png) without altering it. Scroll reveals the laptop, moves closer to its screen and carries the original Rive actor into its lower-right corner. HTML chat and greeting sit over the measured screen rectangle. On narrow screens the camera moves toward the right-hand workspace, keeping Bito and chat readable. Drag/chat bounds use the intersection of the screen and viewport. Reduced motion goes directly to the interactive final composition. The former simulated onboarding panel is removed.
+
+Run node scripts/check.cjs and node scripts/check-stickers.cjs for the layout, bounds, source and drag checks. Manual visual testing remains with the owner.

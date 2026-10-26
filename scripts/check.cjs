@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const {geometry, dragBounds, chatPlacement, clamp, stickerBounds} = require('../dist/scene-math.js');
+const {geometry, dragBounds, chatPlacement, clamp, stickerBounds,laptopLayout,companionPose,companionPanel,companionBounds} = require('../dist/scene-math.js');
 const root=path.join(__dirname,'../dist');
 let tests=0;
 for(const [w,h] of [[320,720],[375,812],[430,932],[768,750],[1024,768],[1440,900],[1920,1080]]) {
@@ -33,7 +33,7 @@ const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Se
 assert.equal((html.match(/<canvas /g)||[]).length,1,'The scroll scene must retain one Rive canvas');
 for(const ref of [...html.matchAll(/(?:src|href)="([^"#]+)"/g)].map(m=>m[1]))if(!/^(https?:|data:|mailto:)/.test(ref))assert(fs.existsSync(path.join(root,ref)),`Missing asset ${ref}`);
 for(const ref of [...html.matchAll(/href="#([^"]+)"/g)].map(m=>m[1]))assert(ids.includes(ref),`Missing anchor ${ref}`);
-const css=['style.css','desktop-paper.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');
+const css=['style.css','desktop-paper.css','laptop-scene.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');
 for(const [,ref]of css.matchAll(/url\(['"]?([^'"\)]+)['"]?\)/g))assert(fs.existsSync(path.join(root,ref)),`Missing CSS asset ${ref}`);
 for(const file of ['site.js','scene-math.js','desktop-stickers.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
 assert(!/fetch\(|XMLHttpRequest|api[_-]?key/i.test(fs.readFileSync(path.join(root,'site.js'),'utf8')),'Demo must remain local');
@@ -73,3 +73,32 @@ for(const name of ['word.svg','excel.svg','notes.svg','trash.png','coffee.png','
 assert((html.match(/data-sticker\b/g)||[]).length>=14);
 for(const tag of html.match(/<(?:a|button)\b[^>]*class="(?:floating-file [^"]+|scene-peek)"[^>]*>/g)||[]){assert(!tag.includes('data-sticker'),'Windows must not be draggable');assert(tag.includes('draggable="false"'),'Disable native window drag');}
 console.log('PASS: sticker bounds across 135 viewport/position cases; all requested icons, GIF and reduced-motion poster bundled');
+let laptopCases=0;
+for(const [w,h]of [[320,800],[375,812],[430,932],[768,760],[1024,768],[1440,900],[1920,1080]]){
+  const mobile=w<=760,size=mobile?260:w>1700?440:w<=1100?310:370;
+  for(const zoom of [0,.25,.5,.75,1]){
+    const l=laptopLayout(w,h,zoom,1,mobile),f=l.visible;
+    assert(Math.abs(l.image.w/l.image.h-4/3)<.00001,'Laptop image must retain original aspect ratio');
+    assert(f.x>=14&&f.x+f.w<=w-14+.01);
+    assert(f.y>=82&&f.y+f.h<=h-94+.01);
+    assert(f.x>=l.screen.x-.01&&f.x+f.w<=l.screen.x+l.screen.w+.01);
+    assert(f.y>=l.screen.y-.01&&f.y+f.h<=l.screen.y+l.screen.h+.01);
+    if(zoom!==1)continue;
+    const p=companionPose(f,size,mobile),b=companionBounds(p,f,size),extent=size*p.scale;
+    assert(p.x>f.x+f.w/2&&p.y>f.y+f.h/2,'Bito must land at bottom right');
+    for(const x of [b.minX,0,b.maxX])for(const y of [b.minY,0,b.maxY]){
+      const a={x:p.x+x*p.scale,y:p.y+y*p.scale,w:extent,h:extent};
+      assert(a.x>=f.x+11.99&&a.x+a.w<=f.x+f.w-11.99);
+      assert(a.y>=f.y+39.99&&a.y+a.h<=f.y+f.h-11.99);
+      const width=Math.min(mobile?300:340,f.w-24),height=Math.min(310,f.h-extent-55);
+      const c=companionPanel(a,f,width,height,mobile);
+      assert(c.x>=f.x+11.99&&c.x+width<=f.x+f.w-11.99,'Chat must stay inside visible screen');
+      assert(c.y>=f.y+31.99&&c.y+height<=f.y+f.h-11.99);
+      laptopCases++;
+    }
+  }
+}
+for(const id of ['laptop-device','laptop-image','laptop-backdrop','laptop-demo-label'])assert(ids.includes(id));
+assert(!html.includes('id="setup-window"'),'Old onboarding illustration must be removed');
+assert(!js.includes("$('#setup-window')"));
+console.log(`PASS: ${laptopCases} laptop corner/chat cases, 35 zoom layouts, correct image ratio, bottom-right landing, responsive screen clipping`);

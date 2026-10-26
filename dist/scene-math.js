@@ -25,6 +25,34 @@
     const minY=y+frame.top+top-rect.top;
     return {minX,maxX:Math.max(minX,x+frame.right-pad-rect.right),minY,maxY:Math.max(minY,y+frame.bottom-pad-rect.bottom)};
   }
-  const api={clamp,geometry,dragBounds,chatPlacement,stickerBounds};
+  const laptopScreen={x:245/1920,y:257/1440,w:1430/1920,h:927/1440};
+  const mix=(a,b,t)=>a+(b-a)*t;
+  function laptopLayout(w,h,zoom=0,reveal=1,mobile=w<=760) {
+    const q=clamp(zoom,0,1),r=clamp(reveal,0,1);
+    const fitWidth=Math.min(w-24,(h-120)*4/3,1440);
+    const zoomWidth=mobile?Math.max(w*1.9,Math.min(470,h*.58)/laptopScreen.h*4/3):Math.min((w-96)/laptopScreen.w,(h-210)/laptopScreen.h*4/3);
+    const start={w:fitWidth,x:(w-fitWidth)/2,y:(h-fitWidth*.75)/2-8};
+    const end={w:zoomWidth,x:mobile?w-16-zoomWidth*(laptopScreen.x+laptopScreen.w):(w-zoomWidth*laptopScreen.w)/2-zoomWidth*laptopScreen.x,y:mobile?h-125-zoomWidth*.75*(laptopScreen.y+laptopScreen.h):90-zoomWidth*.75*laptopScreen.y};
+    const width=mix(start.w,end.w,q),lift=1-.04*(1-r);
+    const image={x:mix(start.x,end.x,q)+(1-lift)*width/2,y:mix(start.y,end.y,q)+64*(1-r),w:width*lift,h:width*.75*lift};
+    const screen={x:image.x+image.w*laptopScreen.x,y:image.y+image.h*laptopScreen.y,w:image.w*laptopScreen.w,h:image.h*laptopScreen.h};
+    const x=Math.max(14,screen.x),y=Math.max(82,screen.y),right=Math.min(w-14,screen.x+screen.w),bottom=Math.min(h-94,screen.y+screen.h);
+    return {image,screen,visible:{x,y,w:Math.max(1,right-x),h:Math.max(1,bottom-y)}};
+  }
+  function companionPose(frame,size,mobile=false) {
+    const edge=mobile?14:18,extent=clamp(frame.h*.18,mobile?76:88,136);
+    return {x:frame.x+frame.w-extent-edge,y:frame.y+frame.h-extent-edge,scale:extent/size};
+  }
+  function companionPanel(actor,frame,width,height,mobile=false) {
+    const pad=12,gap=14,right=actor.x+actor.w+gap;
+    const side=right+width<=frame.x+frame.w-pad?'right':'left';
+    const beside=side==='right'?right:actor.x-width-gap;
+    const above=mobile&&width+actor.w+gap>frame.w-pad*2;
+    return {side,x:clamp(beside,frame.x+pad,frame.x+frame.w-width-pad),y:clamp(above?actor.y-height-gap:actor.y+actor.h-height,frame.y+32,frame.y+frame.h-height-pad)};
+  }
+  function companionBounds(pose,frame,size) {
+    return {minX:(frame.x+12-pose.x)/pose.scale,maxX:(frame.x+frame.w-12-pose.x)/pose.scale-size,minY:(frame.y+40-pose.y)/pose.scale,maxY:(frame.y+frame.h-12-pose.y)/pose.scale-size};
+  }
+  const api={clamp,geometry,dragBounds,chatPlacement,stickerBounds,laptopLayout,companionPose,companionPanel,companionBounds};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.BitoScene=api;
 })(globalThis);

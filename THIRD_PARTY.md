@@ -16,3 +16,5 @@
 - Blue folder and PDF document are original code-native artwork for this page.
 
 Visible attribution is available through the footer's Artwork credits link.
+
+- Laptop/document mockup: supplied by the owner as 165shots_so.png, included unchanged as dist/assets/laptop-workspace.png. The screenshot shows an illustrative workspace; Google/Apple/other displayed product marks remain with their owners.
