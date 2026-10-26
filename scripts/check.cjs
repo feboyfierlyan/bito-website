@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const {geometry, dragBounds, chatPlacement, clamp} = require('../dist/scene-math.js');
+const {geometry, dragBounds, chatPlacement, clamp, stickerBounds} = require('../dist/scene-math.js');
 const root=path.join(__dirname,'../dist');
 let tests=0;
 for(const [w,h] of [[320,720],[375,812],[430,932],[768,750],[1024,768],[1440,900],[1920,1080]]) {
@@ -35,7 +35,7 @@ for(const ref of [...html.matchAll(/(?:src|href)="([^"#]+)"/g)].map(m=>m[1]))if(
 for(const ref of [...html.matchAll(/href="#([^"]+)"/g)].map(m=>m[1]))assert(ids.includes(ref),`Missing anchor ${ref}`);
 const css=['style.css','desktop-paper.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');
 for(const [,ref]of css.matchAll(/url\(['"]?([^'"\)]+)['"]?\)/g))assert(fs.existsSync(path.join(root,ref)),`Missing CSS asset ${ref}`);
-for(const file of ['site.js','scene-math.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
+for(const file of ['site.js','scene-math.js','desktop-stickers.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
 assert(!/fetch\(|XMLHttpRequest|api[_-]?key/i.test(fs.readFileSync(path.join(root,'site.js'),'utf8')),'Demo must remain local');
 assert(css.includes('radial-gradient(circle, #d8dce2 1px'), 'Dotted white canvas missing');
 for(const id of ['hero-desk','hello-sticker','play-scene','tentang'])assert(ids.includes(id));
@@ -50,3 +50,25 @@ for(const [w,h]of [[320,800],[375,812],[430,932],[768,760],[1024,768],[1440,900]
 assert(html.includes('get bito for mac')&&html.includes('get bito for windows'));
 assert.equal(JSON.parse(fs.readFileSync(path.join(__dirname,'../.openai/hosting.json'),'utf8')).project_id,'appgprj_6ade497ddd44819195b35aae3ee1d06a','Existing Site identity must be retained');
 console.log(`PASS: ${tests} corner/viewport placement cases, chat side switching, unique IDs, one persistent canvas, local assets, section anchors, JS syntax, browser-local demo`);
+for(const [w,h]of [[320,800],[375,812],[768,760],[1440,900],[1920,1080]]){
+  const frame={left:20,top:-120,right:w+20,bottom:h-120};
+  for(const size of [30,64,190])for(const x of [-400,0,450])for(const y of [-300,0,500]){
+    const rect={left:50+x,top:80+y,right:50+x+size,bottom:80+y+size};
+    const b=stickerBounds(rect,frame,x,y,96);
+    for(const dx of [b.minX,b.maxX])for(const dy of [b.minY,b.maxY]){
+      assert(rect.left+dx-x>=frame.left+12-.01);
+      assert(rect.right+dx-x<=frame.right-12+.01);
+      assert(rect.top+dy-y>=frame.top+96-.01);
+      assert(rect.bottom+dy-y<=frame.bottom-12+.01);
+    }
+  }
+}
+for(const [,ref]of html.matchAll(/data-(?:gif|still)="([^"]+)"/g))assert(fs.existsSync(path.join(root,ref)),`Missing animated/static asset ${ref}`);
+for(const name of ['word.svg','excel.svg','notes.svg','trash.png','coffee.png','compact-disc.png','flower.gif','flower-still.png']){
+  const file=fs.readFileSync(path.join(root,'assets/stickers',name));
+  if(name.endsWith('.svg'))assert(file.toString().includes('<svg')&&!/<script|onload=|<foreignObject/i.test(file),'Unsafe SVG');
+  else if(name.endsWith('.png'))assert.equal(file.subarray(1,4).toString(),'PNG');
+  else assert.equal(file.subarray(0,3).toString(),'GIF');
+}
+assert((html.match(/data-sticker\b/g)||[]).length>=17);
+console.log('PASS: sticker bounds across 135 viewport/position cases; all requested icons, GIF and reduced-motion poster bundled');

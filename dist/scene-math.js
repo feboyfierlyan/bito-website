@@ -18,6 +18,13 @@
     const side=right+width<=frame.w-pad?'right':'left';
     return {side,x:mobile?pad:clamp(side==='right'?right:left,pad,frame.w-width-pad),y:mobile?clamp(frame.h-height-65,45,frame.h-height-15):clamp(actor.y+actor.h*.15,45,frame.h-height-45)};
   }
-  const api={clamp,geometry,dragBounds,chatPlacement};
+  function stickerBounds(rect,frame,x,y,top=96,pad=12) {
+    // The current transformed rectangle includes each object's original tilt.
+    // Keeping movement separate from the lifted inner artwork avoids cursor jumps.
+    const minX=x+frame.left+pad-rect.left;
+    const minY=y+frame.top+top-rect.top;
+    return {minX,maxX:Math.max(minX,x+frame.right-pad-rect.right),minY,maxY:Math.max(minY,y+frame.bottom-pad-rect.bottom)};
+  }
+  const api={clamp,geometry,dragBounds,chatPlacement,stickerBounds};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.BitoScene=api;
 })(globalThis);

@@ -83,7 +83,7 @@
         .to('#desktop-hint',{autoAlpha:1,duration:.1},.7)
         .to('#chapter-progress',{scaleX:1,duration:1},0)
         .to({},{duration:.25},.75);
-      if(!introPlayed){introPlayed=true;gsap.from('.title-line>span',{yPercent:110,duration:1,ease:'power3.out',stagger:.1,delay:.05});gsap.from('.floating-file,.desk-sticker,.folder-sticker,.scene-peek',{y:18,opacity:0,duration:.75,ease:'power3.out',stagger:.08,delay:.15});gsap.from('.hero-item',{y:12,opacity:0,duration:.65,ease:'power3.out',stagger:.07,delay:.3});gsap.from('#hero-speech',{scale:.7,opacity:0,duration:.6,ease:'back.out(1.1)',transformOrigin:'0 100%',delay:.75});}
+      if(!introPlayed){introPlayed=true;gsap.from('.title-line>span',{yPercent:110,duration:1,ease:'power3.out',stagger:.1,delay:.05});gsap.from('.floating-file,.desk-sticker,.folder-sticker,.internet-sticker,.desktop-icon,.scene-peek',{y:18,opacity:0,duration:.75,ease:'power3.out',stagger:.035,delay:.15});gsap.from('.hero-item',{y:12,opacity:0,duration:.65,ease:'power3.out',stagger:.07,delay:.3});gsap.from('#hero-speech',{scale:.7,opacity:0,duration:.6,ease:'back.out(1.1)',transformOrigin:'0 100%',delay:.75});}
       $$('.line-reveal').forEach(el=>gsap.from(el,{y:28,opacity:0,duration:.8,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%',once:true}}));
       gsap.from('.conversation-stage',{y:35,opacity:0,duration:.8,ease:'power3.out',scrollTrigger:{trigger:'.personality',start:'top 70%',once:true}});
       gsap.fromTo('.download-art',{yPercent:-3},{yPercent:3,ease:'none',scrollTrigger:{trigger:'.download',start:'top bottom',end:'bottom top',scrub:.5}});

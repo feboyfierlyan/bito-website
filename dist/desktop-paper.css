@@ -218,3 +218,85 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
   .floating-file:hover { rotate: 0deg; }
   .hero-downloads .button:hover, .floating-file:hover .mini-window { transform: none; translate: none; }
 }
+
+/* Objects live in their own layers; only the inner surface lifts and sways. */
+[data-sticker] { cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; }
+[data-sticker] img, [data-sticker] svg { pointer-events: none; -webkit-user-drag: none; }
+.hero-desk [data-sticker] { pointer-events: auto; }
+.sticker-art { display: block; width: 100%; height: 100%; position: relative; transform-origin: 50% 54%; }
+.sticker-held { cursor: grabbing!important; }
+.sticker-held .sticker-art { will-change: transform; }
+.floating-file[data-sticker]:hover, .floating-file[data-sticker]:active { rotate: none; }
+.floating-file[data-sticker] .mini-window { translate: none; }
+.folder-sticker[data-sticker]:hover { transform: none; }
+.folder-sticker > .sticker-art { margin: 0; width: 100%; font: inherit; }
+.folder-sticker .sticker-art > span { margin: 7px -15px 0; }
+.folder-sticker svg { filter: drop-shadow(0 4px 3px #1b78a321); }
+.desk-sticker { background: none; padding: 0; }
+.desk-sticker .sticker-art { display: grid; place-items: center; border-radius: inherit; }
+.heart-sticker .sticker-art { background: #f9dfeb; }
+.smile-sticker .sticker-art { background: #def2df; }
+.desk-doodle { padding: 6px; white-space: nowrap; }
+.internet-sticker, .desktop-icon { position: absolute; display: block; padding: 0; border: 0; width: 59px; text-align: center; }
+.internet-sticker img, .desktop-icon img { display: block; width: 100%; height: auto; object-fit: contain; }
+.internet-sticker:not(.flower-sticker) img { filter: drop-shadow(0 5px 4px #35446817); }
+.desktop-icon img, .desktop-icon svg { filter: drop-shadow(0 4px 3px #344a6920); }
+.sticker-filename { display: block; color: #8c939e; font-family: 'Bito Sans', Jakarta, sans-serif; font-size: 8px; line-height: 1.3; margin: 7px -16px 0; white-space: nowrap; }
+.flower-sticker { left: 29%; top: 21%; width: 64px; rotate: -9deg; }
+.flower-sticker img { mix-blend-mode: multiply; }
+.flower-sticker .sticker-filename { color: #a5a8b0; font-size: 7px; }
+.coffee-sticker { left: 3%; top: 39%; width: 63px; rotate: -15deg; }
+.disc-sticker { right: 28%; top: 13%; width: 62px; rotate: 15deg; }
+.trash-sticker { left: 3.5%; top: 66%; width: 50px; rotate: -5deg; }
+.computer-sticker { left: 25%; top: 10%; width: 58px; rotate: 6deg; }
+.word-sticker { left: 22%; top: 50%; width: 48px; rotate: -12deg; }
+.excel-sticker { right: 23%; top: 58%; width: 49px; rotate: 9deg; }
+.notes-sticker { left: 29%; top: 65%; width: 43px; rotate: 9deg; }
+.pdf-sticker { right: 3%; top: 28%; width: 41px; rotate: 12deg; }
+.pdf-sticker svg { display: block; width: 100%; height: auto; }
+.scene-peek[data-sticker] { overflow: visible; border: 0; background: none; box-shadow: none; }
+.scene-peek > .sticker-art { border: 1px solid #9aa6b1; border-radius: inherit; background: #edf3f7; overflow: hidden; box-shadow: 0 13px 40px #31425c13; transition: box-shadow .3s; }
+.scene-peek:hover > .sticker-art { box-shadow: 0 16px 40px #31425c20; }
+.scene-peek .peek-chrome { cursor: grab; touch-action: none; }
+.scene-peek.sticker-held .peek-chrome { cursor: grabbing; }
+.sticker-held .mini-window, .sticker-held .hello-note { box-shadow: 0 18px 32px #24385525; }
+.sticker-held .desktop-icon img { filter: drop-shadow(0 9px 8px #344a6925); }
+@media(min-width: 1701px) {
+  .coffee-sticker { left: 5%; top: 43%; width: 74px; }
+  .flower-sticker { left: 31%; width: 73px; }
+  .disc-sticker { right: 29%; width: 69px; }
+  .trash-sticker { left: 6%; width: 61px; }
+  .computer-sticker { left: 27%; width: 66px; }
+  .word-sticker { left: 24%; width: 56px; }
+  .excel-sticker { right: 22%; width: 58px; }
+  .notes-sticker { width: 49px; }
+  .pdf-sticker { right: 4%; width: 48px; }
+}
+@media(min-width: 761px) and (max-width: 1100px) {
+  .flower-sticker { left: 28%; width: 48px; top: 24%; }
+  .computer-sticker { left: 29%; width: 44px; top: 12%; }
+  .disc-sticker { right: 25%; width: 49px; top: 16%; }
+  .coffee-sticker { left: 3%; width: 49px; top: 42%; }
+  .word-sticker { left: 21%; width: 38px; top: 53%; }
+  .excel-sticker { right: 23%; width: 39px; top: 65%; }
+  .notes-sticker { left: 29%; top: 68%; width: 35px; }
+  .trash-sticker { left: 3%; width: 41px; }
+  .pdf-sticker { right: 3%; top: 35%; width: 32px; }
+}
+@media(max-width: 760px) {
+  .internet-sticker, .desktop-icon { width: 34px; }
+  .sticker-filename { font-size: 6px; margin-top: 5px; }
+  .flower-sticker { left: 17px; top: 267px; width: 39px; }
+  .flower-sticker .sticker-filename { font-size: 5px; }
+  .coffee-sticker { right: 16px; left: auto; top: 263px; width: 42px; }
+  .disc-sticker { right: 76px; top: 88px; width: 30px; }
+  .computer-sticker { display: none; }
+  .folder-sticker { display: block; left: 23px; top: 227px; width: 32px; }
+  .folder-sticker svg { width: 32px; height: 27px; }
+  .folder-sticker .sticker-art > span { font-size: 5px; margin-top: 5px; }
+  .trash-sticker { right: 23px; left: auto; top: 220px; width: 31px; }
+  .word-sticker { left: 18px; top: 557px; width: 33px; }
+  .excel-sticker { right: 18px; top: 557px; width: 33px; }
+  .notes-sticker { left: 76px; top: 559px; width: 30px; }
+  .pdf-sticker { right: 76px; top: 556px; width: 27px; }
+}

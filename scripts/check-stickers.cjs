@@ -1,0 +1,34 @@
+// Exercise actual drag callbacks without launching a manual browser session.
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const scene=require('../dist/scene-math.js');
+let now=0,reduced=false,frame=0;
+const animations=[],listeners={},callbacks=[];
+const art={};
+const object={dataset:{},style:{},x:0,y:0,classList:{add(){},remove(){}},setAttribute(){},querySelector(){return art;},getClientRects(){return[1];},getBoundingClientRect(){return{left:100+this.x,right:170+this.x,top:140+this.y,bottom:210+this.y};},addEventListener(type,fn){listeners[type]=fn;},removeEventListener(){}};
+const gif={dataset:{gif:'flower.gif',still:'flower-still.png'},src:'flower-still.png',getAttribute(){return this.src;}};
+const stage={getBoundingClientRect(){return{left:0,top:0,right:1000,bottom:800};}};
+const desk={inert:false,querySelectorAll(selector){return selector==='[data-sticker]'?[object]:[gif];}};
+const gsap={registerPlugin(){},killTweensOf(){},to(target,config){animations.push({target,...config});},set(target,config){Object.assign(target,config);}};
+const Draggable={create(target,config){callbacks.push(config);const d={target,x:0,y:0,isPressed:false,isDragging:false,update(){this.x=target.x;this.y=target.y;},applyBounds(b){Object.assign(this,b);},kill(){}};callbacks.drag=d;return[d];}};
+const document={hidden:false,documentElement:{classList:{contains(){return reduced;}}},querySelector(s){return s==='#stage'?stage:desk;},fonts:{ready:Promise.resolve()},addEventListener(type,fn){listeners['doc:'+type]=fn;},removeEventListener(){}};
+const window={gsap,Draggable,BitoScene:scene,addEventListener(type,fn){listeners['win:'+type]=fn;},removeEventListener(){}};
+const context={window,document,innerWidth:1000,matchMedia:()=>({matches:reduced}),performance:{now:()=>now},requestAnimationFrame(fn){frame++;fn();return frame;},cancelAnimationFrame(){},MutationObserver:class{observe(){}disconnect(){}},getComputedStyle:()=>({visibility:'visible'})};
+vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../dist/desktop-stickers.js'),'utf8'),context);
+const c=callbacks[0],d=callbacks.drag;
+function click(){const e={blocked:false,preventDefault(){this.blocked=true;},stopImmediatePropagation(){}};listeners.click(e);return e.blocked;}
+assert.equal(click(),false,'Ordinary clicks must keep existing actions');
+c.onPress.call(d);assert.equal(animations.at(-1).scale,1.055);
+now=100;object.x=d.x=177;object.y=d.y=95;d.isDragging=true;c.onDrag.call(d);
+assert.equal(click(),true,'Releasing a drag must not activate a link');
+c.onRelease.call(d);
+assert.equal(object.x,177);assert.equal(object.y,95,'Drop must retain the user position');
+assert(!('x' in animations.at(-1))&&!('y' in animations.at(-1)),'Settling must not animate position');
+assert.equal(animations.at(-1).rotation,0);
+now=600;assert.equal(click(),false,'New clicks should work after a drag');
+d.isDragging=false;listeners.keydown({key:'ArrowRight',shiftKey:false,preventDefault(){}});assert.equal(object.x,185);
+listeners.keydown({key:'ArrowDown',shiftKey:true,preventDefault(){}});assert.equal(object.y,119);
+reduced=true;c.onPress.call(d);assert.equal(animations.at(-1).duration,0);c.onRelease.call(d);assert.equal(animations.at(-1).duration,0);
+listeners['doc:visibilitychange']();assert.equal(gif.src,'flower-still.png');
+reduced=false;listeners['doc:visibilitychange']();assert.equal(gif.src,'flower.gif');
+document.hidden=true;listeners['doc:visibilitychange']();assert.equal(gif.src,'flower-still.png');
+console.log('PASS: pickup/sway/drop, no position snap, click-vs-drag, keyboard movement, reduced motion and hidden-tab GIF pause');
