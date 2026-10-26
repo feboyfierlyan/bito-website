@@ -2,18 +2,21 @@
 (() => {
   'use strict';
   const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-  const gsap=window.gsap, Flip=window.Flip, ScrollTrigger=window.ScrollTrigger, Draggable=window.Draggable;
-  const {clamp,geometry,laptopLayout,companionPose,companionPanel,companionBounds}=window.BitoScene;
+  const gsap=window.gsap, ScrollTrigger=window.ScrollTrigger, Draggable=window.Draggable;
+  const {clamp,geometry,laptopLayout,companionPose,companionPanel,companionBounds,returnWeight}=window.BitoScene;
   const stage=$('#stage'), anchor=$('#actor-anchor'), drag=$('#actor-drag'), sway=$('#actor-sway'), mascot=$('#mascot');
   const shell=$('#desktop-shell'), chat=$('#demo-chat'), messages=$('#demo-messages'), greeting=$('#demo-greeting');
   const device=$('#laptop-device'),backdrop=$('#laptop-backdrop');
+  const chatPosition=$('#chat-position'),greetingPosition=$('#greeting-position');
+  const dragOffset={x:0,y:0},placements={};
+  let chatReveal;
   const flight={reveal:0,zoom:0,arrival:0};
   let laptop;
   const systemMotion=matchMedia('(prefers-reduced-motion: reduce)');
   let manualMotion=false;
   try{manualMotion=localStorage.getItem('bito-reduced-motion')==='true';}catch{}
   let quiet=manualMotion||systemMotion.matches, context, draggable, storyTimeline;
-  let interactive=false, chatOpen=false, opening=false, currentChapter=-1, sceneProgress=0, disposed=false, introPlayed=false;
+  let interactive=false, chatOpen=false, disposed=false, introPlayed=false;
   let rive, rig, painted=false, paintFrame=0, dragging=false, talking=false, stageVisible=true;
   let gaze={active:false,x:.5,y:.5}, lastPointerX=0, lastPointerAt=0, waveAt=0;
   let desktopTimers=[], personalityTimers=[], helpTimers=[], helpVersion=0;
@@ -38,7 +41,7 @@
   function verifyPaint(){if(painted||paintFrame||disposed)return;paintFrame=requestAnimationFrame(()=>{paintFrame=0;try{const c=$('#bito-canvas'),ctx=c.getContext('2d');if(!ctx||!c.width)return;const p=ctx.getImageData(0,0,c.width,c.height).data;let visible=0;for(let i=3;i<p.length;i+=128)if(p[i]>45)visible++;if(visible>100){painted=true;$('#mascot-art').classList.add('ready');syncRive();}}catch{}});}
   function startRive(){if(!window.rive)return;try{window.rive.RuntimeLoader.setWasmUrl(new URL('assets/rive.wasm',location.href).href);rive=new window.rive.Rive({src:'assets/bito.riv',canvas:$('#bito-canvas'),autoplay:true,stateMachine:'State Machine 1',autoBind:true,enableRiveAssetCDN:false,layout:new window.rive.Layout({fit:window.rive.Fit.Contain,alignment:window.rive.Alignment.Center}),onLoad(){fitRive();rig=createEyes();verifyPaint();},onAdvance(event){rig?.advance(event.data);verifyPaint();}});}catch{/* Matching poster remains visible; no loading box. */}}
   function sceneGeometry(){const w=stage.clientWidth,h=stage.clientHeight,size=anchor.offsetWidth;const view=laptop||laptopLayout(w,h,flight.zoom,flight.reveal);return {hero:geometry(w,h,size,view.screen,w<=760).hero,desktop:companionPose(view.visible,size,w<=760,view.screen.h)};}
-  function renderLaptop(){
+  function renderLaptop(progress=storyTimeline?.progress()??(quiet?1:0)){
     if(!gsap)return;
     laptop=laptopLayout(stage.clientWidth,stage.clientHeight,flight.zoom,flight.reveal,innerWidth<=760);
     const {image,screen}=laptop;
@@ -47,26 +50,57 @@
     gsap.set(shell,{x:screen.x,y:screen.y,width:screen.w,height:screen.h,scale:1,autoAlpha:flight.reveal});
     const {hero,desktop}=sceneGeometry(),t=clamp(flight.arrival,0,1),arc=Math.sin(t*Math.PI);
     gsap.set(anchor,{x:hero.x+(desktop.x-hero.x)*t+arc*24,y:hero.y+(desktop.y-hero.y)*t-arc*18,scale:hero.scale+(desktop.scale-hero.scale)*t});
+    if(!interactive){const weight=quiet?1:returnWeight(progress);gsap.set(drag,{x:dragOffset.x*weight,y:dragOffset.y*weight});}
   }
-  function positionPanels(){if(!interactive||!laptop)return;
-    const a=mascot.getBoundingClientRect(),s=stage.getBoundingClientRect(),mobile=innerWidth<=760;
+  // Translation belongs to the dock; reveal belongs to its clipped panel.
+  // Neither operation writes the other's transform or reparents live bubbles.
+  function placePanel(key,target,point,immediate=false){
+    let p=placements[key];
+    if(!p){p=placements[key]={x:NaN,y:NaN,side:point.side};p.moveX=gsap.quickTo(target,'x',{duration:.38,ease:'power3.out'});p.moveY=gsap.quickTo(target,'y',{duration:.38,ease:'power3.out'});}
+    const x=point.x-laptop.screen.x,y=point.y-laptop.screen.y;
+    if(immediate||quiet||!Number.isFinite(p.x)){p.moveX.tween.pause();p.moveY.tween.pause();gsap.set(target,{x,y});}
+    else{if(Math.abs(x-p.x)>.1)p.moveX(x);if(Math.abs(y-p.y)>.1)p.moveY(y);}
+    p.x=x;p.y=y;p.side=point.side;
+  }
+  function positionPanels(immediate=false){if(!laptop||(!interactive&&!chatReveal?.isActive()))return;
+    // The drag box excludes the decorative wave/sway rotation and scale.
+    const a=drag.getBoundingClientRect(),s=stage.getBoundingClientRect(),mobile=innerWidth<=760;
     const actor={x:a.left-s.left,y:a.top-s.top,w:a.width,h:a.height},frame=laptop.visible;
-    chat.style.width=Math.min(mobile?300:340,frame.w-24)+'px';
-    chat.style.setProperty('--chat-room',Math.max(90,Math.min(230,frame.h-(mobile?actor.h:0)-160))+'px');
-    const c=companionPanel(actor,frame,chat.offsetWidth,chat.offsetHeight,mobile);
-    gsap?.set(chat,{left:c.x-laptop.screen.x,top:c.y-laptop.screen.y,right:'auto',bottom:'auto'});
-    if(!chatOpen){const p=companionPanel(actor,frame,greeting.offsetWidth,greeting.offsetHeight,false);gsap?.set(greeting,{left:p.x-laptop.screen.x,top:p.y-laptop.screen.y,right:'auto'});greeting.dataset.side=p.side;}
+    const width=Math.min(mobile?300:340,frame.w-24)+'px';
+    if(chat.style.width!==width)chat.style.width=width;
+    const room=Math.max(90,Math.min(230,frame.h-(mobile?actor.h:0)-160))+'px';
+    if(chat.style.getPropertyValue('--chat-room')!==room)chat.style.setProperty('--chat-room',room);
+    const c=companionPanel(actor,frame,chat.offsetWidth,chat.offsetHeight,mobile,placements.chat?.side);
+    placePanel('chat',chatPosition,c,immediate);
+    const p=companionPanel(actor,frame,greeting.offsetWidth,greeting.offsetHeight,false,placements.greeting?.side);
+    placePanel('greeting',greetingPosition,p);greeting.dataset.side=p.side;
   }
   function updateBounds(){if(!draggable||!laptop)return;draggable.applyBounds(companionBounds(sceneGeometry().desktop,laptop.visible,anchor.offsetWidth));}
-  function resetPosition(){if(!gsap)return;gsap.to(drag,{x:0,y:0,duration:quiet?0:.55,ease:'power3.out',onUpdate:positionPanels,onComplete:updateBounds});gsap.to(sway,{rotation:0,duration:.6,ease:'elastic.out(1,.5)'});}
-  function closeChat(immediate=false){if(!chatOpen&&!opening)return;Flip?.killFlipsOf(greeting);chatOpen=false;opening=false;chat.inert=true;chat.setAttribute('aria-hidden','true');mascot.setAttribute('aria-expanded','false');const finish=()=>{if(chatOpen)return;greeting.classList.add('desktop-greeting');shell.append(greeting);gsap?.set(greeting,{clearProps:'all'});positionPanels();if(interactive)gsap?.to(greeting,{autoAlpha:1,duration:quiet?0:.2});};
-    if(gsap){gsap.killTweensOf(chat);gsap.to(chat,{autoAlpha:0,scale:.97,duration:quiet||immediate?0:.23,ease:'power2.in',onComplete:finish});}else{chat.style.visibility='hidden';finish();}}
-  function openChat(){if(!interactive||chatOpen||opening)return;chatOpen=true;opening=true;wave();positionPanels();const state=Flip&&!quiet?Flip.getState(greeting):null;gsap?.killTweensOf([chat,greeting]);gsap?.set(chat,{autoAlpha:1,scale:1});chat.inert=false;chat.setAttribute('aria-hidden','false');greeting.classList.remove('desktop-greeting');greeting.removeAttribute('style');messages.prepend(greeting);mascot.setAttribute('aria-expanded','true');positionPanels();
-    if(state){Flip.from(state,{duration:.55,ease:'power3.inOut',absolute:true,scale:false,onComplete(){opening=false;}});gsap.fromTo(chat,{clipPath:'inset(0% 0% 0% 0% round 50px)',backgroundColor:'#ffffff00'},{clipPath:'inset(0% 0% 0% 0% round 24px)',backgroundColor:'#fffffff7',duration:.5});gsap.fromTo(['.demo-chat-top','.demo-choices','.composer'],{opacity:0,y:5},{opacity:1,y:0,duration:.3,stagger:.03,delay:.15});}else opening=false;
+  function rememberDrag(){dragOffset.x=Number(gsap.getProperty(drag,'x'))||0;dragOffset.y=Number(gsap.getProperty(drag,'y'))||0;}
+  function resetPosition(){if(!gsap)return;gsap.to(drag,{x:0,y:0,duration:quiet?0:.55,ease:'power3.out',overwrite:'auto',onUpdate(){rememberDrag();positionPanels();},onComplete:updateBounds});gsap.to(sway,{rotation:0,duration:.6,ease:'elastic.out(1,.5)'});}
+  function prepareChatMotion(){
+    chatReveal?.kill();
+    chatReveal=gsap.timeline({paused:true})
+      .fromTo(chat,{autoAlpha:0,y:10,scaleX:.93,scaleY:.96},{autoAlpha:1,y:0,scaleX:1,scaleY:1,duration:.44,ease:'power3.out'},0)
+      .fromTo(greeting,{autoAlpha:1},{autoAlpha:0,duration:.16,ease:'power1.out'},0);
+    chatReveal.progress(0).pause();
   }
-  function setInteractive(value){if(interactive===value)return;interactive=value;stage.classList.toggle('story-interactive',value);if(value){draggable?.enable();updateBounds();positionPanels();wave();if(!chatOpen)gsap?.to(greeting,{autoAlpha:1,duration:quiet?0:.3});mascot.setAttribute('aria-label','Buka atau tutup contoh chat Bito');mascot.setAttribute('aria-expanded',String(chatOpen));}else{dragging=false;boolean('isDragging',false);draggable?.disable();closeChat(true);gsap?.set(greeting,{autoAlpha:0});gsap?.set(drag,{x:0,y:0});gsap?.set(sway,{rotation:0});mascot.setAttribute('aria-label','Sapa Bito');mascot.removeAttribute('aria-expanded');}}
-  function chapter(progress){const n=progress<.2?0:progress<.72?1:2;if(n===currentChapter)return;currentChapter=n;$('#chapter-number').textContent=`0${n+1} / 03`;$('#chapter-copy').textContent=['Kenalan sebentar.','Ada tempat buat Bito?','Aku di sini. Klik untuk ngobrol.'][n];}
-  function setupDrag(){if(!Draggable||!gsap)return;draggable=Draggable.create(drag,{type:'x,y',dragClickables:true,minimumMovement:6,dragResistance:.04,edgeResistance:.8,allowContextMenu:true,onPress(){if(!interactive)return;dragging=true;boolean('isDragging',true);boolean('isTalking',false);stage.classList.add('is-dragging');lastPointerX=this.x;lastPointerAt=performance.now();gsap.killTweensOf(sway);gsap.to(sway,{scale:1.025,duration:.16,ease:'power2.out'});},onDrag(){const now=performance.now(),velocity=(this.x-lastPointerX)/Math.max(8,now-lastPointerAt);lastPointerX=this.x;lastPointerAt=now;gsap.to(sway,{rotation:quiet?0:clamp(velocity*8,-14,14),duration:.18,ease:'power2.out',overwrite:'auto'});positionPanels();},onRelease(){dragging=false;boolean('isDragging',false);boolean('isTalking',talking&&!quiet);stage.classList.remove('is-dragging');gsap.to(sway,{scale:1,rotation:0,duration:quiet?0:1,ease:'elastic.out(1,.36)',overwrite:'auto'});positionPanels();},onClick(){if(interactive)chatOpen?closeChat():openChat();}})[0];draggable.disable();}
+  function closeChat(immediate=false){if(!chatOpen&&!chatReveal?.isActive())return;
+    chatOpen=false;chat.inert=true;greetingPosition.inert=!interactive;chat.setAttribute('aria-hidden','true');mascot.setAttribute('aria-expanded','false');
+    if(chatReveal){if(quiet||immediate)chatReveal.progress(0).pause();else chatReveal.timeScale(1.15).reverse();}
+  }
+  function openChat(){if(!interactive||chatOpen)return;
+    const hidden=!chatReveal||chatReveal.progress()===0;
+    positionPanels(hidden);chatOpen=true;wave();chat.inert=false;greetingPosition.inert=true;chat.setAttribute('aria-hidden','false');mascot.setAttribute('aria-expanded','true');
+    if(chatReveal){if(quiet)chatReveal.progress(1).pause();else chatReveal.timeScale(1).play();}
+  }
+  function setInteractive(value){if(interactive===value)return;
+    if(!value){rememberDrag();gsap.killTweensOf(drag);draggable?.endDrag();}
+    interactive=value;greetingPosition.inert=!value||chatOpen;stage.classList.toggle('story-interactive',value);
+    if(value){draggable?.update();draggable?.enable();updateBounds();positionPanels();wave();gsap?.to(greetingPosition,{autoAlpha:1,duration:quiet?0:.28,overwrite:'auto'});mascot.setAttribute('aria-label','Buka atau tutup contoh chat Bito');mascot.setAttribute('aria-expanded',String(chatOpen));}
+    else{dragging=false;boolean('isDragging',false);draggable?.disable();stage.classList.remove('is-dragging');closeChat();gsap?.to(greetingPosition,{autoAlpha:0,duration:quiet?0:.18,overwrite:'auto'});gsap?.to(sway,{scale:1,rotation:0,duration:quiet?0:.45,ease:'power3.out',overwrite:'auto'});mascot.setAttribute('aria-label','Sapa Bito');mascot.removeAttribute('aria-expanded');}
+  }
+  function setupDrag(){if(!Draggable||!gsap)return;draggable=Draggable.create(drag,{type:'x,y',dragClickables:true,minimumMovement:6,dragResistance:.04,edgeResistance:.8,allowContextMenu:true,onPress(){if(!interactive)return;dragging=true;boolean('isDragging',true);boolean('isTalking',false);stage.classList.add('is-dragging');gsap.killTweensOf(drag);rememberDrag();lastPointerX=this.x;lastPointerAt=performance.now();gsap.killTweensOf(sway);gsap.to(sway,{scale:1.025,duration:.16,ease:'power2.out'});},onDrag(){rememberDrag();const now=performance.now(),velocity=(this.x-lastPointerX)/Math.max(8,now-lastPointerAt);lastPointerX=this.x;lastPointerAt=now;gsap.to(sway,{rotation:quiet?0:clamp(velocity*8,-14,14),duration:.18,ease:'power2.out',overwrite:'auto'});positionPanels();},onRelease(){rememberDrag();dragging=false;boolean('isDragging',false);boolean('isTalking',talking&&!quiet);stage.classList.remove('is-dragging');gsap.to(sway,{scale:1,rotation:0,duration:quiet?0:1,ease:'elastic.out(1,.36)',overwrite:'auto'});positionPanels();},onClick(){if(interactive)chatOpen?closeChat():openChat();}})[0];draggable.disable();}
   mascot.addEventListener('click',()=>{if(!interactive)wave();if(!draggable&&interactive)(chatOpen?closeChat():openChat());});
   mascot.addEventListener('keydown',event=>{if(interactive&&(event.key==='Enter'||event.key===' ')){event.preventDefault();chatOpen?closeChat():openChat();}});
   greeting.addEventListener('click',()=>{if(!chatOpen)openChat();});$('#close-chat').addEventListener('click',()=>closeChat());$('#reset-demo').addEventListener('click',resetPosition);
@@ -75,31 +109,29 @@
   const resetGaze=()=>{gaze.active=false;};document.documentElement.addEventListener('pointerleave',resetGaze);window.addEventListener('blur',resetGaze);document.addEventListener('visibilitychange',()=>{resetGaze();syncRive();});
   function appendBubble(parent,text,kind='received'){const el=document.createElement('div');el.className=`bubble ${kind}`;el.textContent=text;parent.append(el);animateBubble(el);return el;}
   function typing(parent){const el=document.createElement('div');el.className='bubble received typing';el.setAttribute('aria-label','Bito sedang mengetik');el.innerHTML='<i></i><i></i><i></i>';parent.append(el);animateBubble(el);return el;}
-  function demoReply(value){if(demoBusy||!value.trim())return;demoBusy=true;clearTimers(desktopTimers);$('#demo-input').value='';if(messages.children.length>6)[...messages.children].filter(n=>n!==greeting).slice(0,2).forEach(n=>n.remove());appendBubble(messages,value.trim(),'sent');$('#demo-choices').hidden=true;const t=typing(messages);messages.scrollTop=messages.scrollHeight;positionPanels();const lower=value.toLowerCase(),reminder=/inget|ingat|reminder|istirahat/.test(lower);const reply=reminder?'siap. nanti aku colek, ya.':/capek|lelah/.test(lower)?'duh, hari panjang ya. mau cerita bagian paling capeknya?':/halo|hai|sapa|bro|hello/.test(lower)?'heii. seneng kamu mampir :)':'aku dengerin. di aplikasi nanti, kita bisa ngobrol lebih jauh.';
+  function demoReply(value){if(demoBusy||!value.trim())return;demoBusy=true;clearTimers(desktopTimers);$('#demo-input').value='';if(messages.children.length>6)[...messages.children].filter(n=>n.id!=='demo-welcome').slice(0,2).forEach(n=>n.remove());appendBubble(messages,value.trim(),'sent');$('#demo-choices').hidden=true;const t=typing(messages);messages.scrollTop=messages.scrollHeight;positionPanels();const lower=value.toLowerCase(),reminder=/inget|ingat|reminder|istirahat/.test(lower);const reply=reminder?'siap. nanti aku colek, ya.':/capek|lelah/.test(lower)?'duh, hari panjang ya. mau cerita bagian paling capeknya?':/halo|hai|sapa|bro|hello/.test(lower)?'heii. seneng kamu mampir :)':'aku dengerin. di aplikasi nanti, kita bisa ngobrol lebih jauh.';
     later(desktopTimers,()=>{t.remove();setTalking(true);appendBubble(messages,reply);if(reminder)later(desktopTimers,()=>{const card=document.createElement('div');card.className='demo-reminder';card.innerHTML='<span aria-hidden="true">◷</span><div><strong>Istirahat sebentar</strong><small>15 menit lagi · Contoh pengingat</small></div>';messages.append(card);animateBubble(card);messages.scrollTop=messages.scrollHeight;positionPanels();},650);messages.scrollTop=messages.scrollHeight;positionPanels();later(desktopTimers,()=>{setTalking(false);demoBusy=false;},1100);},1000);
   }
   $('#demo-form').addEventListener('submit',event=>{event.preventDefault();demoReply($('#demo-input').value);});$$('[data-demo]').forEach(b=>b.addEventListener('click',()=>demoReply(b.dataset.demo==='reminder'?'ingetin aku istirahat 15 menit lagi':'halo Bito')));
 
   function configureScene(){if(!gsap||!ScrollTrigger){device.style.cssText='opacity:1;visibility:visible;left:50%;top:160px;transform:translateX(-50%) scale(.45)';return;}
-    context?.revert();draggable?.kill();draggable=null;interactive=false;chatOpen=false;opening=false;currentChapter=-1;chat.inert=true;chat.setAttribute('aria-hidden','true');greeting.classList.add('desktop-greeting');shell.append(greeting);greeting.removeAttribute('style');gsap.set([drag,sway],{clearProps:'all'});gsap.set(chat,{autoAlpha:0});
-    quiet=manualMotion||systemMotion.matches;document.documentElement.classList.toggle('motion-paused',quiet);motionButton.textContent=quiet?'Gerakan dikurangi':'Kurangi gerakan';motionButton.setAttribute('aria-pressed',String(quiet));gsap.registerPlugin(ScrollTrigger,Flip,Draggable);context=gsap.matchMedia();
+    chatReveal?.kill();context?.revert();draggable?.kill();draggable=null;storyTimeline=null;interactive=false;chatOpen=false;chat.inert=true;chat.setAttribute('aria-hidden','true');gsap.killTweensOf([chatPosition,greetingPosition,drag,sway]);for(const key of Object.keys(placements))delete placements[key];Object.assign(dragOffset,{x:0,y:0});gsap.set([drag,sway],{clearProps:'all'});gsap.set(chat,{autoAlpha:0});
+    quiet=manualMotion||systemMotion.matches;document.documentElement.classList.toggle('motion-paused',quiet);motionButton.textContent=quiet?'Gerakan dikurangi':'Kurangi gerakan';motionButton.setAttribute('aria-pressed',String(quiet));gsap.registerPlugin(ScrollTrigger,Draggable);context=gsap.matchMedia();
     context.add({wide:'(min-width: 761px)',narrow:'(max-width: 760px)',systemQuiet:'(prefers-reduced-motion: reduce)'},media=>{
-      quiet=manualMotion||media.conditions.systemQuiet;document.documentElement.classList.toggle('motion-paused',quiet);motionButton.setAttribute('aria-pressed',String(quiet));motionButton.textContent=quiet?'Gerakan dikurangi':'Kurangi gerakan';syncRive();setInteractive(false);draggable?.kill();setupDrag();
-      Object.assign(flight,{reveal:0,zoom:0,arrival:0});gsap.set(anchor,{left:0,top:0,bottom:'auto',xPercent:0,yPercent:0});renderLaptop();gsap.set(greeting,{autoAlpha:0});
-      if(quiet){gsap.set(['.hero-copy','#hero-desk','.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0});stage.style.height=innerWidth<=760?'800px':'900px';$('.story').style.height='auto';Object.assign(flight,{reveal:1,zoom:1,arrival:1});renderLaptop();gsap.set(['#desktop-hint','#laptop-demo-label','.stage-caption'],{autoAlpha:1});gsap.set('#chapter-progress',{scaleX:1});chapter(1);setInteractive(true);return()=>{setInteractive(false);stage.style.height='';$('.story').style.height='';draggable?.kill();draggable=null;};}
-      const tl=gsap.timeline({defaults:{ease:'none'},onUpdate(){renderLaptop();const p=this.progress();chapter(p);setInteractive(p>.72);if(interactive&&!dragging)positionPanels();},scrollTrigger:{trigger:'.story',start:'top top',end:'bottom bottom',scrub:.4,invalidateOnRefresh:true,onUpdate:self=>{sceneProgress=self.progress;},onRefresh(){renderLaptop();if(interactive){updateBounds();positionPanels();}fitRive();}}});storyTimeline=tl;
+      quiet=manualMotion||media.conditions.systemQuiet;document.documentElement.classList.toggle('motion-paused',quiet);motionButton.setAttribute('aria-pressed',String(quiet));motionButton.textContent=quiet?'Gerakan dikurangi':'Kurangi gerakan';syncRive();setInteractive(false);draggable?.kill();gsap.killTweensOf([chatPosition,greetingPosition]);for(const key of Object.keys(placements))delete placements[key];setupDrag();prepareChatMotion();
+      Object.assign(flight,{reveal:0,zoom:0,arrival:0});gsap.set(anchor,{left:0,top:0,bottom:'auto',xPercent:0,yPercent:0});renderLaptop(0);gsap.set(greetingPosition,{autoAlpha:0});
+      if(quiet){gsap.set(['.hero-copy','#hero-desk','.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0});stage.style.height=innerWidth<=760?'800px':'900px';$('.story').style.height='auto';Object.assign(flight,{reveal:1,zoom:1,arrival:1});renderLaptop(1);gsap.set(['#desktop-hint','#laptop-demo-label'],{autoAlpha:1});setInteractive(true);return()=>{setInteractive(false);stage.style.height='';$('.story').style.height='';draggable?.kill();draggable=null;};}
+      const tl=gsap.timeline({defaults:{ease:'none'},onUpdate(){const p=this.progress();setInteractive(p>.72);renderLaptop(p);if((interactive&&!dragging)||chatReveal?.isActive())positionPanels();},scrollTrigger:{trigger:'.story',start:'top top',end:'bottom bottom',scrub:.4,invalidateOnRefresh:true,onRefresh(){renderLaptop();if(interactive){updateBounds();positionPanels();}fitRive();}}});storyTimeline=tl;
       tl.addLabel('hello',0)
         .to(['.hero-copy','#hero-desk'],{y:-50,autoAlpha:0,duration:.2},.02)
         .to(['.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0,duration:.12},.03)
         .addLabel('laptop',.12)
         .fromTo(flight,{reveal:0},{reveal:1,duration:.22,ease:'power2.inOut',immediateRender:false},.12)
-        .to('.stage-caption',{autoAlpha:1,duration:.09},.22)
         .addLabel('closer',.3)
         .fromTo(flight,{zoom:0},{zoom:1,duration:.32,ease:'power2.inOut',immediateRender:false},.3)
         .fromTo(flight,{arrival:0},{arrival:1,duration:.34,ease:'power2.inOut',immediateRender:false},.3)
         .addLabel('together',.72)
         .to(['#desktop-hint','#laptop-demo-label'],{autoAlpha:1,duration:.1},.69)
-        .to('#chapter-progress',{scaleX:1,duration:1},0)
         .to({},{duration:.27},.73);
       if(!introPlayed){introPlayed=true;gsap.from('.title-line>span',{yPercent:110,duration:1,ease:'power3.out',stagger:.1,delay:.05});gsap.from('.floating-file,.desk-sticker,.folder-sticker,.internet-sticker,.desktop-icon,.scene-peek',{y:18,opacity:0,duration:.75,ease:'power3.out',stagger:.035,delay:.15});gsap.from('.hero-item',{y:12,opacity:0,duration:.65,ease:'power3.out',stagger:.07,delay:.3});gsap.from('#hero-speech',{scale:.7,opacity:0,duration:.6,ease:'back.out(1.1)',transformOrigin:'0 100%',delay:.75});}
       $$('.line-reveal').forEach(el=>gsap.from(el,{y:28,opacity:0,duration:.8,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%',once:true}}));
@@ -129,6 +161,6 @@
   $$('details summary').forEach(summary=>summary.addEventListener('click',event=>{if(!gsap||quiet)return;event.preventDefault();const d=summary.parentElement,expand=!d.open||d.dataset.closing==='true',start=d.offsetHeight;gsap.killTweensOf(d);if(expand){delete d.dataset.closing;d.style.height='';d.open=true;const end=d.scrollHeight;gsap.fromTo(d,{height:start,overflow:'hidden'},{height:end,duration:.32,ease:'power3.out',onComplete:()=>gsap.set(d,{clearProps:'height,overflow'})});}else{d.dataset.closing='true';gsap.to(d,{height:summary.offsetHeight,overflow:'hidden',duration:.24,ease:'power2.inOut',onComplete:()=>{if(d.dataset.closing==='true'){d.open=false;delete d.dataset.closing;}gsap.set(d,{clearProps:'height,overflow'});}});}}));
   if(/Windows/i.test(navigator.userAgent)){const a=$('#primary-download');a.href='https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-Windows-x64-Setup.exe';$('#primary-download-label').textContent='Download untuk Windows';}
   let resizeFrame=0;window.addEventListener('resize',()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{moveToneTrack(true);renderLaptop();fitRive();if(interactive){updateBounds();positionPanels();}});},{passive:true});
-  window.addEventListener('pagehide',event=>{if(event.persisted)return;disposed=true;[desktopTimers,personalityTimers,helpTimers].forEach(clearTimers);cancelAnimationFrame(paintFrame);cancelAnimationFrame(resizeFrame);helpObserver?.disconnect();stageObserver?.disconnect();context?.revert();draggable?.kill();rig?.restore();rive?.cleanup();});
+  window.addEventListener('pagehide',event=>{if(event.persisted)return;disposed=true;[desktopTimers,personalityTimers,helpTimers].forEach(clearTimers);cancelAnimationFrame(paintFrame);cancelAnimationFrame(resizeFrame);helpObserver?.disconnect();stageObserver?.disconnect();chatReveal?.kill();gsap?.killTweensOf([chatPosition,greetingPosition,drag,sway]);context?.revert();draggable?.kill();rig?.restore();rive?.cleanup();});
   configureScene();moveToneTrack(true);document.fonts.ready.then(()=>{ScrollTrigger?.refresh();moveToneTrack(true);fitRive();}).catch(()=>{});startRive();
 })();

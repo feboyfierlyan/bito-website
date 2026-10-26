@@ -45,9 +45,15 @@
     const edge=mobile?14:18,extent=clamp(screenHeight*.18,mobile?76:88,mobile?136:200);
     return {x:frame.x+frame.w-extent-edge,y:frame.y+frame.h-extent-edge,scale:extent/size};
   }
-  function companionPanel(actor,frame,width,height,mobile=false) {
+  function returnWeight(progress) {
+    const t=clamp((progress-.34)/.38,0,1);
+    return t*t*(3-2*t);
+  }
+  function companionPanel(actor,frame,width,height,mobile=false,previousSide=null) {
     const pad=12,gap=14,right=actor.x+actor.w+gap;
-    const side=right+width<=frame.x+frame.w-pad?'right':'left';
+    // Extra clearance prevents repeated side changes near the fitting boundary.
+    const clearance=previousSide==='left'?32:0;
+    const side=right+width+clearance<=frame.x+frame.w-pad?'right':'left';
     const beside=side==='right'?right:actor.x-width-gap;
     const above=mobile&&width+actor.w+gap>frame.w-pad*2;
     return {side,x:clamp(beside,frame.x+pad,frame.x+frame.w-width-pad),y:clamp(above?actor.y-height-gap:actor.y+actor.h-height,frame.y+32,frame.y+frame.h-height-pad)};
@@ -55,6 +61,6 @@
   function companionBounds(pose,frame,size) {
     return {minX:(frame.x+12-pose.x)/pose.scale,maxX:(frame.x+frame.w-12-pose.x)/pose.scale-size,minY:(frame.y+40-pose.y)/pose.scale,maxY:(frame.y+frame.h-12-pose.y)/pose.scale-size};
   }
-  const api={clamp,geometry,dragBounds,chatPlacement,stickerBounds,laptopLayout,companionPose,companionPanel,companionBounds};
+  const api={clamp,geometry,dragBounds,chatPlacement,stickerBounds,laptopLayout,companionPose,companionPanel,companionBounds,returnWeight};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.BitoScene=api;
 })(globalThis);
