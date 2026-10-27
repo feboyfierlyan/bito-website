@@ -48,7 +48,7 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
 .hero-desk { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
 .hero-desk a, .hero-desk button { pointer-events: auto; }
 .floating-file { position: absolute; display: block; border: 0; padding: 0; text-align: center; transform-origin: 50% 45%; cursor: pointer; }
-.feature-file { left: 5.5%; top: 16%; width: clamp(190px, 18vw, 280px); --window-tilt: -5deg; }
+.feature-file { left: 5.5%; top: 16%; width: clamp(190px, 18vw, 280px); }
 .mini-window { display: block; background: #fff; border: 1px solid #a2adbb; border-radius: 12px; overflow: hidden; box-shadow: 0 13px 25px #22334e12, 0 2px 3px #22334e0a; transition: box-shadow .4s, translate .4s var(--ease); }
 .floating-file:hover .mini-window { box-shadow: 0 18px 35px #22334e20, 0 2px 3px #22334e0a; }
 .mini-chrome, .peek-chrome { display: flex; align-items: center; justify-content: space-between; gap: 15px; background: linear-gradient(#fff, #f1f2f4); height: 27px; padding: 0 10px; font-size: 8px; color: #969ba3; border-bottom: 1px solid #dce1e7; }
@@ -63,13 +63,13 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
 .mini-reminder { display: flex; gap: 7px; align-items: center; font-size: 8px; color: #7895bd; margin-top: 15px; border-top: 1px solid #cbdcf6; padding-top: 12px; width: 100%; justify-content: center; }
 .tiny-check { width: 14px; height: 14px; display: grid; place-items: center; border: 1px solid #9ebce4; border-radius: 4px; }
 .file-caption { display: block; margin-top: 12px; color: #9c9fa7; font-size: 9px; font-weight: 400; letter-spacing: -.025em; }
-.hello-file { right: 8%; top: 15%; width: 186px; --window-tilt: 8deg; }
+.hello-file { right: 8%; top: 15%; width: 186px; }
 .hello-note { display: block; position: relative; border: 1px solid #e2bb76; border-radius: 9px; background: #fff8e8; padding: 12px 10px 24px; box-shadow: 0 10px 22px #9f743510; }
 .hello-label { display: block; color: #ba8132; background: #f9dfb1; border-radius: 4px; font-size: 13px; letter-spacing: .08em; padding: 7px 0; line-height: 1.3; }
 .hello-label small { font-size: 8px; letter-spacing: .01em; font-weight: 400; }
 .hello-note strong { display: block; font-size: 26px; font-weight: 600; letter-spacing: -.07em; color: #846337; padding-top: 14px; }
 .hello-sprout { position: absolute; right: -15px; top: -21px; font-size: 37px; color: #b5cc9b; rotate: 20deg; }
-.chat-file { width: clamp(150px, 15vw, 224px); right: 4%; top: 44%; --window-tilt: 5deg; }
+.chat-file { width: clamp(150px, 15vw, 224px); right: 4%; top: 44%; }
 .mini-chat { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; background: #fff; padding: 17px 16px; text-align: left; }
 .mini-chat>span { padding: 8px 12px; border-radius: 13px; background: #edf0f4; color: #676b73; font-family: 'Bito Sans', Jakarta, sans-serif; font-size: 10px; line-height: 1.2; }
 .mini-chat>span:nth-child(odd) { margin-left: auto; align-self: flex-end; background: #2986ff; color: #fff; }
@@ -169,7 +169,7 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
   .hero-speech { top: calc(110px + var(--actor-size) * .53 + 16px); left: 50%; transform: translateX(-50%); bottom: auto; font-size: 10px!important; padding: 10px 13px; }
   .hero-speech:after { display: none; }
   .hero-invite { top: 290px; left: 50%; transform: translateX(-50%); font-size: 7px; }
-  .feature-file { top: 117px; left: 16px; width: 88px; --window-tilt: -6deg; }
+  .feature-file { top: 117px; left: 16px; width: 88px; }
   .mini-chrome { padding: 0 6px; height: 19px; gap: 4px; font-size: 5px; }
   .mini-chrome .window-dots { gap: 2px; }
   .mini-chrome .window-dots i { width: 4px; height: 4px; }
@@ -179,7 +179,7 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
   .mini-content>span:not(.reminder-icon) { font-size: 5px; }
   .mini-reminder { display: none; }
   .file-caption { font-size: 6px; margin-top: 8px; }
-  .hello-file { top: 130px; right: 18px; width: 83px; --window-tilt: 8deg; }
+  .hello-file { top: 130px; right: 18px; width: 83px; }
   .hello-note { padding: 6px 5px 11px; border-radius: 5px; }
   .hello-label { font-size: 8px; padding: 5px 0; }
   .hello-label small { font-size: 5px; }
@@ -226,7 +226,7 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
 .floating-file .mini-window { translate: none; }
 .floating-file, .scene-peek { user-select: none; -webkit-user-select: none; -webkit-user-drag: none; }
 .floating-file img, .floating-file svg, .scene-peek img { pointer-events: none; -webkit-user-drag: none; }
-.floating-file > .sticker-art { rotate: var(--window-tilt, 0deg); }
+.floating-file > .sticker-art { rotate: 0deg; }
 .folder-sticker[data-sticker]:hover { transform: none; }
 .folder-sticker > .sticker-art { margin: 0; width: 100%; font: inherit; }
 .folder-sticker .sticker-art > span { margin: 7px -15px 0; }
@@ -307,9 +307,15 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
   transition: opacity .32s ease, scale .42s var(--ease), rotate .42s var(--ease);
 }
 .hero-desk .floating-file > .sticker-art {
-  transform-origin: 50% 50%;
-  transition: opacity .32s ease, scale .48s cubic-bezier(.16, 1, .3, 1), rotate .42s var(--ease);
+  transform-origin: var(--window-origin, 0% 0%);
+  transition: opacity .32s ease, scale .48s cubic-bezier(.16, 1, .3, 1);
 }
+/* Keep each requested window corner stationary. The chat origin excludes
+   its filename row (12px margin + 12px line), so it is the window's corner. */
+.feature-file { --window-origin: 0% 0%; }
+.hello-file { --window-origin: 100% 0%; }
+.chat-file { --window-origin: 100% calc(100% - 24px); }
+.floating-file .file-caption { line-height: 12px; white-space: nowrap; }
 .mascot-art { transition: opacity .32s ease; }
 .hero-speech, .hero-invite { transition: filter .32s ease; }
 .floating-file .mini-window, .floating-file .hello-note {
