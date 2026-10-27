@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="desktop-paper.css" />
   <link rel="stylesheet" href="laptop-scene.css" />
+  <link rel="stylesheet" href="feature-stories.css" />
   <script defer src="assets/vendor/gsap.min.js"></script>
   <script defer src="assets/vendor/ScrollTrigger.min.js"></script>
   <script defer src="assets/vendor/Flip.min.js"></script>
@@ -24,6 +25,7 @@
   <script defer src="scene-math.js"></script>
   <script defer src="desktop-stickers.js"></script>
   <script defer src="rive-presentation.js"></script>
+  <script defer src="feature-stories.js"></script>
   <script defer src="site.js"></script>
 </head>
 <body>
@@ -47,7 +49,7 @@
             <div class="mini-window blue-window"><div class="mini-chrome"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>reminder</span><span aria-hidden="true">↗</span></div><div class="mini-content"><span class="reminder-icon" aria-hidden="true">◷</span><strong>minum air dulu?</strong><span>aku ingetin, kok.</span><div class="mini-reminder"><span class="tiny-check" aria-hidden="true">✓</span> a little care, every day.</div></div></div><span class="file-caption">a-little-reminder.demo</span>
           </span></a>
           <button class="floating-file hello-file" id="hello-sticker" aria-label="Sapa Bito" draggable="false"><span class="sticker-art"><span class="hello-note"><span class="hello-sprout" aria-hidden="true">✳</span><span class="hello-label">HELLO<br/><small>my name is</small></span><strong>bito :)</strong></span><span class="file-caption">say hello!</span></span></button>
-          <a class="floating-file chat-file" href="#gaya" aria-label="Coba empat gaya ngobrol Bito" draggable="false"><span class="sticker-art"><div class="mini-window chat-window"><div class="mini-chrome"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>bito chat</span><span aria-hidden="true">↗</span></div><div class="mini-chat"><span>bro</span><span>wut</span><span>ada cerita nih</span><span>spill</span></div></div><span class="file-caption">cerita-random.demo</span></span></a>
+          <a class="floating-file chat-file" href="#gaya" aria-label="Lihat contoh ngobrol dengan Bito" draggable="false"><span class="sticker-art"><div class="mini-window chat-window"><div class="mini-chrome"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>bito chat</span><span aria-hidden="true">↗</span></div><div class="mini-chat"><span>bro</span><span>wut</span><span>ada cerita nih</span><span>spill</span></div></div><span class="file-caption">cerita-random.demo</span></span></a>
           <button type="button" class="desk-doodle doodle-one" data-sticker aria-label="Stiker wajah senang; seret untuk memindahkan"><span class="sticker-art">^ ᴗ ^</span></button><button type="button" class="desk-doodle doodle-two" data-sticker aria-label="Stiker tulisan; seret untuk memindahkan"><span class="sticker-art">a little closer ↴</span></button>
           <a class="folder-sticker" href="#bantuan" aria-label="Lihat contoh file Bito" data-sticker aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight"><span class="sticker-art"><svg viewBox="0 0 62 49" aria-hidden="true"><path d="M3 12V7a4 4 0 0 1 4-4h16l6 6h25a4 4 0 0 1 4 4v29a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" fill="#94d2fa" stroke="#61ade1"/><path d="M3 17a4 4 0 0 1 4-4h47a4 4 0 0 1 4 4v25a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" fill="#75bcec" stroke="#61ade1"/></svg><span>little things</span></span></a>
           <button type="button" class="internet-sticker flower-sticker" data-sticker aria-label="GIF bunga berputar; seret untuk memindahkan"><span class="sticker-art"><img src="assets/stickers/flower-still.png" data-gif="assets/stickers/flower.gif" data-still="assets/stickers/flower-still.png" width="200" height="200" alt="" draggable="false"/><span class="sticker-filename">flower.gif</span></span></button>
@@ -75,14 +77,58 @@
       </div>
     </section>
 
-    <section class="personality section-pad" id="gaya" aria-labelledby="personality-title">
-      <div class="section-top"><span class="eyebrow">NGOBROL, PAKAI CARAMU.</span><span class="section-counter">01 — KEPRIBADIAN</span></div>
-      <div class="personality-grid"><div class="personality-copy"><h2 id="personality-title" class="line-reveal">Sama Bito.<br /><span class="blue-text">Bisa jadi diri sendiri.</span></h2><p>Receh boleh. Serius juga boleh.<br />Pilih gaya yang paling kamu banget.</p><div class="tone-selector" role="group" aria-label="Pilih contoh gaya ngobrol"><span class="tone-track" id="tone-track" aria-hidden="true"></span><button data-tone="direct" aria-pressed="false">To the point</button><button data-tone="chill" aria-pressed="true">Chill</button><button data-tone="humor" aria-pressed="false">Humoris</button><button data-tone="care" aria-pressed="false">Care</button></div><p class="tone-description" id="tone-description">Santai. Nggak perlu mikirin cara mulainya.</p></div>
-      <div class="conversation-stage"><div class="conversation-head"><span class="conversation-dot"></span>Bito<span>Contoh percakapan</span></div><div class="conversation" id="conversation" aria-live="polite"><div class="bubble sent">bro</div><div class="bubble received">wut</div></div><div class="scenario-options" role="group" aria-label="Pilih contoh pesan"><button data-scenario="greet" aria-pressed="true">“bro”</button><button data-scenario="tired" aria-pressed="false">“capek banget hari ini”</button><button data-scenario="idea" aria-pressed="false">“ada ide random nih”</button></div></div></div>
-    </section>
-
-    <section class="help section-pad" id="bantuan" aria-labelledby="help-title"><div class="section-top"><span class="eyebrow">ADA YANG BISA KUBANTU?</span><span class="section-counter">02 — HAL KECIL</span></div><div class="help-heading"><h2 id="help-title" class="line-reveal">Bukan cuma<br /><span class="blue-text">“semangat, ya”.</span></h2><p>Kadang yang dibutuhkan cuma<br />satu hal kecil yang beres.</p></div>
-      <div class="help-experience"><div class="help-options" role="group" aria-label="Pilih contoh bantuan Bito"><button data-help="reminder" aria-pressed="true"><span>01</span><strong>Ingetin aku.</strong><span class="help-arrow" aria-hidden="true">↗</span></button><button data-help="checklist" aria-pressed="false"><span>02</span><strong>Pelan-pelan, satu-satu.</strong><span class="help-arrow" aria-hidden="true">↗</span></button><button data-help="file" aria-pressed="false"><span>03</span><strong>Jadiin file, dong.</strong><span class="help-arrow" aria-hidden="true">↗</span></button></div><div class="help-stage" id="help-stage"><span class="example-label">CONTOH INTERAKSI</span><div id="help-content" aria-live="polite"></div><button class="replay" id="replay-help" aria-label="Putar ulang contoh bantuan"><span aria-hidden="true">↺</span> Ulangi</button></div></div>
+    <section class="feature-stories" id="gaya" aria-label="Fitur Bito · contoh percakapan">
+      <article class="feature-story" data-feature="chat" aria-labelledby="feature-chat-title">
+        <div class="feature-surface">
+          <div class="feature-copy">
+            <div class="feature-dialogue" aria-label="Contoh percakapan: Ngobrol">
+              <div class="feature-message feature-prompt"><span class="feature-text"><span class="feature-measure" aria-hidden="true">bito, hari ini kepala gue rame banget</span><span data-feature-prompt aria-hidden="true">bito, hari ini kepala gue rame banget</span></span></div>
+              <div class="feature-reply-slot"><div class="feature-message feature-answer"><span class="feature-text"><span class="feature-measure" aria-hidden="true">sini, cerita satu-satu. gue dengerin.</span><span data-feature-answer aria-hidden="true">sini, cerita satu-satu. gue dengerin.</span></span></div><div class="feature-typing" aria-hidden="true"><i></i><i></i><i></i></div></div>
+              <p class="feature-transcript sr-only">Kamu: bito, hari ini kepala gue rame banget. Bito: sini, cerita satu-satu. gue dengerin.</p>
+            </div>
+            <h2 id="feature-chat-title">Nggak harus dipendam sendiri.</h2>
+            <p class="feature-description">Cerita random, keluh kesah, atau sekadar nyapa. Ngobrol pakai caramu.</p>
+          </div>
+          <figure class="feature-demo" aria-label="Placeholder video demo Ngobrol">
+            <div class="feature-window"><div class="feature-window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Ngobrol</span><span class="feature-window-mark" aria-hidden="true">↗</span></div><div class="feature-window-body"><svg class="feature-play" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="23"/><path d="m20 16 12 8-12 8Z"/></svg><span>Video demo segera hadir</span></div></div>
+            <figcaption>ngobrol.demo</figcaption>
+          </figure>
+        </div>
+      </article>
+      <article class="feature-story" id="bantuan" data-feature="reminder" aria-labelledby="feature-reminder-title">
+        <div class="feature-surface feature-reverse">
+          <div class="feature-copy">
+            <div class="feature-dialogue" aria-label="Contoh percakapan: Pengingat">
+              <div class="feature-message feature-prompt"><span class="feature-text"><span class="feature-measure" aria-hidden="true">ingetin istirahat 15 menit lagi, ya</span><span data-feature-prompt aria-hidden="true">ingetin istirahat 15 menit lagi, ya</span></span></div>
+              <div class="feature-reply-slot"><div class="feature-message feature-answer"><span class="feature-text"><span class="feature-measure" aria-hidden="true">siap. nanti aku colek, ya.</span><span data-feature-answer aria-hidden="true">siap. nanti aku colek, ya.</span></span></div><div class="feature-typing" aria-hidden="true"><i></i><i></i><i></i></div></div>
+              <p class="feature-transcript sr-only">Kamu: ingetin istirahat 15 menit lagi, ya. Bito: siap. nanti aku colek, ya.</p>
+            </div>
+            <h2 id="feature-reminder-title">Hal kecil, aku ingetin.</h2>
+            <p class="feature-description">Titip pengingat, lalu lanjutkan harimu. Bito mengingatkan saat aplikasi berjalan.</p>
+          </div>
+          <figure class="feature-demo" aria-label="Placeholder video demo Pengingat">
+            <div class="feature-window"><div class="feature-window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Pengingat</span><span class="feature-window-mark" aria-hidden="true">↗</span></div><div class="feature-window-body"><svg class="feature-play" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="23"/><path d="m20 16 12 8-12 8Z"/></svg><span>Video demo segera hadir</span></div></div>
+            <figcaption>pengingat.demo</figcaption>
+          </figure>
+        </div>
+      </article>
+      <article class="feature-story" data-feature="file" aria-labelledby="feature-file-title">
+        <div class="feature-surface">
+          <div class="feature-copy">
+            <div class="feature-dialogue" aria-label="Contoh percakapan: File">
+              <div class="feature-message feature-prompt"><span class="feature-text"><span class="feature-measure" aria-hidden="true">bito, catatan ini jadiin file markdown, dong</span><span data-feature-prompt aria-hidden="true">bito, catatan ini jadiin file markdown, dong</span></span></div>
+              <div class="feature-reply-slot"><div class="feature-message feature-answer"><span class="feature-text"><span class="feature-measure" aria-hidden="true">boleh. aku siapin filenya, ya.</span><span data-feature-answer aria-hidden="true">boleh. aku siapin filenya, ya.</span></span></div><div class="feature-typing" aria-hidden="true"><i></i><i></i><i></i></div></div>
+              <p class="feature-transcript sr-only">Kamu: bito, catatan ini jadiin file markdown, dong. Bito: boleh. aku siapin filenya, ya.</p>
+            </div>
+            <h2 id="feature-file-title">Dari obrolan, jadi file.</h2>
+            <p class="feature-description">Bikin catatan jadi TXT, Markdown, atau CSV. Pilih tempat simpannya, beres.</p>
+          </div>
+          <figure class="feature-demo" aria-label="Placeholder video demo File">
+            <div class="feature-window"><div class="feature-window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>File</span><span class="feature-window-mark" aria-hidden="true">↗</span></div><div class="feature-window-body"><svg class="feature-play" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="23"/><path d="m20 16 12 8-12 8Z"/></svg><span>Video demo segera hadir</span></div></div>
+            <figcaption>catatan.demo</figcaption>
+          </figure>
+        </div>
+      </article>
     </section>
 
     <section class="quiet section-pad" id="tentang" aria-labelledby="quiet-title"><span class="eyebrow">DEKAT, SECUKUPNYA.</span><h2 id="quiet-title">Ada saat kamu butuh.<br /><span>Sisanya, kasih ruang.</span></h2><div class="quiet-bottom"><p>Seret ke tempat yang nyaman. Klik saat mau ngobrol.<br />Lagi butuh tenang? Aktifkan Jangan Ganggu.</p><p>Profil dan riwayat ada di perangkatmu. Saat ngobrol,<br />konteks dikirim ke layanan AI. Kamu tetap bisa<br />mengelola memori dan menghapus percakapan.</p></div></section>

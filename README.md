@@ -1,6 +1,6 @@
 # Bito — Hai. Aku Bito.
 
-A character-led website for Bito. One persistent Rive character moves from the opening greeting into the bottom-right corner of a laptop screen. Drag Bito, open its chat, try four conversation styles, explore small helpful actions, and find the macOS or Windows download.
+A character-led website for Bito. One persistent Rive character moves from the opening greeting into the bottom-right corner of a laptop screen. Drag Bito, open its chat, watch three scroll-led feature conversations, and find the macOS or Windows download.
 
 Serve `dist/` with a static HTTP server. No build step or dependency installation is needed. Run `node scripts/check.cjs` for geometry, asset, anchor and source checks.
 
@@ -23,3 +23,5 @@ The interactive scene preserves a dropped drag offset and blends it back along t
 Run node scripts/check.cjs, node scripts/check-stickers.cjs and node scripts/check-scene-motion.cjs for the layout, bounds, source, drag and interruption checks. Manual visual testing remains with the owner.
 
 Run node scripts/check-rive-presentation.cjs to check startup black frames, transparent loading frames, invalid frames after readiness, resize handoff and cleanup without manual browser testing.
+
+The former personality selector and small-actions tabs are replaced with three alternating feature stories: conversation, reminders and file creation. The story nearest the reading line scales up and becomes fully opaque; neighboring rows ease smaller and fade. Each entry restarts a local typed prompt, a typing indicator, and a Bito response. Leaving cancels the sequence and all pending motion. The windows are explicitly labeled video placeholders, with no fake playback controls. Reduced motion shows the complete conversations; the footer toggle applies as well. Run node scripts/check-feature-stories.cjs for reentry, cancellation, reading-line selection and reduced-motion checks.

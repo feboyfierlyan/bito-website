@@ -33,9 +33,9 @@ const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Se
 assert.equal((html.match(/<canvas /g)||[]).length,2,'One presentation canvas and one hidden runtime canvas must persist through the scene');
 for(const ref of [...html.matchAll(/(?:src|href)="([^"#]+)"/g)].map(m=>m[1]))if(!/^(https?:|data:|mailto:)/.test(ref))assert(fs.existsSync(path.join(root,ref)),`Missing asset ${ref}`);
 for(const ref of [...html.matchAll(/href="#([^"]+)"/g)].map(m=>m[1]))assert(ids.includes(ref),`Missing anchor ${ref}`);
-const css=['style.css','desktop-paper.css','laptop-scene.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');
+const css=['style.css','desktop-paper.css','laptop-scene.css','feature-stories.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');
 for(const [,ref]of css.matchAll(/url\(['"]?([^'"\)]+)['"]?\)/g))assert(fs.existsSync(path.join(root,ref)),`Missing CSS asset ${ref}`);
-for(const file of ['site.js','scene-math.js','desktop-stickers.js','rive-presentation.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
+for(const file of ['site.js','scene-math.js','desktop-stickers.js','rive-presentation.js','feature-stories.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
 assert(!/fetch\(|XMLHttpRequest|api[_-]?key/i.test(fs.readFileSync(path.join(root,'site.js'),'utf8')),'Demo must remain local');
 assert(css.includes('radial-gradient(circle, #d8dce2 1px'), 'Dotted white canvas missing');
 for(const id of ['hero-desk','hello-sticker','play-scene','tentang'])assert(ids.includes(id));
