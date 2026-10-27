@@ -4,7 +4,7 @@ A character-led website for Bito. One persistent Rive character moves from the o
 
 Serve `dist/` with a static HTTP server. No build step or dependency installation is needed. Run `node scripts/check.cjs` for geometry, asset, anchor and source checks.
 
-GSAP 3.15.0, ScrollTrigger, Flip and Draggable are vendored. Plus Jakarta Sans is stored locally. The original Bito poster stays visible until the Rive canvas has painted, and the same runtime remains mounted throughout the scroll story. The page respects reduced motion and has a footer motion toggle. The interactive scenes are explicitly illustrative, stay inside the webpage and do not call AI or collect messages.
+GSAP 3.15.0, ScrollTrigger, Flip and Draggable are vendored. Plus Jakarta Sans is stored locally. The original Bito poster is preloaded and stays visible while one persistent Rive runtime renders into a hidden buffer. A 32×32 transparency/color probe rejects black, blank and incomplete frames before copying them to the visible canvas. Two valid frames are required for the initial handoff; the poster fades only after the animation surface is visible. Invalid later frames leave the last good frame intact. Resizing the hidden surface is idempotent and the visible surface changes size only when a valid replacement is ready. The page respects reduced motion and has a footer motion toggle. The interactive scenes are explicitly illustrative, stay inside the webpage and do not call AI or collect messages.
 
 All downloads point to the existing v0.5.1 desktop release. AI access in the desktop app remains limited to invited demo accounts. See THIRD_PARTY.md and dist/assets/ for third-party licenses.
 
@@ -21,3 +21,5 @@ The laptop story uses the supplied 1920×1440 mockup (dist/assets/laptop-workspa
 The interactive scene preserves a dropped drag offset and blends it back along the scroll path, with zero velocity at the handoff. Chat translation and panel reveal use separate nested surfaces. A single reversible reveal timeline carries the panel and all its contents together; interrupted clicks reverse the current motion. Side changes use transform easing with a clearance buffer, and placement measures the stable drag box rather than the waving character. The notification and initial transcript message stay mounted. The numbered chapter caption is removed.
 
 Run node scripts/check.cjs, node scripts/check-stickers.cjs and node scripts/check-scene-motion.cjs for the layout, bounds, source, drag and interruption checks. Manual visual testing remains with the owner.
+
+Run node scripts/check-rive-presentation.cjs to check startup black frames, transparent loading frames, invalid frames after readiness, resize handoff and cleanup without manual browser testing.

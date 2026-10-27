@@ -12,6 +12,7 @@
   <meta property="og:image" content="https://bito-companion-studio.feboyfierlyan10.chatgpt.site/assets/social.png" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="preload" href="assets/jakarta-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/bito.png" as="image" fetchpriority="high" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="desktop-paper.css" />
   <link rel="stylesheet" href="laptop-scene.css" />
@@ -22,6 +23,7 @@
   <script defer src="assets/vendor/rive.js"></script>
   <script defer src="scene-math.js"></script>
   <script defer src="desktop-stickers.js"></script>
+  <script defer src="rive-presentation.js"></script>
   <script defer src="site.js"></script>
 </head>
 <body>
@@ -72,7 +74,7 @@
         </div>
         <div class="desktop-hint" id="desktop-hint"><span class="hint-dot"></span><span>Seret Bito. Klik untuk ngobrol.</span><button id="reset-demo" aria-label="Kembalikan posisi Bito">↺</button></div>
         <span class="desktop-demo-label laptop-demo-label" id="laptop-demo-label">Ilustrasi interaktif · berjalan di halaman ini</span>
-        <div class="actor-anchor" id="actor-anchor"><div class="actor-drag" id="actor-drag"><div class="actor-sway" id="actor-sway"><button class="mascot" id="mascot" aria-label="Sapa Bito"><span class="mascot-art" id="mascot-art"><img src="assets/bito.png" alt="Bito, karakter hijau kecil dengan dua daun" width="1024" height="1024" fetchpriority="high" /><canvas id="bito-canvas" aria-hidden="true"></canvas></span></button></div></div></div>
+        <div class="actor-anchor" id="actor-anchor"><div class="actor-drag" id="actor-drag"><div class="actor-sway" id="actor-sway"><button class="mascot" id="mascot" aria-label="Sapa Bito"><span class="mascot-art" id="mascot-art"><img src="assets/bito.png" alt="Bito, karakter hijau kecil dengan dua daun" width="1024" height="1024" fetchpriority="high" /><canvas id="bito-canvas" aria-hidden="true"></canvas><canvas id="bito-runtime" aria-hidden="true"></canvas></span></button></div></div></div>
         <a class="scroll-note" href="#gaya"><span>SCROLL, KITA KENALAN</span><span aria-hidden="true">↓</span></a>
         <div class="stage-note" aria-hidden="true"><span>01</span><span>little companion,<br />a little closer.</span></div>
       </div>

@@ -17,7 +17,7 @@
   try{manualMotion=localStorage.getItem('bito-reduced-motion')==='true';}catch{}
   let quiet=manualMotion||systemMotion.matches, context, draggable, storyTimeline;
   let interactive=false, chatOpen=false, disposed=false, introPlayed=false;
-  let rive, rig, painted=false, paintFrame=0, dragging=false, talking=false, stageVisible=true;
+  let rive, rig, presenter, riveLoaded=false, dragging=false, talking=false, stageVisible=true;
   let gaze={active:false,x:.5,y:.5}, lastPointerX=0, lastPointerAt=0, waveAt=0;
   let desktopTimers=[], personalityTimers=[], helpTimers=[], helpVersion=0;
   let demoBusy=false, currentHelp='reminder', currentTone='chill', currentScenario='greet';
@@ -28,7 +28,13 @@
   function boolean(name,value){try{const p=rive?.viewModelInstance?.boolean(name);if(p)p.value=value;}catch{}}
   function setTalking(value){talking=value;boolean('isTalking',value&&!quiet&&!dragging);}
   function wave(){if(quiet||performance.now()-waveAt<900)return;waveAt=performance.now();try{rive?.viewModelInstance?.trigger('wave')?.trigger();}catch{}if(gsap)gsap.fromTo(sway,{y:0},{y:-7,duration:.19,repeat:1,yoyo:true,ease:'power2.out',overwrite:'auto'});}
-  function fitRive(){if(!rive)return;const c=$('#bito-canvas'),rect=c.getBoundingClientRect();if(!rect.width)return;const density=Math.min(devicePixelRatio||1,2)*c.offsetWidth/rect.width;rive.resizeDrawingSurfaceToCanvas(density);}
+  function fitRive(){
+    if(!riveLoaded)return;
+    const buffer=$('#bito-runtime'),dpr=Math.min(devicePixelRatio||1,2);
+    const width=Math.round(buffer.offsetWidth*dpr),height=Math.round(buffer.offsetHeight*dpr);
+    if(!width||!height||(buffer.width===width&&buffer.height===height))return;
+    buffer.width=width;buffer.height=height;rive.resizeToCanvas();rive.drawFrame();presenter?.request();
+  }
   function syncRive(){if(!rive)return;if(document.hidden||quiet||!stageVisible)rive.pause();else rive.play();boolean('isTalking',talking&&!quiet);}
   function createEyes(){try{
     const artboard=rive.artboard,nodes=['Pupil_L','Pupil_R'].map(n=>artboard?.node(n));if(nodes.some(n=>!n))return null;
@@ -38,8 +44,13 @@
     let mix=0,x=0,y=0;const approach=(a,b,s,t=.075)=>b+(a-b)*Math.exp(-Math.max(0,s)/t);
     return {advance(seconds){const active=gaze.active&&!quiet&&!dragging&&!talking;mix=approach(mix,active?1:0,seconds,.065);if(mix<.001&&!active)return;const dx=(gaze.x-cx)/.55,dy=(gaze.y-cy)/.55,r=Math.max(1,Math.hypot(dx,dy));x=approach(x,dx/r*11,seconds);y=approach(y,dy/r*7,seconds);pupils.forEach(p=>{p.node.x=p.x*(1-mix)+x*mix;p.node.y=p.y+y*mix;});artboard.advance(0);},restore(){pupils.forEach(p=>{p.node.x=p.x;p.node.y=p.y;});artboard.advance(0);}};
   }catch{return null;}}
-  function verifyPaint(){if(painted||paintFrame||disposed)return;paintFrame=requestAnimationFrame(()=>{paintFrame=0;try{const c=$('#bito-canvas'),ctx=c.getContext('2d');if(!ctx||!c.width)return;const p=ctx.getImageData(0,0,c.width,c.height).data;let visible=0;for(let i=3;i<p.length;i+=128)if(p[i]>45)visible++;if(visible>100){painted=true;$('#mascot-art').classList.add('ready');syncRive();}}catch{}});}
-  function startRive(){if(!window.rive)return;try{window.rive.RuntimeLoader.setWasmUrl(new URL('assets/rive.wasm',location.href).href);rive=new window.rive.Rive({src:'assets/bito.riv',canvas:$('#bito-canvas'),autoplay:true,stateMachine:'State Machine 1',autoBind:true,enableRiveAssetCDN:false,layout:new window.rive.Layout({fit:window.rive.Fit.Contain,alignment:window.rive.Alignment.Center}),onLoad(){fitRive();rig=createEyes();verifyPaint();},onAdvance(event){rig?.advance(event.data);verifyPaint();}});}catch{/* Matching poster remains visible; no loading box. */}}
+  function startRive(){if(!window.rive||!window.BitoPresentation)return;
+    try{
+      presenter=window.BitoPresentation.createPresenter({canvas:$('#bito-canvas'),buffer:$('#bito-runtime'),art:$('#mascot-art'),sample:document.createElement('canvas'),requestFrame:requestAnimationFrame,cancelFrame:cancelAnimationFrame,onReady:syncRive});
+      window.rive.RuntimeLoader.setWasmUrl(new URL('assets/rive.wasm',location.href).href);
+      rive=new window.rive.Rive({src:'assets/bito.riv',canvas:$('#bito-runtime'),autoplay:true,stateMachine:'State Machine 1',autoBind:true,enableRiveAssetCDN:false,layout:new window.rive.Layout({fit:window.rive.Fit.Contain,alignment:window.rive.Alignment.Center}),onLoad(){riveLoaded=true;fitRive();rig=createEyes();presenter.request();},onAdvance(event){rig?.advance(event.data);presenter.request();}});
+    }catch{/* The matching poster remains visible if initialization cannot finish. */}
+  }
   function sceneGeometry(){const w=stage.clientWidth,h=stage.clientHeight,size=anchor.offsetWidth;const view=laptop||laptopLayout(w,h,flight.zoom,flight.reveal);return {hero:geometry(w,h,size,view.screen,w<=760).hero,desktop:companionPose(view.visible,size,w<=760,view.screen.h)};}
   function renderLaptop(progress=storyTimeline?.progress()??(quiet?1:0)){
     if(!gsap)return;
@@ -161,6 +172,6 @@
   $$('details summary').forEach(summary=>summary.addEventListener('click',event=>{if(!gsap||quiet)return;event.preventDefault();const d=summary.parentElement,expand=!d.open||d.dataset.closing==='true',start=d.offsetHeight;gsap.killTweensOf(d);if(expand){delete d.dataset.closing;d.style.height='';d.open=true;const end=d.scrollHeight;gsap.fromTo(d,{height:start,overflow:'hidden'},{height:end,duration:.32,ease:'power3.out',onComplete:()=>gsap.set(d,{clearProps:'height,overflow'})});}else{d.dataset.closing='true';gsap.to(d,{height:summary.offsetHeight,overflow:'hidden',duration:.24,ease:'power2.inOut',onComplete:()=>{if(d.dataset.closing==='true'){d.open=false;delete d.dataset.closing;}gsap.set(d,{clearProps:'height,overflow'});}});}}));
   if(/Windows/i.test(navigator.userAgent)){const a=$('#primary-download');a.href='https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-Windows-x64-Setup.exe';$('#primary-download-label').textContent='Download untuk Windows';}
   let resizeFrame=0;window.addEventListener('resize',()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{moveToneTrack(true);renderLaptop();fitRive();if(interactive){updateBounds();positionPanels();}});},{passive:true});
-  window.addEventListener('pagehide',event=>{if(event.persisted)return;disposed=true;[desktopTimers,personalityTimers,helpTimers].forEach(clearTimers);cancelAnimationFrame(paintFrame);cancelAnimationFrame(resizeFrame);helpObserver?.disconnect();stageObserver?.disconnect();chatReveal?.kill();gsap?.killTweensOf([chatPosition,greetingPosition,drag,sway]);context?.revert();draggable?.kill();rig?.restore();rive?.cleanup();});
+  window.addEventListener('pagehide',event=>{if(event.persisted)return;disposed=true;[desktopTimers,personalityTimers,helpTimers].forEach(clearTimers);presenter?.dispose();cancelAnimationFrame(resizeFrame);helpObserver?.disconnect();stageObserver?.disconnect();chatReveal?.kill();gsap?.killTweensOf([chatPosition,greetingPosition,drag,sway]);context?.revert();draggable?.kill();rig?.restore();rive?.cleanup();});
   configureScene();moveToneTrack(true);document.fonts.ready.then(()=>{ScrollTrigger?.refresh();moveToneTrack(true);fitRive();}).catch(()=>{});startRive();
 })();

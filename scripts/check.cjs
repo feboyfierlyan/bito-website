@@ -30,16 +30,18 @@ assert.equal(chatPlacement({x:800,y:200,w:200,h:200},{w:1100,h:700},330,300,fals
 assert.equal(chatPlacement({x:50,y:200,w:200,h:200},{w:1100,h:700},330,300,false).side,'right');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Set(ids).size,ids.length,'Duplicate element IDs');
-assert.equal((html.match(/<canvas /g)||[]).length,1,'The scroll scene must retain one Rive canvas');
+assert.equal((html.match(/<canvas /g)||[]).length,2,'One presentation canvas and one hidden runtime canvas must persist through the scene');
 for(const ref of [...html.matchAll(/(?:src|href)="([^"#]+)"/g)].map(m=>m[1]))if(!/^(https?:|data:|mailto:)/.test(ref))assert(fs.existsSync(path.join(root,ref)),`Missing asset ${ref}`);
 for(const ref of [...html.matchAll(/href="#([^"]+)"/g)].map(m=>m[1]))assert(ids.includes(ref),`Missing anchor ${ref}`);
 const css=['style.css','desktop-paper.css','laptop-scene.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');
 for(const [,ref]of css.matchAll(/url\(['"]?([^'"\)]+)['"]?\)/g))assert(fs.existsSync(path.join(root,ref)),`Missing CSS asset ${ref}`);
-for(const file of ['site.js','scene-math.js','desktop-stickers.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
+for(const file of ['site.js','scene-math.js','desktop-stickers.js','rive-presentation.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
 assert(!/fetch\(|XMLHttpRequest|api[_-]?key/i.test(fs.readFileSync(path.join(root,'site.js'),'utf8')),'Demo must remain local');
 assert(css.includes('radial-gradient(circle, #d8dce2 1px'), 'Dotted white canvas missing');
 for(const id of ['hero-desk','hello-sticker','play-scene','tentang'])assert(ids.includes(id));
 const js=fs.readFileSync(path.join(root,'site.js'),'utf8');
+assert.equal((js.match(/new window\.rive\.Rive\(/g)||[]).length,1,'Keep exactly one Rive instance');
+assert(js.includes("canvas:$('#bito-runtime')"),'Rive must render only to the hidden buffer');
 for(const [,id]of js.matchAll(/\$\('#([a-z0-9-]+)'\)/g))assert(ids.includes(id),`Missing scripted element ${id}`);
 for(const [w,h]of [[320,800],[375,812],[430,932],[768,760],[1024,768],[1440,900],[1920,1080]]){
   const mobile=w<=760,size=mobile?260:w>1700?440:w<=1100?310:370;
@@ -49,7 +51,7 @@ for(const [w,h]of [[320,800],[375,812],[430,932],[768,760],[1024,768],[1440,900]
 }
 assert(html.includes('get bito for mac')&&html.includes('get bito for windows'));
 assert.equal(JSON.parse(fs.readFileSync(path.join(__dirname,'../.openai/hosting.json'),'utf8')).project_id,'appgprj_6ade497ddd44819195b35aae3ee1d06a','Existing Site identity must be retained');
-console.log(`PASS: ${tests} corner/viewport placement cases, chat side switching, unique IDs, one persistent canvas, local assets, section anchors, JS syntax, browser-local demo`);
+console.log(`PASS: ${tests} corner/viewport placement cases, chat side switching, unique IDs, one persistent Rive instance and guarded presentation, local assets, section anchors, JS syntax, browser-local demo`);
 for(const [w,h]of [[320,800],[375,812],[768,760],[1440,900],[1920,1080]]){
   const frame={left:20,top:-120,right:w+20,bottom:h-120};
   for(const size of [30,64,190])for(const x of [-400,0,450])for(const y of [-300,0,500]){
