@@ -8,17 +8,20 @@
 .feature-reverse .feature-demo { grid-column: 1; grid-row: 1; }
 .feature-copy { min-width: 0; padding: 12px 0; }
 .feature-dialogue { display: flex; flex-direction: column; gap: 20px; min-height: 202px; padding: 5px 5px 22px; }
-.feature-message { position: relative; width: fit-content; max-width: 100%; border-radius: 24px; padding: 17px 22px; font: 500 clamp(17px, 1.65vw, 23px)/1.35 'Bito Sans', Jakarta, sans-serif; letter-spacing: -.025em; overflow-wrap: anywhere; }
-.feature-prompt { color: #163a69; border: 1px solid #77a8eb; background: linear-gradient(180deg, #e4f0ff 0%, #bcd9ff 52%, #cce5f6 100%); box-shadow: inset 0 2px 0 #ffffffb3, 0 5px 11px #233f5f0c; align-self: flex-start; transform-origin: 0% 100%; }
+.feature-message { position: absolute; top: 0; width: fit-content; max-width: 100%; border-radius: 24px; padding: 17px 22px; font: 500 clamp(17px, 1.65vw, 23px)/1.35 'Bito Sans', Jakarta, sans-serif; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.feature-prompt { right: 0; color: #163a69; border: 1px solid #77a8eb; background: linear-gradient(180deg, #e4f0ff 0%, #bcd9ff 52%, #cce5f6 100%); box-shadow: inset 0 2px 0 #ffffffb3, 0 5px 11px #233f5f0c; transform-origin: 100% 100%; }
 .feature-prompt:before { content: ''; position: absolute; height: 8px; left: 15px; right: 15px; top: 4px; border-radius: 99px; background: #ffffff75; pointer-events: none; }
 .feature-prompt:after, .feature-answer:after { content: ''; position: absolute; bottom: 0; width: 16px; height: 17px; background: inherit; clip-path: path('M 16 0 Q 15 13 0 17 Q 12 17 16 11 Z'); }
 .feature-prompt:after { right: -7px; transform: scaleX(-1); background: #cce5f6; }
-.feature-answer { color: #34453b; background: #edf2ed; border: 1px solid #dce5db; transform-origin: 0% 100%; }
+.feature-answer { left: 0; color: #34453b; background: #edf2ed; border: 1px solid #dce5db; transform-origin: 0% 100%; }
 .feature-answer:after { left: -8px; }
-.feature-text { display: inline-grid; }
-.feature-text > span { grid-area: 1 / 1; }
-.feature-measure { visibility: hidden; pointer-events: none; }
-.feature-reply-slot { position: relative; min-height: 68px; }
+/* Reserve the completed message outside its animated surface. This keeps
+   the heading, the next bubble and ScrollTrigger geometry stationary. */
+.feature-prompt-slot, .feature-reply-slot { position: relative; width: 100%; align-self: stretch; min-height: 68px; }
+.feature-ink { position: absolute; inset: 0; padding: inherit; border-radius: inherit; overflow: hidden; }
+.feature-text { position: relative; display: block; width: var(--feature-line-width, auto); }
+.feature-text > [data-feature-prompt], .feature-text > [data-feature-answer] { display: block; }
+.feature-measure { position: absolute; top: 0; left: 0; width: max-content; max-width: var(--feature-line-width, 100%); visibility: hidden; pointer-events: none; }
 .feature-typing { position: absolute; left: 0; top: 0; height: 43px; width: 64px; border-radius: 22px; background: #edf2ed; display: flex; align-items: center; justify-content: center; gap: 5px; opacity: 0; visibility: hidden; }
 .feature-typing i { width: 5px; height: 5px; border-radius: 50%; background: #8a988b; }
 .feature-copy h2 { font-size: clamp(21px, 2vw, 28px); line-height: 1.3; letter-spacing: -.05em; font-weight: 650; margin-top: 20px; }
@@ -33,9 +36,7 @@
 .feature-play path { fill: #c0c7cf; stroke: none; }
 .feature-window-body > span { font-size: 10px; letter-spacing: .015em; }
 .feature-demo figcaption { margin-top: 14px; text-align: center; font-size: 10px; color: #9da3ac; letter-spacing: -.01em; }
-.feature-reverse .feature-dialogue { align-items: flex-end; }
-.feature-reverse .feature-prompt { align-self: flex-end; }
-.feature-reverse .feature-typing { left: auto; right: 0; }
+/* The copy column alternates; message ownership never mirrors with it. */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 @media (max-width: 1000px) and (min-width: 761px) {
   .feature-surface { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 36px; }
@@ -49,7 +50,7 @@
   .feature-reverse .feature-copy, .feature-reverse .feature-demo { grid-column: auto; grid-row: auto; }
   .feature-copy { padding: 0 6px; }
   .feature-dialogue { min-height: 0; gap: 17px; padding-bottom: 8px; }
-  .feature-message { font-size: 20px; padding: 15px 19px; max-width: min(330px, 100%); border-radius: 22px; }
+  .feature-message { font-size: 20px; padding: 15px 19px; max-width: 100%; border-radius: 22px; }
   .feature-copy h2 { font-size: 23px; margin-top: 20px; }
   .feature-description { font-size: 14px; max-width: 100%; }
   .feature-window { border-radius: 13px; }

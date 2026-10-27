@@ -19,6 +19,52 @@
     return last && candidates[0].distance + 24 >= last.distance ? previous : candidates[0].index;
   }
 
+  function bubbleMorph(element, text, measure, slot, container, gsap, content) {
+    const readStyle = node => node.ownerDocument.defaultView.getComputedStyle(node);
+    let widthTo, heightTo, widthGoal = NaN, heightGoal = NaN, horizontal, vertical, lineHeight, available;
+    function size() {
+      return {width: Math.min(available, Math.max(64, Math.ceil(measure.offsetWidth + horizontal))), height: Math.ceil(Math.max(lineHeight, measure.offsetHeight) + vertical)};
+    }
+    function dimensions(immediate) {
+      const next = size();
+      if (immediate || !widthTo) {
+        widthTo?.tween.pause(); heightTo?.tween.pause();
+        gsap.set(element, next);
+      } else {
+        if (next.width !== widthGoal) widthTo(next.width);
+        if (next.height !== heightGoal) heightTo(next.height);
+      }
+      widthGoal = next.width; heightGoal = next.height;
+    }
+    function write(value, immediate = false) {
+      // Measure only when the visible prefix actually changes, not each frame.
+      if (text.textContent === value && !immediate) return;
+      text.textContent = measure.textContent = value;
+      dimensions(immediate);
+    }
+    function stop() {widthTo?.tween.kill(); heightTo?.tween.kill(); widthTo = heightTo = null;}
+    function layout() {
+      stop();
+      const css = readStyle(element), parent = readStyle(container);
+      const px = key => parseFloat(css[key]) || 0;
+      horizontal = px('paddingLeft') + px('paddingRight') + px('borderLeftWidth') + px('borderRightWidth');
+      vertical = px('paddingTop') + px('paddingBottom') + px('borderTopWidth') + px('borderBottomWidth');
+      lineHeight = parseFloat(css.lineHeight) || parseFloat(css.fontSize) * 1.35;
+      available = Math.max(horizontal + 8, container.clientWidth - (parseFloat(parent.paddingLeft) || 0) - (parseFloat(parent.paddingRight) || 0));
+      element.style.setProperty('--feature-line-width', Math.max(8, available - horizontal) + 'px');
+      measure.textContent = content;
+      slot.style.height = size().height + 'px';
+      // Only the surface and its clipped ink change size. Text wraps at a
+      // stable line width throughout typing, so words cannot jump between lines.
+      measure.textContent = text.textContent;
+      dimensions(true);
+      widthTo = gsap.quickTo(element, 'width', {duration: .16, ease: 'power2.out'});
+      heightTo = gsap.quickTo(element, 'height', {duration: .2, ease: 'power2.out'});
+    }
+    layout();
+    return {write, layout, stop, pause() {widthTo?.tween.pause(); heightTo?.tween.pause();}, resume() {widthTo?.tween.resume(); heightTo?.tween.resume();}};
+  }
+
   function conversation(root, gsap) {
     const prompt = root.querySelector('.feature-prompt');
     const answer = root.querySelector('.feature-answer');
@@ -28,18 +74,23 @@
     const answerText = root.querySelector('[data-feature-answer]');
     const request = Array.from(prompt.querySelector('.feature-measure').textContent);
     const response = Array.from(answer.querySelector('.feature-measure').textContent);
+    const container = root.querySelector('.feature-dialogue');
+    const promptMorph = bubbleMorph(prompt, promptText, prompt.querySelector('.feature-measure'), root.querySelector('.feature-prompt-slot'), container, gsap, request.join(''));
+    const answerMorph = bubbleMorph(answer, answerText, answer.querySelector('.feature-measure'), root.querySelector('.feature-reply-slot'), container, gsap, response.join(''));
     let timeline, pulse, version = 0, running = false;
     function stop() {
       ++version;
       running = false;
       timeline?.kill(); pulse?.kill();
+      promptMorph.stop(); answerMorph.stop();
       timeline = pulse = null;
       gsap.killTweensOf([prompt, answer, indicator, ...dots]);
       gsap.set(indicator, {autoAlpha: 0});
     }
     function finish() {
       stop();
-      promptText.textContent = request.join(''); answerText.textContent = response.join('');
+      promptMorph.layout(); answerMorph.layout();
+      promptMorph.write(request.join(''), true); answerMorph.write(response.join(''), true);
       gsap.set([prompt, answer], {autoAlpha: 1, scaleX: 1, scaleY: 1, y: 0});
     }
     function start(reduced = false) {
@@ -47,16 +98,17 @@
       stop(); running = true;
       const current = version;
       const typed = {prompt: 0, answer: 0};
-      promptText.textContent = answerText.textContent = '';
-      gsap.set([prompt, answer], {autoAlpha: 0, scaleX: .94, scaleY: .97, y: 7});
+      promptMorph.layout(); answerMorph.layout();
+      promptMorph.write('', true); answerMorph.write('', true);
+      gsap.set([prompt, answer], {autoAlpha: 0, scaleX: 1, scaleY: 1, y: 4});
       gsap.set(dots, {y: 0, opacity: .45});
       const duration = clamp(request.length * .033, .65, 1.6);
       const waiting = .16 + duration + .28;
       const replying = waiting + 1.05;
       timeline = gsap.timeline();
-      timeline.to(prompt, {autoAlpha: 1, scaleX: 1, scaleY: 1, y: 0, duration: .42, ease: 'power3.out'}, .12)
+      timeline.to(prompt, {autoAlpha: 1, y: 0, duration: .24, ease: 'power3.out'}, .12)
         .to(typed, {prompt: request.length, duration, ease: 'none', onUpdate() {
-          if (version === current) promptText.textContent = request.slice(0, Math.floor(typed.prompt)).join('');
+          if (version === current) promptMorph.write(request.slice(0, Math.floor(typed.prompt)).join(''));
         }}, .16)
         .to(indicator, {autoAlpha: 1, duration: .18}, waiting)
         .call(() => {
@@ -65,15 +117,15 @@
         }, [], waiting)
         .to(indicator, {autoAlpha: 0, duration: .14}, replying)
         .call(() => { pulse?.kill(); pulse = null; }, [], replying)
-        .to(answer, {autoAlpha: 1, scaleX: 1, scaleY: 1, y: 0, duration: .42, ease: 'power3.out'}, replying + .1)
+        .to(answer, {autoAlpha: 1, y: 0, duration: .24, ease: 'power3.out'}, replying + .1)
         .to(typed, {answer: response.length, duration: clamp(response.length * .025, .5, 1.2), ease: 'none', onUpdate() {
-          if (version === current) answerText.textContent = response.slice(0, Math.floor(typed.answer)).join('');
+          if (version === current) answerMorph.write(response.slice(0, Math.floor(typed.answer)).join(''));
         }, onComplete() {
-          if (version === current) { promptText.textContent = request.join(''); answerText.textContent = response.join(''); running = false; }
+          if (version === current) { promptMorph.write(request.join('')); answerMorph.write(response.join('')); running = false; }
         }}, replying + .15);
     }
     finish();
-    return {start, stop, finish, pause() {timeline?.pause(); pulse?.pause();}, resume() {if(running) {timeline?.resume(); pulse?.resume();}}};
+    return {start, stop, finish, reflow() {promptMorph.layout(); answerMorph.layout();}, pause() {timeline?.pause(); pulse?.pause(); promptMorph.pause(); answerMorph.pause();}, resume() {timeline?.resume(); pulse?.resume(); promptMorph.resume(); answerMorph.resume();}};
   }
 
   function mount(scope) {
@@ -110,12 +162,17 @@
       else {sync(); if (active >= 0) sequences[active].resume();}
     };
     document.addEventListener('visibilitychange', visibility);
+    const resize = scope.ResizeObserver ? new scope.ResizeObserver(() => sequences.forEach(sequence => sequence.reflow())) : null;
+    rows.forEach(row => resize?.observe(row.querySelector('.feature-dialogue')));
+    // Width changes require fresh text measurement; fonts can change it too.
+    document.fonts?.ready.then(() => {if (!disposed) sequences.forEach(sequence => sequence.reflow());});
     sync();
     return {setReducedMotion, dispose() {
       disposed = true;
       trigger.kill(); sequences.forEach(sequence => sequence.stop()); gsap.killTweensOf(surfaces);
+      resize?.disconnect();
       document.removeEventListener('visibilitychange', visibility);
     }};
   }
-  return {readingRow, conversation, mount};
+  return {readingRow, bubbleMorph, conversation, mount};
 });
