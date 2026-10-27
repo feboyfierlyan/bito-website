@@ -42,7 +42,7 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
 .platform { font-size: 9px; color: #92969d; margin-top: -7px; }
 .platform a:hover { color: var(--blue); }
 .actor-anchor { left: 50%; top: max(102px, 12.5%); bottom: auto; transform: translateX(-23%) scale(.46); }
-.hero-speech { left: calc(50% + 78px); top: 23%; bottom: auto; transform: none; white-space: nowrap; font-size: 11px!important; padding: 10px 15px; background: #edf0f4; color: #626a75; border-radius: 18px; }
+.hero-speech { z-index: 10; left: calc(50% + var(--actor-size) * .23 + 28px); top: 23%; bottom: auto; transform: none; white-space: nowrap; font-size: 11px!important; padding: 10px 15px; background: #edf0f4; color: #626a75; border-radius: 18px; }
 .hero-invite { right: auto; left: calc(50% - 37px); top: calc(max(102px, 12.5%) + 178px); bottom: auto; font-size: 8px; color: #a1a5ac; }
 .hero-aside, .stage-note { display: none; }
 .hero-desk { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
@@ -121,7 +121,7 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
 .motion-paused .hero-desk { display: none; }
 @media(min-width: 1701px) {
   .hero-copy { top: 37%; }
-  .hero-speech { top: 24%; left: calc(50% + 95px); }
+  .hero-speech { top: 24%; left: calc(50% + var(--actor-size) * .23 + 28px); }
   .hero-invite { top: calc(max(102px, 12.5%) + 210px); }
   .feature-file { left: 9%; width: 285px; }
   .hello-file { right: 13%; width: 210px; }
@@ -134,7 +134,7 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
   .chat-file { width: 152px; right: 3%; top: 48%; }
   .hero-copy { top: 38%; }
   .hero-copy h1 { font-size: 87px; }
-  .hero-speech { top: 24%; left: calc(50% + 60px); font-size: 9px!important; }
+  .hero-speech { top: 24%; left: calc(50% + var(--actor-size) * .23 + 28px); font-size: 9px!important; }
   .hero-invite { top: calc(max(102px, 12.5%) + 151px); }
   .hero-downloads .button { padding-inline: 13px; font-size: 11px; gap: 7px; }
   .hero-downloads svg { width: 17px; }
@@ -166,7 +166,7 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
   .download-down { margin-left: auto; font-size: 17px; }
   .platform { font-size: 8px; margin-top: -8px; }
   .actor-anchor { left: 50%; top: 110px; bottom: auto; transform: translateX(-26.5%) scale(.53); }
-  .hero-speech { top: 243px; left: 50%; transform: translateX(-50%); bottom: auto; font-size: 10px!important; padding: 10px 13px; }
+  .hero-speech { top: calc(110px + var(--actor-size) * .53 + 16px); left: 50%; transform: translateX(-50%); bottom: auto; font-size: 10px!important; padding: 10px 13px; }
   .hero-speech:after { display: none; }
   .hero-invite { top: 290px; left: 50%; transform: translateX(-50%); font-size: 7px; }
   .feature-file { top: 117px; left: 16px; width: 88px; --window-tilt: -6deg; }

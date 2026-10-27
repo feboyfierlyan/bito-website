@@ -131,11 +131,11 @@
     context.add({wide:'(min-width: 761px)',narrow:'(max-width: 760px)',systemQuiet:'(prefers-reduced-motion: reduce)'},media=>{
       quiet=manualMotion||media.conditions.systemQuiet;document.documentElement.classList.toggle('motion-paused',quiet);motionButton.setAttribute('aria-pressed',String(quiet));motionButton.textContent=quiet?'Gerakan dikurangi':'Kurangi gerakan';syncRive();setInteractive(false);draggable?.kill();gsap.killTweensOf([chatPosition,greetingPosition]);for(const key of Object.keys(placements))delete placements[key];setupDrag();prepareChatMotion();
       Object.assign(flight,{reveal:0,zoom:0,arrival:0});gsap.set(anchor,{left:0,top:0,bottom:'auto',xPercent:0,yPercent:0});renderLaptop(0);gsap.set(greetingPosition,{autoAlpha:0});
-      if(quiet){gsap.set(['.hero-copy','#hero-desk','.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0});stage.style.height=innerWidth<=760?'800px':'900px';$('.story').style.height='auto';Object.assign(flight,{reveal:1,zoom:1,arrival:1});renderLaptop(1);gsap.set(['#desktop-hint','#laptop-demo-label'],{autoAlpha:1});setInteractive(true);return()=>{setInteractive(false);stage.style.height='';$('.story').style.height='';draggable?.kill();draggable=null;};}
+      if(quiet){gsap.set(['.hero-copy','#hero-desk','.hero-aside','.hero-speech','.stage-note','.scroll-note'],{autoAlpha:0});stage.style.height=innerWidth<=760?'800px':'900px';$('.story').style.height='auto';Object.assign(flight,{reveal:1,zoom:1,arrival:1});renderLaptop(1);gsap.set(['#desktop-hint','#laptop-demo-label'],{autoAlpha:1});setInteractive(true);return()=>{setInteractive(false);stage.style.height='';$('.story').style.height='';draggable?.kill();draggable=null;};}
       const tl=gsap.timeline({defaults:{ease:'none'},onUpdate(){const p=this.progress();setInteractive(p>.72);renderLaptop(p);if((interactive&&!dragging)||chatReveal?.isActive())positionPanels();},scrollTrigger:{trigger:'.story',start:'top top',end:'bottom bottom',scrub:.4,invalidateOnRefresh:true,onRefresh(){renderLaptop();if(interactive){updateBounds();positionPanels();}fitRive();}}});storyTimeline=tl;
       tl.addLabel('hello',0)
         .to(['.hero-copy','#hero-desk'],{y:-50,autoAlpha:0,duration:.2},.02)
-        .to(['.hero-aside','.hero-speech','.hero-invite','.stage-note','.scroll-note'],{autoAlpha:0,duration:.12},.03)
+        .to(['.hero-aside','.hero-speech','.stage-note','.scroll-note'],{autoAlpha:0,duration:.12},.03)
         .addLabel('laptop',.12)
         .fromTo(flight,{reveal:0},{reveal:1,duration:.22,ease:'power2.inOut',immediateRender:false},.12)
         .addLabel('closer',.3)
