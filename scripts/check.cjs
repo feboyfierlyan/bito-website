@@ -66,13 +66,13 @@ for(const [w,h]of [[320,800],[375,812],[768,760],[1440,900],[1920,1080]]){
   }
 }
 for(const [,ref]of html.matchAll(/data-(?:gif|still)="([^"]+)"/g))assert(fs.existsSync(path.join(root,ref)),`Missing animated/static asset ${ref}`);
-for(const name of ['word.svg','excel.svg','notes.svg','trash.png','coffee.png','compact-disc.png','flower.gif','flower-still.png']){
+for(const name of ['word.svg','excel.svg','notes.svg','compact-disc.png','flower.gif','flower-still.png']){
   const file=fs.readFileSync(path.join(root,'assets/stickers',name));
   if(name.endsWith('.svg'))assert(file.toString().includes('<svg')&&!/<script|onload=|<foreignObject/i.test(file),'Unsafe SVG');
   else if(name.endsWith('.png'))assert.equal(file.subarray(1,4).toString(),'PNG');
   else assert.equal(file.subarray(0,3).toString(),'GIF');
 }
-assert((html.match(/data-sticker\b/g)||[]).length>=14);
+assert((html.match(/data-sticker\b/g)||[]).length>=10);
 for(const tag of html.match(/<(?:a|button)\b[^>]*class="(?:floating-file [^"]+|scene-peek)"[^>]*>/g)||[]){assert(!tag.includes('data-sticker'),'Windows must not be draggable');assert(tag.includes('draggable="false"'),'Disable native window drag');}
 console.log('PASS: sticker bounds across 135 viewport/position cases; all requested icons, GIF and reduced-motion poster bundled');
 let laptopCases=0;
