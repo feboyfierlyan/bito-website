@@ -135,6 +135,12 @@
     const sequences = rows.map(row => conversation(row, gsap));
     let active = -1, reduced = null, disposed = false;
     gsap.registerPlugin(ScrollTrigger);
+    const presentation = index => ({
+      opacity: reduced || index === active ? 1 : .3,
+      // Layout owns the compact base size. Scale changes only the inner
+      // composition, so highlighting cannot move the next row or scroll anchor.
+      scale: reduced ? 1 : index === active ? (scope.innerWidth <= 760 ? 1 : 1.025) : .91,
+    });
     function sync() {
       if (disposed || document.hidden) return;
       const next = readingRow(rows.map(row => row.getBoundingClientRect()), scope.innerHeight, active);
@@ -143,7 +149,7 @@
       active = next;
       surfaces.forEach((surface, index) => {
         rows[index].classList.toggle('feature-active', index === active);
-        gsap.to(surface, {opacity: reduced || index === active ? 1 : .3, scale: reduced || index === active ? 1 : .95, duration: reduced ? 0 : .62, ease: 'power3.out', overwrite: true});
+        gsap.to(surface, {...presentation(index), duration: reduced ? 0 : .68, ease: 'power3.out', overwrite: true});
       });
       if (active >= 0) sequences[active].start(reduced);
     }
@@ -152,7 +158,7 @@
       reduced = value;
       gsap.killTweensOf(surfaces);
       sequences.forEach(sequence => sequence.finish());
-      surfaces.forEach((surface, index) => gsap.set(surface, {opacity: reduced || index === active ? 1 : .3, scale: reduced || index === active ? 1 : .95}));
+      surfaces.forEach((surface, index) => gsap.set(surface, presentation(index)));
       if (active >= 0 && !document.hidden) sequences[active].start(reduced);
     }
     setReducedMotion(scope.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -162,7 +168,10 @@
       else {sync(); if (active >= 0) sequences[active].resume();}
     };
     document.addEventListener('visibilitychange', visibility);
-    const resize = scope.ResizeObserver ? new scope.ResizeObserver(() => sequences.forEach(sequence => sequence.reflow())) : null;
+    const resize = scope.ResizeObserver ? new scope.ResizeObserver(() => {
+      sequences.forEach(sequence => sequence.reflow());
+      surfaces.forEach((surface, index) => gsap.to(surface, {...presentation(index), duration: reduced ? 0 : .3, ease: 'power2.out', overwrite: true}));
+    }) : null;
     rows.forEach(row => resize?.observe(row.querySelector('.feature-dialogue')));
     // Width changes require fresh text measurement; fonts can change it too.
     document.fonts?.ready.then(() => {if (!disposed) sequences.forEach(sequence => sequence.reflow());});

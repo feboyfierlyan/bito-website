@@ -1,14 +1,14 @@
 /* Alternating feature stories. The outer row keeps scroll geometry stable;
    only its inner composition scales and fades. */
-.feature-stories { padding: 68px 6vw 92px; border-top: 1px solid var(--line); }
-.feature-story { max-width: 1240px; margin: 0 auto; min-height: clamp(620px, 84svh, 900px); display: grid; align-items: center; scroll-margin-top: 100px; }
-.feature-surface { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.8fr); gap: clamp(40px, 6vw, 92px); align-items: center; transform-origin: 50% 50%; }
+.feature-stories { padding: 36px 6vw 56px; border-top: 1px solid var(--line); }
+.feature-story { max-width: 1080px; margin: 0 auto; min-height: clamp(460px, 62svh, 620px); display: grid; align-items: center; padding-block: 28px; scroll-margin-top: 100px; }
+.feature-surface { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.8fr); gap: clamp(32px, 4.5vw, 64px); align-items: center; transform-origin: 50% 50%; }
 .feature-reverse { grid-template-columns: minmax(0, 1.8fr) minmax(0, .95fr); }
 .feature-reverse .feature-copy { grid-column: 2; grid-row: 1; }
 .feature-reverse .feature-demo { grid-column: 1; grid-row: 1; }
 .feature-copy { min-width: 0; padding: 12px 0; }
-.feature-dialogue { display: flex; flex-direction: column; gap: 20px; min-height: 202px; padding: 5px 5px 22px; }
-.feature-message { position: absolute; top: 0; width: fit-content; max-width: 100%; border-radius: 24px; padding: 17px 22px; font: 500 clamp(17px, 1.65vw, 23px)/1.35 'Bito Sans', Jakarta, sans-serif; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.feature-dialogue { display: flex; flex-direction: column; gap: 14px; min-height: 164px; padding: 5px 5px 14px; }
+.feature-message { position: absolute; top: 0; width: fit-content; max-width: 100%; border-radius: 22px; padding: 13px 18px; font: 500 clamp(16px, 1.35vw, 20px)/1.35 'Bito Sans', Jakarta, sans-serif; letter-spacing: -.025em; overflow-wrap: anywhere; }
 .feature-prompt { right: 0; color: #163a69; border: 1px solid #77a8eb; background: linear-gradient(180deg, #e4f0ff 0%, #bcd9ff 52%, #cce5f6 100%); box-shadow: inset 0 2px 0 #ffffffb3, 0 5px 11px #233f5f0c; transform-origin: 100% 100%; }
 .feature-prompt:before { content: ''; position: absolute; height: 8px; left: 15px; right: 15px; top: 4px; border-radius: 99px; background: #ffffff75; pointer-events: none; }
 .feature-prompt:after, .feature-answer:after { content: ''; position: absolute; bottom: 0; width: 16px; height: 17px; background: inherit; clip-path: path('M 16 0 Q 15 13 0 17 Q 12 17 16 11 Z'); }
@@ -17,15 +17,15 @@
 .feature-answer:after { left: -8px; }
 /* Reserve the completed message outside its animated surface. This keeps
    the heading, the next bubble and ScrollTrigger geometry stationary. */
-.feature-prompt-slot, .feature-reply-slot { position: relative; width: 100%; align-self: stretch; min-height: 68px; }
+.feature-prompt-slot, .feature-reply-slot { position: relative; width: 100%; align-self: stretch; min-height: 56px; }
 .feature-ink { position: absolute; inset: 0; padding: inherit; border-radius: inherit; overflow: hidden; }
 .feature-text { position: relative; display: block; width: var(--feature-line-width, auto); }
 .feature-text > [data-feature-prompt], .feature-text > [data-feature-answer] { display: block; }
 .feature-measure { position: absolute; top: 0; left: 0; width: max-content; max-width: var(--feature-line-width, 100%); visibility: hidden; pointer-events: none; }
 .feature-typing { position: absolute; left: 0; top: 0; height: 43px; width: 64px; border-radius: 22px; background: #edf2ed; display: flex; align-items: center; justify-content: center; gap: 5px; opacity: 0; visibility: hidden; }
 .feature-typing i { width: 5px; height: 5px; border-radius: 50%; background: #8a988b; }
-.feature-copy h2 { font-size: clamp(21px, 2vw, 28px); line-height: 1.3; letter-spacing: -.05em; font-weight: 650; margin-top: 20px; }
-.feature-description { max-width: 355px; margin-top: 13px; font-size: clamp(14px, 1.2vw, 17px); line-height: 1.75; color: #81858b; letter-spacing: -.025em; }
+.feature-copy h2 { font-size: clamp(20px, 1.7vw, 24px); line-height: 1.3; letter-spacing: -.05em; font-weight: 650; margin-top: 16px; }
+.feature-description { max-width: 330px; margin-top: 11px; font-size: clamp(14px, 1.1vw, 16px); line-height: 1.65; color: #81858b; letter-spacing: -.025em; }
 .feature-demo { margin: 0; min-width: 0; }
 .feature-window { border: 1px solid #b5bdc7; border-radius: 17px; background: #f5f7f9; overflow: hidden; box-shadow: 0 13px 28px #30425c0a, 0 2px 4px #30425c05; }
 .feature-window-bar { height: 34px; display: flex; align-items: center; justify-content: space-between; padding: 0 13px; gap: 12px; background: linear-gradient(#fff, #edf0f3); border-bottom: 1px solid #dce1e7; color: #8b9199; font-size: 10px; }
@@ -41,11 +41,11 @@
 @media (max-width: 1000px) and (min-width: 761px) {
   .feature-surface { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 36px; }
   .feature-reverse { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
-  .feature-dialogue { min-height: 215px; }
+  .feature-dialogue { min-height: 164px; }
 }
 @media (max-width: 760px) {
   .feature-stories { padding: 36px 7vw 55px; }
-  .feature-story { min-height: 0; padding-block: 55px; }
+  .feature-story { min-height: 0; padding-block: 34px; }
   .feature-surface, .feature-reverse { grid-template-columns: minmax(0, 1fr); gap: 30px; }
   .feature-reverse .feature-copy, .feature-reverse .feature-demo { grid-column: auto; grid-row: auto; }
   .feature-copy { padding: 0 6px; }
