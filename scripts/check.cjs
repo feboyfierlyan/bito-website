@@ -33,12 +33,12 @@ const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Se
 assert.equal((html.match(/<canvas /g)||[]).length,2,'One presentation canvas and one hidden runtime canvas must persist through the scene');
 for(const ref of [...html.matchAll(/(?:src|href)="([^"#]+)"/g)].map(m=>m[1]))if(!/^(https?:|data:|mailto:)/.test(ref))assert(fs.existsSync(path.join(root,ref)),`Missing asset ${ref}`);
 for(const ref of [...html.matchAll(/href="#([^"]+)"/g)].map(m=>m[1]))assert(ids.includes(ref),`Missing anchor ${ref}`);
-const css=['style.css','desktop-paper.css','laptop-scene.css','feature-stories.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');
+const css=['style.css','desktop-paper.css','feature-stories.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');
 for(const [,ref]of css.matchAll(/url\(['"]?([^'"\)]+)['"]?\)/g))assert(fs.existsSync(path.join(root,ref)),`Missing CSS asset ${ref}`);
 for(const file of ['site.js','scene-math.js','desktop-stickers.js','rive-presentation.js','feature-stories.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
 assert(!/fetch\(|XMLHttpRequest|api[_-]?key/i.test(fs.readFileSync(path.join(root,'site.js'),'utf8')),'Demo must remain local');
 assert(css.includes('radial-gradient(circle, #d8dce2 1px'), 'Dotted white canvas missing');
-for(const id of ['hero-desk','hello-sticker','play-scene','tentang'])assert(ids.includes(id));
+for(const id of ['hero-desk','hello-sticker','tentang'])assert(ids.includes(id));
 const js=fs.readFileSync(path.join(root,'site.js'),'utf8');
 assert.equal((js.match(/new window\.rive\.Rive\(/g)||[]).length,1,'Keep exactly one Rive instance');
 assert(js.includes("canvas:$('#bito-runtime')"),'Rive must render only to the hidden buffer');
@@ -75,38 +75,6 @@ for(const name of ['word.svg','excel.svg','notes.svg','compact-disc.png','flower
 assert((html.match(/data-sticker\b/g)||[]).length>=10);
 for(const tag of html.match(/<(?:a|button)\b[^>]*class="(?:floating-file [^"]+|scene-peek)"[^>]*>/g)||[]){assert(!tag.includes('data-sticker'),'Windows must not be draggable');assert(tag.includes('draggable="false"'),'Disable native window drag');}
 console.log('PASS: sticker bounds across 135 viewport/position cases; all requested icons, GIF and reduced-motion poster bundled');
-let laptopCases=0;
-for(const [w,h]of [[320,800],[375,812],[430,932],[768,760],[1024,768],[1440,900],[1920,1080]]){
-  const mobile=w<=760,size=mobile?260:w>1700?440:w<=1100?310:370;
-  for(const zoom of [0,.25,.5,.75,1]){
-    const l=laptopLayout(w,h,zoom,1,mobile),f=l.visible;
-    assert(Math.abs(l.image.w/l.image.h-4/3)<.00001,'Laptop image must retain original aspect ratio');
-    assert(f.x>=14&&f.x+f.w<=w-14+.01);
-    assert(f.y>=82&&f.y+f.h<=h-94+.01);
-    assert(f.x>=l.screen.x-.01&&f.x+f.w<=l.screen.x+l.screen.w+.01);
-    assert(f.y>=l.screen.y-.01&&f.y+f.h<=l.screen.y+l.screen.h+.01);
-    if(zoom!==1)continue;
-    if(!mobile){
-      assert(l.screen.x<0&&l.screen.y<0,'Final camera must crop the left and top of the laptop');
-      assert(Math.abs(l.screen.x+l.screen.w-w*.78)<.01,'Camera must retain the right bezel near 78% of the viewport');
-      assert(Math.abs(l.screen.y+l.screen.h-(h-140))<.01,'Camera must focus on the bottom-right workspace');
-      assert(l.image.w>laptopLayout(w,h,0,1,mobile).image.w*1.5,'Final camera must visibly zoom into the laptop');
-    }
-    const p=companionPose(f,size,mobile,l.screen.h),b=companionBounds(p,f,size),extent=size*p.scale;
-    assert(p.x>f.x+f.w/2&&p.y>f.y+f.h/2,'Bito must land at bottom right');
-    for(const x of [b.minX,0,b.maxX])for(const y of [b.minY,0,b.maxY]){
-      const a={x:p.x+x*p.scale,y:p.y+y*p.scale,w:extent,h:extent};
-      assert(a.x>=f.x+11.99&&a.x+a.w<=f.x+f.w-11.99);
-      assert(a.y>=f.y+39.99&&a.y+a.h<=f.y+f.h-11.99);
-      const width=Math.min(mobile?300:340,f.w-24),height=Math.min(310,f.h-extent-55);
-      const c=companionPanel(a,f,width,height,mobile);
-      assert(c.x>=f.x+11.99&&c.x+width<=f.x+f.w-11.99,'Chat must stay inside visible screen');
-      assert(c.y>=f.y+31.99&&c.y+height<=f.y+f.h-11.99);
-      laptopCases++;
-    }
-  }
-}
-for(const id of ['laptop-device','laptop-image','laptop-backdrop','laptop-demo-label'])assert(ids.includes(id));
-assert(!html.includes('id="setup-window"'),'Old onboarding illustration must be removed');
-assert(!js.includes("$('#setup-window')"));
-console.log(`PASS: ${laptopCases} laptop corner/chat cases, 35 zoom layouts, bottom-right camera crop, original image ratio, responsive screen clipping`);
+assert(!/id="(?:laptop-device|desktop-shell|play-scene)"/.test(html),'Laptop scroll scene must be removed');
+assert(!js.includes('renderLaptop')&&!js.includes('configureScene'),'No removed scene callbacks');
+console.log('PASS: laptop scroll section removed; hero and feature anchors remain valid');

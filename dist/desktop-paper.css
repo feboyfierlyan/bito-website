@@ -23,7 +23,8 @@ body {
 nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
 .nav-cta { color: var(--blue); border: 0; padding: 9px 0 9px 12px; background: none; }
 .nav-cta svg { width: 13px; }
-.stage { min-height: 760px; }
+.story { height: auto; }
+.stage { position: relative; height: 100svh; min-height: 760px; }
 .hero-copy { left: 50%; top: 38%; width: max-content; max-width: 90%; transform: translateX(-50%); text-align: center; }
 .hero-copy h1 { font-size: clamp(78px, 8.5vw, 142px); font-weight: 750; letter-spacing: -.075em; line-height: 1.04; }
 .hero-copy h1 .blue-text { color: var(--ink); }
