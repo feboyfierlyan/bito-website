@@ -119,7 +119,6 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
 .quiet h2>span { color: #a3adba; }
 .download { margin-inline: 3vw; border-radius: 28px; }
 .footer { border-top: 1px solid #e7ebef; }
-.motion-paused .hero-desk { display: none; }
 @media(min-width: 1701px) {
   .hero-copy { top: 37%; }
   .hero-speech { top: 24%; left: calc(50% + var(--actor-size) * .23 + 28px); }
