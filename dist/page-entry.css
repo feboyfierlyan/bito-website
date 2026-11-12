@@ -1,0 +1,14 @@
+/* The header is deliberately outside every entrance selector. */
+html.scroll-restoring { scroll-behavior: auto!important; }
+.entry-boot [data-entry-title],
+.entry-boot [data-entry],
+.entry-pending { opacity: 0; }
+[data-entry-title] { transform-origin: 50% 100%; backface-visibility: hidden; }
+/* Never make keyboard users wait for a cosmetic entrance. */
+.entry-pending:focus-within { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .entry-boot [data-entry-title], .entry-boot [data-entry], .entry-pending { opacity: 1; }
+}
+@media print {
+  [data-entry-title], [data-entry] { opacity: 1!important; filter: none!important; transform: none!important; translate: none!important; }
+}

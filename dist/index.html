@@ -4,27 +4,54 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#ffffff" />
-  <title>Bito — a little buddy for your everyday.</title>
-  <meta name="description" content="Teman kecil di desktopmu. Kenalan, coba ngobrol, dan bawa Bito ke harimu. Tersedia untuk macOS dan Windows." />
-  <meta property="og:title" content="Bito — Hai. Aku Bito." />
-  <meta property="og:description" content="Buat cerita random, mikir bareng, atau sekadar ditemenin." />
+  <title>Bito — Teman desktop buat skripsi</title>
+  <meta name="description" content="Teman desktop buat mengatur revisi, pengingat bimbingan, dan langkah kecil selama skripsi. Tersedia untuk macOS dan Windows." />
+  <meta property="og:title" content="Bito — Teman desktop buat skripsi" />
+  <meta property="og:description" content="Susun langkah revisi, titip pengingat bimbingan, dan lanjutkan skripsimu bersama Bito." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://bito-companion-studio.feboyfierlyan10.chatgpt.site/assets/social.png" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-  <link rel="preload" href="assets/jakarta-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/bito-web-variable.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/bito.png" as="image" fetchpriority="high" />
-  <link rel="stylesheet" href="style.css" />
+  <script>
+    // Native restoration owns reload/back/forward. Smooth scrolling is only
+    // enabled once restoration has settled, never while restoring old offsets.
+    history.scrollRestoration = 'auto';
+    document.documentElement.classList.add('scroll-restoring');
+    window.bitoReturningNavigation = ['reload', 'back_forward'].includes(performance.getEntriesByType('navigation')[0]?.type);
+    addEventListener('pageshow', () => requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('scroll-restoring'))));
+    addEventListener('pagehide', () => document.documentElement.classList.add('scroll-restoring'));
+    // Hide only entrance targets before first paint; failed scripts fail open.
+    try {
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches && localStorage.getItem('bito-reduced-motion') !== 'true' && !location.hash) {
+        document.documentElement.classList.add('entry-boot');
+        window.bitoEntrySafety = setTimeout(() => document.documentElement.classList.remove('entry-boot'), 4500);
+      }
+    } catch {}
+  </script>
+  <link rel="stylesheet" href="style.css?v=45" />
   <link rel="stylesheet" href="desktop-paper.css" />
-  <link rel="stylesheet" href="feature-stories.css" />
+  <link rel="stylesheet" href="feature-stories.css?v=50" />
+  <link rel="stylesheet" href="hero.css?v=50" />
+  <link rel="stylesheet" href="local-desktop.css?v=47" />
+  <link rel="stylesheet" href="download.css?v=33" />
+  <link rel="stylesheet" href="faq.css?v=34" />
+  <link rel="stylesheet" href="about.css?v=36" />
+  <link rel="stylesheet" href="page-entry.css?v=28" />
   <script defer src="assets/vendor/gsap.min.js"></script>
-  <script defer src="assets/vendor/ScrollTrigger.min.js"></script>
   <script defer src="assets/vendor/Draggable.min.js"></script>
   <script defer src="assets/vendor/rive.js"></script>
   <script defer src="scene-math.js"></script>
   <script defer src="desktop-stickers.js"></script>
   <script defer src="rive-presentation.js"></script>
-  <script defer src="feature-stories.js"></script>
-  <script defer src="site.js"></script>
+  <script defer src="feature-stories.js?v=28"></script>
+  <script defer src="feature-media.js?v=50"></script>
+  <script defer src="peek-glass.js?v=50"></script>
+  <script defer src="peek-motion.js?v=50"></script>
+  <script defer src="page-entry.js?v=32"></script>
+  <script defer src="site.js?v=48"></script>
+  <script defer src="about.js?v=37"></script>
+  <script defer src="local-desktop.js?v=47"></script>
 </head>
 <body>
   <a class="skip" href="#main">Langsung ke konten</a>
@@ -36,98 +63,186 @@
     <section class="story" id="kenalan" aria-label="Kenalan dengan Bito">
       <div class="stage" id="stage">
         <div class="hero-copy">
-          <h1><span class="title-line"><span>meet bito<span class="blue-text">.</span></span></span></h1>
-          <div class="hero-bottom hero-item"><p>a little buddy for your everyday.</p>
-            <div class="hero-downloads"><a class="button hero-mac" href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-macOS-arm64.dmg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.7 12.7c0-2 1.6-3 1.7-3.1-1-1.5-2.6-1.7-3.2-1.7-1.4-.2-2.7.8-3.4.8s-1.8-.8-3-.8c-1.6 0-3 .9-3.8 2.2-1.6 2.8-.4 6.9 1.2 9.1.8 1.1 1.6 2.2 2.8 2.1 1.1 0 1.5-.7 2.9-.7s1.8.7 3 .7 2-1.1 2.7-2.1c.9-1.3 1.3-2.5 1.3-2.6-.1 0-2.2-.9-2.2-3.9ZM14.5 6.3c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.2 1.8-1.1 2.9 1.1.1 2.2-.5 2.9-1.3Z"/></svg><span>get bito for mac</span><span class="download-down" aria-hidden="true">↓</span></a><a class="button hero-windows" href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-Windows-x64-Setup.exe"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#f35325" d="M2 2h9v9H2z"/><path fill="#81bc06" d="M13 2h9v9h-9z"/><path fill="#05a6f0" d="M2 13h9v9H2z"/><path fill="#ffba08" d="M13 13h9v9h-9z"/></svg><span>get bito for windows</span><span class="download-down" aria-hidden="true">↓</span></a></div>
-            <span class="platform"><a href="#download">macOS & Windows · v0.5.1</a></span>
+          <div class="hero-heading">
+            <h1 aria-label="meet bito."><span class="hero-word" data-entry-title>meet</span><span class="actor-anchor" data-entry-title id="actor-anchor"><span class="actor-drag" id="actor-drag"><span class="actor-sway" id="actor-sway"><button class="mascot" id="mascot" aria-label="Sapa Bito"><span class="mascot-art" id="mascot-art"><img src="assets/bito.png" alt="Bito, karakter hijau kecil dengan dua daun" width="1024" height="1024" fetchpriority="high" /><canvas id="bito-canvas" aria-hidden="true"></canvas><canvas id="bito-runtime" aria-hidden="true"></canvas></span></button></span></span></span><span class="hero-word" data-entry-title>bito<span class="blue-text">.</span></span></h1>
+            <div class="hero-speech bubble received" id="hero-speech" role="status">heii, ketemu juga :)</div>
+          </div>
+          <div class="hero-bottom hero-item"><p data-entry="hero" data-entry-group="description">Teman desktop buat ngerjain skripsi, satu langkah dulu.</p>
+            <div class="hero-downloads" data-entry="hero" data-entry-group="actions"><a class="button hero-mac" href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.6.3/Bito-0.6.3-macOS-arm64.dmg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.7 12.7c0-2 1.6-3 1.7-3.1-1-1.5-2.6-1.7-3.2-1.7-1.4-.2-2.7.8-3.4.8s-1.8-.8-3-.8c-1.6 0-3 .9-3.8 2.2-1.6 2.8-.4 6.9 1.2 9.1.8 1.1 1.6 2.2 2.8 2.1 1.1 0 1.5-.7 2.9-.7s1.8.7 3 .7 2-1.1 2.7-2.1c.9-1.3 1.3-2.5 1.3-2.6-.1 0-2.2-.9-2.2-3.9ZM14.5 6.3c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.2 1.8-1.1 2.9 1.1.1 2.2-.5 2.9-1.3Z"/></svg><span>get bito for mac</span><span class="download-down" aria-hidden="true">↓</span></a><a class="button hero-windows" href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.6.3/Bito-0.6.3-Windows-x64-Setup.exe"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#f35325" d="M2 2h9v9H2z"/><path fill="#81bc06" d="M13 2h9v9h-9z"/><path fill="#05a6f0" d="M2 13h9v9H2z"/><path fill="#ffba08" d="M13 13h9v9h-9z"/></svg><span>get bito for windows</span><span class="download-down" aria-hidden="true">↓</span></a></div>
+            <span class="platform" data-entry="hero" data-entry-group="actions"><a href="#download">macOS & Windows · v0.6.3</a></span>
           </div>
         </div>
         <div class="hero-desk" id="hero-desk">
-          <a class="floating-file feature-file" href="#bantuan" aria-label="Lihat contoh pengingat dan bantuan Bito" draggable="false"><span class="sticker-art">
-            <div class="mini-window blue-window"><div class="mini-chrome"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>reminder</span><span aria-hidden="true">↗</span></div><div class="mini-content"><span class="reminder-icon" aria-hidden="true">◷</span><strong>minum air dulu?</strong><span>aku ingetin, kok.</span><div class="mini-reminder"><span class="tiny-check" aria-hidden="true">✓</span> a little care, every day.</div></div></div><span class="file-caption">a-little-reminder.demo</span>
-          </span></a>
-          <button class="floating-file hello-file" id="hello-sticker" aria-label="Sapa Bito" draggable="false"><span class="sticker-art"><span class="hello-note"><span class="hello-sprout" aria-hidden="true">✳</span><span class="hello-label">HELLO<br/><small>my name is</small></span><strong>bito :)</strong></span><span class="file-caption">say hello!</span></span></button>
-          <a class="floating-file chat-file" href="#gaya" aria-label="Lihat contoh ngobrol dengan Bito" draggable="false"><span class="sticker-art"><div class="mini-window chat-window"><div class="mini-chrome"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>bito chat</span><span aria-hidden="true">↗</span></div><div class="mini-chat"><span>bro</span><span>wut</span><span>ada cerita nih</span><span>spill</span></div></div><span class="file-caption">cerita-random.demo</span></span></a>
-          <button type="button" class="desk-doodle doodle-one" data-sticker aria-label="Stiker wajah senang; seret untuk memindahkan"><span class="sticker-art">^ ᴗ ^</span></button><button type="button" class="desk-doodle doodle-two" data-sticker aria-label="Stiker tulisan; seret untuk memindahkan"><span class="sticker-art">a little closer ↴</span></button>
-          <a class="folder-sticker" href="#bantuan" aria-label="Lihat contoh file Bito" data-sticker aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight"><span class="sticker-art"><svg viewBox="0 0 62 49" aria-hidden="true"><path d="M3 12V7a4 4 0 0 1 4-4h16l6 6h25a4 4 0 0 1 4 4v29a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" fill="#94d2fa" stroke="#61ade1"/><path d="M3 17a4 4 0 0 1 4-4h47a4 4 0 0 1 4 4v25a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" fill="#75bcec" stroke="#61ade1"/></svg><span>little things</span></span></a>
-          <button type="button" class="internet-sticker flower-sticker" data-sticker aria-label="GIF bunga berputar; seret untuk memindahkan"><span class="sticker-art"><img src="assets/stickers/flower-still.png" data-gif="assets/stickers/flower.gif" data-still="assets/stickers/flower-still.png" width="200" height="200" alt="" draggable="false"/><span class="sticker-filename">flower.gif</span></span></button>
-          <button type="button" class="internet-sticker disc-sticker" data-sticker aria-label="Stiker CD; seret untuk memindahkan"><span class="sticker-art"><img src="assets/stickers/compact-disc.png" width="256" height="256" alt="" draggable="false"/></span></button>
-          <button type="button" class="desktop-icon computer-sticker" data-sticker aria-label="Komputer; seret untuk memindahkan"><span class="sticker-art"><img src="assets/stickers/computer.png" width="256" height="256" alt="" draggable="false"/><span class="sticker-filename">my desktop</span></span></button>
-          <button type="button" class="desktop-icon word-sticker" data-sticker aria-label="Ikon Microsoft Word; seret untuk memindahkan"><span class="sticker-art"><img src="assets/stickers/word.svg" width="512" height="476" alt="" draggable="false"/><span class="sticker-filename">Word</span></span></button>
-          <button type="button" class="desktop-icon excel-sticker" data-sticker aria-label="Ikon Microsoft Excel; seret untuk memindahkan"><span class="sticker-art"><img src="assets/stickers/excel.svg" width="512" height="476" alt="" draggable="false"/><span class="sticker-filename">Excel</span></span></button>
-          <button type="button" class="desktop-icon notes-sticker" data-sticker aria-label="Ikon Notes; seret untuk memindahkan"><span class="sticker-art"><img src="assets/stickers/notes.svg" width="120" height="120" alt="" draggable="false"/><span class="sticker-filename">Notes</span></span></button>
-          <button type="button" class="desktop-icon pdf-sticker" data-sticker aria-label="Ikon dokumen PDF; seret untuk memindahkan"><span class="sticker-art"><svg viewBox="0 0 64 76" aria-hidden="true"><defs><linearGradient id="pdf-paper" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#f0f1f5"/></linearGradient></defs><path d="M8 2h31l17 17v49a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6V8a6 6 0 0 1 6-6Z" fill="url(#pdf-paper)" stroke="#cbd0d8"/><path d="M39 2v12a5 5 0 0 0 5 5h12" fill="#e4e6ed" stroke="#cbd0d8"/><path d="M15 31h28M15 37h28M15 43h18" stroke="#c9ced8" stroke-width="2.5" stroke-linecap="round"/><rect x="0" y="50" width="48" height="21" rx="4" fill="#ee6169"/><text x="24" y="65" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="700" fill="#fff">PDF</text></svg><span class="sticker-filename">read me.pdf</span></span></button>
-          <a class="scene-peek" href="#gaya" aria-label="Lihat fitur Bito" draggable="false"><span class="sticker-art"><span class="peek-chrome"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Bito in action</span><span aria-hidden="true">↗</span></span><span class="peek-desktop"><span class="peek-paper"><span>today.md</span><strong>satu hal dulu.</strong><i></i><i></i><i></i></span><img src="assets/bito.png" alt="" width="1024" height="1024" class="peek-bito"/><span class="peek-chat"><span>capek juga ya hari ini</span><span>sini cerita. aku dengerin.</span></span><span class="peek-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg> lihat fitur</span><span class="peek-label">a small friend. a softer day.</span></span></span></a>
+          <a data-entry="hero" data-entry-group="windows" class="floating-file feature-file student-window" href="#rencana" aria-label="Lihat fitur rencana dan jadwal Bito" draggable="false">
+            <span class="sticker-art">
+              <span class="mini-window">
+                <span class="mini-chrome"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Pengingat</span><span aria-hidden="true">↗</span></span>
+                <span class="student-reminder">
+                  <span class="student-clock" aria-hidden="true"><span></span></span>
+                  <strong>Bimbingan skripsi</strong>
+                  <span>Besok · 10.00</span>
+                </span>
+              </span>
+            </span>
+          </a>
+          <a data-entry="hero" data-entry-group="windows" class="floating-file chat-file student-window student-revision-file" href="#rencana" aria-label="Lihat fitur Bito: contoh checklist revisi Bab 3" draggable="false">
+            <span class="sticker-art">
+              <span class="mini-window">
+                <span class="mini-chrome"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Checklist</span><span aria-hidden="true">↗</span></span>
+                <span class="student-revision">
+                  <strong>Revisi Bab 3</strong>
+                  <span><i class="revision-check checked" aria-hidden="true">✓</i> Baca catatan dosen</span>
+                  <span><i class="revision-check next" aria-hidden="true"><b>✓</b></i> Rapikan metode</span>
+                  <span><i class="revision-check" aria-hidden="true"></i> Cek sitasi</span>
+                </span>
+              </span>
+            </span>
+          </a>
+          <!-- Student files are draggable illustrations. -->
+          <button type="button" data-entry="hero" data-entry-group="icons" class="desktop-icon pdf-sticker" data-sticker aria-label="Jurnal rujukan; gunakan tombol panah untuk memindahkan"><span class="sticker-art"><svg viewBox="0 0 64 76" aria-hidden="true"><defs><linearGradient id="pdf-paper" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#f0f1f5"/></linearGradient></defs><path d="M8 2h31l17 17v49a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6V8a6 6 0 0 1 6-6Z" fill="url(#pdf-paper)" stroke="#cbd0d8"/><path d="M39 2v12a5 5 0 0 0 5 5h12" fill="#e4e6ed" stroke="#cbd0d8"/><path d="M15 31h28M15 37h28M15 43h18" stroke="#c9ced8" stroke-width="2.5" stroke-linecap="round"/><rect x="0" y="50" width="48" height="21" rx="4" fill="#ee6169"/><text x="24" y="65" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" font-weight="700" fill="#fff">PDF</text></svg><span class="sticker-filename">jurnal-rujukan.pdf</span></span></button>
+          <button type="button" data-entry="hero" data-entry-group="icons" class="desktop-icon excel-sticker" data-sticker aria-label="Data penelitian; gunakan tombol panah untuk memindahkan"><span class="sticker-art"><img src="assets/stickers/excel.svg" width="512" height="476" alt="" draggable="false"/><span class="sticker-filename">data-riset.xlsx</span></span></button>
+          <button type="button" data-entry="hero" data-entry-group="icons" class="desktop-icon word-sticker" data-sticker aria-label="Draf revisi Bab 3; gunakan tombol panah untuk memindahkan"><span class="sticker-art"><img src="assets/stickers/word.svg" width="512" height="476" alt="" draggable="false"/><span class="sticker-filename">revisi-bab-3.docx</span></span></button>
+          <button type="button" class="folder-sticker" data-entry="hero" data-entry-group="icons" aria-label="Folder skripsi; gunakan tombol panah untuk memindahkan" data-sticker aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight"><span class="sticker-art"><svg viewBox="0 0 62 49" aria-hidden="true"><path d="M3 12V7a4 4 0 0 1 4-4h16l6 6h25a4 4 0 0 1 4 4v29a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" fill="#94d2fa" stroke="#61ade1"/><path d="M3 17a4 4 0 0 1 4-4h47a4 4 0 0 1 4 4v25a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" fill="#75bcec" stroke="#61ade1"/></svg><span>Skripsi</span></span></button>
+          <a class="scene-peek" data-entry="hero" data-entry-group="preview" href="#gaya" aria-label="Putar demo Bito in action, 20 detik" draggable="false"><span class="sticker-art"><span class="peek-chrome"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Bito in action</span><span class="peek-chrome-tag" aria-hidden="true">0:20</span></span><span class="peek-desktop"><video class="peek-video" disablepictureinpicture disableremoteplayback muted loop playsinline preload="metadata" poster="assets/demos/bito-in-action.jpg" aria-label="Trailer Bito in action"><source src="assets/demos/bito-in-action.mp4" type="video/mp4" /></video><span class="feature-progress peek-progress"><span class="feature-progress-track" aria-hidden="true"><span class="feature-progress-fill"></span></span><input class="feature-progress-input" type="range" min="0" max="1000" value="0" aria-label="Posisi video Bito in action" disabled /></span></span><span class="peek-play"><span class="peek-glass" aria-hidden="true"><span class="peek-glass-clip"><span class="peek-glass-lens"></span></span></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg><span class="peek-play-label">Putar demo · 20 dtk</span></span></span></a>
         </div>
         <div class="hero-aside" aria-hidden="true"></div>
-        <div class="hero-speech bubble received" id="hero-speech">heii, ketemu juga :)</div>
-        <div class="actor-anchor" id="actor-anchor"><div class="actor-drag" id="actor-drag"><div class="actor-sway" id="actor-sway"><button class="mascot" id="mascot" aria-label="Sapa Bito"><span class="mascot-art" id="mascot-art"><img src="assets/bito.png" alt="Bito, karakter hijau kecil dengan dua daun" width="1024" height="1024" fetchpriority="high" /><canvas id="bito-canvas" aria-hidden="true"></canvas><canvas id="bito-runtime" aria-hidden="true"></canvas></span></button></div></div></div>
-        <a class="scroll-note" href="#gaya"><span>SCROLL, KITA KENALAN</span><span aria-hidden="true">↓</span></a>
         <div class="stage-note" aria-hidden="true"><span>01</span><span>little companion,<br />a little closer.</span></div>
       </div>
     </section>
 
     <section class="feature-stories" id="gaya" aria-label="Fitur Bito · contoh percakapan">
-      <article class="feature-story" data-feature="chat" aria-labelledby="feature-chat-title">
+      <article class="feature-story" data-entry="section" data-feature="ask-screen" aria-labelledby="feature-ask-screen-title">
         <div class="feature-surface">
           <div class="feature-copy">
-            <div class="feature-dialogue" aria-label="Contoh percakapan: Ngobrol">
-              <div class="feature-prompt-slot"><div class="feature-message feature-prompt"><span class="feature-ink"><span class="feature-text"><span class="feature-measure" aria-hidden="true">bito, hari ini kepala gue rame banget</span><span data-feature-prompt aria-hidden="true">bito, hari ini kepala gue rame banget</span></span></span></div></div>
-              <div class="feature-reply-slot"><div class="feature-message feature-answer"><span class="feature-ink"><span class="feature-text"><span class="feature-measure" aria-hidden="true">sini, cerita satu-satu. gue dengerin.</span><span data-feature-answer aria-hidden="true">sini, cerita satu-satu. gue dengerin.</span></span></span></div><div class="feature-typing" aria-hidden="true"><i></i><i></i><i></i></div></div>
-              <p class="feature-transcript sr-only">Kamu: bito, hari ini kepala gue rame banget. Bito: sini, cerita satu-satu. gue dengerin.</p>
+            <div class="feature-dialogue" aria-label="Contoh percakapan: Ask on Screen">
+              <div class="feature-prompt-slot"><div class="feature-message feature-prompt"><span class="feature-ink"><span class="feature-text"><span class="feature-measure" aria-hidden="true">bito, jelasin panel-panel di layar ini, dong.</span><span data-feature-prompt aria-hidden="true">bito, jelasin panel-panel di layar ini, dong.</span></span></span></div></div>
+              <div class="feature-reply-slot"><div class="feature-message feature-answer"><span class="feature-ink"><span class="feature-text"><span class="feature-measure" aria-hidden="true">boleh. kita lihat fungsi tiap bagiannya, ya.</span><span data-feature-answer aria-hidden="true">boleh. kita lihat fungsi tiap bagiannya, ya.</span></span></span></div><div class="feature-typing" aria-hidden="true"><i></i><i></i><i></i></div></div>
+              <p class="feature-transcript sr-only">Kamu: bito, jelasin panel-panel di layar ini, dong. Bito: boleh. kita lihat fungsi tiap bagiannya, ya.</p>
             </div>
-            <h2 id="feature-chat-title">Nggak harus dipendam sendiri.</h2>
-            <p class="feature-description">Cerita random, keluh kesah, atau sekadar nyapa. Ngobrol pakai caramu.</p>
+            <h2 id="feature-ask-screen-title">Yang bikin bingung, langsung tanyain.</h2>
+            <p class="feature-description">Pilih bagian layar yang ingin kamu pahami. Dari materi kuliah sampai panel software, tanyakan langsung ke Bito.</p>
           </div>
-          <figure class="feature-demo" aria-label="Placeholder video demo Ngobrol">
-            <div class="feature-window"><div class="feature-window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Ngobrol</span><span class="feature-window-mark" aria-hidden="true">↗</span></div><div class="feature-window-body"><svg class="feature-play" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="23"/><path d="m20 16 12 8-12 8Z"/></svg><span>Video demo segera hadir</span></div></div>
-            <figcaption>ngobrol.demo</figcaption>
+          <figure class="feature-demo" aria-label="Demo Ask on Screen">
+            <div class="feature-window"><div class="feature-window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Ask on Screen</span><span class="feature-window-spacer" aria-hidden="true"></span></div><div class="feature-window-body"><video class="feature-video" disablepictureinpicture disableremoteplayback muted loop playsinline preload="none" poster="assets/demos/ask-on-screen.jpg" aria-label="Penjelasan panel software langsung di layar" aria-describedby="demo-ask-screen-caption"><source src="assets/demos/ask-on-screen.mp4" type="video/mp4" /><a href="assets/demos/ask-on-screen.mp4">Tonton demo Ask on Screen</a></video>
+              <button type="button" class="feature-video-toggle" aria-label="Putar demo Ask on Screen" data-demo-title="Ask on Screen"></button>
+              <div class="feature-progress">
+                <div class="feature-progress-track" aria-hidden="true"><div class="feature-progress-fill"></div></div>
+                <input class="feature-progress-input" type="range" min="0" max="1000" value="0" aria-label="Posisi video Ask on Screen" disabled />
+              </div>
+            </div></div>
+            <figcaption id="demo-ask-screen-caption">Penjelasan panel software langsung di layar</figcaption>
           </figure>
         </div>
       </article>
-      <article class="feature-story" id="bantuan" data-feature="reminder" aria-labelledby="feature-reminder-title">
+      <article class="feature-story" data-entry="section" id="bantuan" data-feature="show-screen" aria-labelledby="feature-show-screen-title">
         <div class="feature-surface feature-reverse">
           <div class="feature-copy">
-            <div class="feature-dialogue" aria-label="Contoh percakapan: Pengingat">
-              <div class="feature-prompt-slot"><div class="feature-message feature-prompt"><span class="feature-ink"><span class="feature-text"><span class="feature-measure" aria-hidden="true">ingetin istirahat 15 menit lagi, ya</span><span data-feature-prompt aria-hidden="true">ingetin istirahat 15 menit lagi, ya</span></span></span></div></div>
-              <div class="feature-reply-slot"><div class="feature-message feature-answer"><span class="feature-ink"><span class="feature-text"><span class="feature-measure" aria-hidden="true">siap. nanti aku colek, ya.</span><span data-feature-answer aria-hidden="true">siap. nanti aku colek, ya.</span></span></span></div><div class="feature-typing" aria-hidden="true"><i></i><i></i><i></i></div></div>
-              <p class="feature-transcript sr-only">Kamu: ingetin istirahat 15 menit lagi, ya. Bito: siap. nanti aku colek, ya.</p>
+            <div class="feature-dialogue" aria-label="Contoh percakapan: Show on Screen">
+              <div class="feature-prompt-slot"><div class="feature-message feature-prompt"><span class="feature-ink"><span class="feature-text"><span class="feature-measure" aria-hidden="true">bito, cara bikin daftar isi di sini gimana?</span><span data-feature-prompt aria-hidden="true">bito, cara bikin daftar isi di sini gimana?</span></span></span></div></div>
+              <div class="feature-reply-slot"><div class="feature-message feature-answer"><span class="feature-ink"><span class="feature-text"><span class="feature-measure" aria-hidden="true">aku tunjukin langkahnya. kamu ikutin, ya.</span><span data-feature-answer aria-hidden="true">aku tunjukin langkahnya. kamu ikutin, ya.</span></span></span></div><div class="feature-typing" aria-hidden="true"><i></i><i></i><i></i></div></div>
+              <p class="feature-transcript sr-only">Kamu: bito, cara bikin daftar isi di sini gimana? Bito: aku tunjukin langkahnya. kamu ikutin, ya.</p>
             </div>
-            <h2 id="feature-reminder-title">Hal kecil, aku ingetin.</h2>
-            <p class="feature-description">Titip pengingat, lalu lanjutkan harimu. Bito mengingatkan saat aplikasi berjalan.</p>
+            <h2 id="feature-show-screen-title">Bito tunjukin. Kamu yang jalanin.</h2>
+            <p class="feature-description">Ikuti petunjuk dan sorotan langsung di layar. Bito membantu menunjukkan langkahnya, kamu tetap yang memegang kendali.</p>
           </div>
-          <figure class="feature-demo" aria-label="Placeholder video demo Pengingat">
-            <div class="feature-window"><div class="feature-window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Pengingat</span><span class="feature-window-mark" aria-hidden="true">↗</span></div><div class="feature-window-body"><svg class="feature-play" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="23"/><path d="m20 16 12 8-12 8Z"/></svg><span>Video demo segera hadir</span></div></div>
-            <figcaption>pengingat.demo</figcaption>
+          <figure class="feature-demo" aria-label="Demo Show on Screen">
+            <div class="feature-window"><div class="feature-window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Show on Screen</span><span class="feature-window-spacer" aria-hidden="true"></span></div><div class="feature-window-body"><video class="feature-video" disablepictureinpicture disableremoteplayback muted loop playsinline preload="none" poster="assets/demos/show-on-screen.jpg" aria-label="Panduan membuat daftar isi di Google Docs" aria-describedby="demo-show-screen-caption"><source src="assets/demos/show-on-screen.mp4" type="video/mp4" /><a href="assets/demos/show-on-screen.mp4">Tonton demo Show on Screen</a></video>
+              <button type="button" class="feature-video-toggle" aria-label="Putar demo Show on Screen" data-demo-title="Show on Screen"></button>
+              <div class="feature-progress">
+                <div class="feature-progress-track" aria-hidden="true"><div class="feature-progress-fill"></div></div>
+                <input class="feature-progress-input" type="range" min="0" max="1000" value="0" aria-label="Posisi video Show on Screen" disabled />
+              </div>
+            </div></div>
+            <figcaption id="demo-show-screen-caption">Panduan membuat daftar isi di Google Docs</figcaption>
           </figure>
         </div>
       </article>
-      <article class="feature-story" data-feature="file" aria-labelledby="feature-file-title">
+      <article class="feature-story" data-entry="section" id="rencana" data-feature="project" aria-labelledby="feature-project-title">
         <div class="feature-surface">
           <div class="feature-copy">
-            <div class="feature-dialogue" aria-label="Contoh percakapan: File">
-              <div class="feature-prompt-slot"><div class="feature-message feature-prompt"><span class="feature-ink"><span class="feature-text"><span class="feature-measure" aria-hidden="true">bito, catatan ini jadiin file markdown, dong</span><span data-feature-prompt aria-hidden="true">bito, catatan ini jadiin file markdown, dong</span></span></span></div></div>
-              <div class="feature-reply-slot"><div class="feature-message feature-answer"><span class="feature-ink"><span class="feature-text"><span class="feature-measure" aria-hidden="true">boleh. aku siapin filenya, ya.</span><span data-feature-answer aria-hidden="true">boleh. aku siapin filenya, ya.</span></span></span></div><div class="feature-typing" aria-hidden="true"><i></i><i></i><i></i></div></div>
-              <p class="feature-transcript sr-only">Kamu: bito, catatan ini jadiin file markdown, dong. Bito: boleh. aku siapin filenya, ya.</p>
+            <div class="feature-dialogue" aria-label="Contoh percakapan: Rencana &amp; Progres">
+              <div class="feature-prompt-slot"><div class="feature-message feature-prompt"><span class="feature-ink"><span class="feature-text"><span class="feature-measure" aria-hidden="true">laporan mesin buat Jumat. mulai dari mana, ya?</span><span data-feature-prompt aria-hidden="true">laporan mesin buat Jumat. mulai dari mana, ya?</span></span></span></div></div>
+              <div class="feature-reply-slot"><div class="feature-message feature-answer"><span class="feature-ink"><span class="feature-text"><span class="feature-measure" aria-hidden="true">kita susun jadi langkah kecil. kamu cek dulu rencananya.</span><span data-feature-answer aria-hidden="true">kita susun jadi langkah kecil. kamu cek dulu rencananya.</span></span></span></div><div class="feature-typing" aria-hidden="true"><i></i><i></i><i></i></div></div>
+              <p class="feature-transcript sr-only">Kamu: laporan mesin buat Jumat. mulai dari mana, ya? Bito: kita susun jadi langkah kecil. kamu cek dulu rencananya.</p>
             </div>
-            <h2 id="feature-file-title">Dari obrolan, jadi file.</h2>
-            <p class="feature-description">Bikin catatan jadi TXT, Markdown, atau CSV. Pilih tempat simpannya, beres.</p>
+            <h2 id="feature-project-title">Tugas besar, jadi langkah yang jelas.</h2>
+            <p class="feature-description">Susun rencana dari tugas dan bahanmu, tinjau langkahnya, lalu pantau tenggat dan progres dalam satu tempat.</p>
           </div>
-          <figure class="feature-demo" aria-label="Placeholder video demo File">
-            <div class="feature-window"><div class="feature-window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>File</span><span class="feature-window-mark" aria-hidden="true">↗</span></div><div class="feature-window-body"><svg class="feature-play" viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="23"/><path d="m20 16 12 8-12 8Z"/></svg><span>Video demo segera hadir</span></div></div>
-            <figcaption>catatan.demo</figcaption>
+          <figure class="feature-demo" aria-label="Demo Rencana &amp; Progres">
+            <div class="feature-window"><div class="feature-window-bar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Rencana &amp; Progres</span><span class="feature-window-spacer" aria-hidden="true"></span></div><div class="feature-window-body"><video class="feature-video" disablepictureinpicture disableremoteplayback muted loop playsinline preload="none" poster="assets/demos/project-management.jpg" aria-label="Menyusun langkah tugas dan melihat progres bersama Bito" aria-describedby="demo-project-caption"><source src="assets/demos/project-management.mp4" type="video/mp4" /><a href="assets/demos/project-management.mp4">Tonton demo Rencana &amp; Progres</a></video>
+              <button type="button" class="feature-video-toggle" aria-label="Putar demo Rencana &amp; Progres" data-demo-title="Rencana &amp; Progres"></button>
+              <div class="feature-progress">
+                <div class="feature-progress-track" aria-hidden="true"><div class="feature-progress-fill"></div></div>
+                <input class="feature-progress-input" type="range" min="0" max="1000" value="0" aria-label="Posisi video Rencana &amp; Progres" disabled />
+              </div>
+            </div></div>
+            <figcaption id="demo-project-caption">Menyusun langkah tugas dan melihat progres bersama Bito</figcaption>
           </figure>
         </div>
       </article>
     </section>
 
-    <section class="quiet section-pad" id="tentang" aria-labelledby="quiet-title"><span class="eyebrow">DEKAT, SECUKUPNYA.</span><h2 id="quiet-title">Ada saat kamu butuh.<br /><span>Sisanya, kasih ruang.</span></h2><div class="quiet-bottom"><p>Seret ke tempat yang nyaman. Klik saat mau ngobrol.<br />Lagi butuh tenang? Aktifkan Jangan Ganggu.</p><p>Profil dan riwayat ada di perangkatmu. Saat ngobrol,<br />konteks dikirim ke layanan AI. Kamu tetap bisa<br />mengelola memori dan menghapus percakapan.</p></div></section>
+    <section class="about section-pad" data-entry="section" id="tentang" aria-labelledby="quiet-title">
+      <div class="about-panel">
+        <div class="about-copy">
+          <h2 id="quiet-title">Teman kecil.<br />Hadir secukupnya.</h2>
+          <p>Buat cerita random, pengingat kecil, atau sekadar ditemenin. Bito ada di desktopmu, siap diajak ngobrol. Lagi butuh fokus? Bito juga tahu kapan harus tenang.</p>
+        </div>
+        <div class="about-scene">
+          <button class="about-bito" id="about-bito" aria-label="Sapa Bito di bagian About">
+            <span class="about-bito-art" id="about-bito-art"><img src="assets/bito.png" width="1024" height="1024" alt="" loading="lazy" draggable="false" /><canvas id="about-bito-canvas" aria-hidden="true"></canvas><canvas id="about-bito-runtime" aria-hidden="true"></canvas></span>
+          </button>
+        </div>
+      </div>
+    </section>
 
-    <section class="download" id="download" aria-labelledby="download-title"><div class="download-art" aria-hidden="true"></div><div class="download-card"><span class="eyebrow">KITA LANJUT DI DESKTOP?</span><img src="assets/bito.png" class="download-mascot" alt="" width="1024" height="1024" loading="lazy" /><h2 id="download-title">Ada tempat<br />buat <span class="blue-text">Bito?</span></h2><p>Teman kecilmu, satu download lagi.</p><div class="download-buttons"><a class="button blue-button" id="primary-download" href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-macOS-arm64.dmg"><span id="primary-download-label">Mac · Apple Silicon</span><span class="arrow" aria-hidden="true">↓</span></a><button id="other-downloads" aria-expanded="false" aria-controls="download-options">Pilih perangkat lain <span aria-hidden="true">⌄</span></button></div><div class="download-options" id="download-options" hidden><a href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-macOS-arm64.dmg">Mac · Apple Silicon <span>↓</span></a><a href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-macOS-x64.dmg">Mac · Intel <span>↓</span></a><a href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-Windows-x64-Setup.exe">Windows · 64-bit <span>↓</span></a></div><span class="download-note">v0.5.1 · Akses AI saat ini khusus akun demo yang diizinkan.</span></div></section>
+    <section class="download" data-entry="section" id="download" aria-labelledby="download-title">
+      <div class="download-art" aria-hidden="true"></div>
+      <div class="download-card">
+        <div class="download-copy">
+          <h2 id="download-title">Ada tempat<br />buat Bito?</h2>
+          <p>Teman kecilmu, satu download lagi.<br />Siap nemenin di Mac atau Windows.</p>
+        </div>
+        <div class="download-actions">
+          <div class="download-buttons">
+            <a class="download-row" id="primary-download" href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.6.3/Bito-0.6.3-macOS-arm64.dmg">
+              <span class="download-row-icon" id="primary-download-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.7 12.7c0-2 1.6-3 1.7-3.1-1-1.5-2.6-1.7-3.2-1.7-1.4-.2-2.7.8-3.4.8s-1.8-.8-3-.8c-1.6 0-3 .9-3.8 2.2-1.6 2.8-.4 6.9 1.2 9.1.8 1.1 1.6 2.2 2.8 2.1 1.1 0 1.5-.7 2.9-.7s1.8.7 3 .7 2-1.1 2.7-2.1c.9-1.3 1.3-2.5 1.3-2.6-.1 0-2.2-.9-2.2-3.9ZM14.5 6.3c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.2 1.8-1.1 2.9 1.1.1 2.2-.5 2.9-1.3Z"/></svg></span>
+              <span class="download-row-copy"><strong id="primary-download-label">macOS</strong><span id="primary-download-detail">Apple Silicon</span></span><svg class="download-row-end" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg>
+            </a>
+            <button class="download-row" id="other-downloads" aria-haspopup="dialog" aria-controls="download-options" aria-expanded="false">
+              <span class="download-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="6" height="6" rx="1.4"/><rect x="15" y="3" width="6" height="6" rx="1.4"/><rect x="3" y="15" width="6" height="6" rx="1.4"/><rect x="15" y="15" width="6" height="6" rx="1.4"/></svg></span>
+              <span class="download-row-copy"><strong>Perangkat lain</strong><span>Semua pilihan download</span></span><svg class="download-row-end" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+            </button>
+          </div>
+          <span class="download-note">v0.6.3 · Akses AI khusus akun demo yang diizinkan.</span>
 
-    <section class="faq section-pad" aria-label="Pertanyaan tentang Bito"><span class="eyebrow">SEBELUM KETEMU</span><div class="faq-list"><details><summary>Siapa saja bisa pakai Bito?<span aria-hidden="true">+</span></summary><p>Installer dan source code bisa diunduh. Layanan AI saat ini tersedia untuk akun Google yang diizinkan pemilik demo. Pengguna demo tidak perlu memasukkan API key sendiri.</p></details><details><summary>Apa yang sudah bisa dibantu?<span aria-hidden="true">+</span></summary><p>Ngobrol, timer, pengingat, checklist, memori yang kamu minta, dan membuat file TXT, Markdown, CSV, atau satu folder. Pengingat bekerja saat aplikasi berjalan. Kalender, pencarian web, konversi PDF/Office, dan voice belum tersedia.</p></details><details><summary>Bagaimana cara memasangnya?<span aria-hidden="true">+</span></summary><p>Pilih installer sesuai perangkatmu. Paket demo belum memiliki sertifikat penerbit atau notarization Apple, jadi sistem mungkin menampilkan peringatan. <a href="https://github.com/feboyfierlyan/bito-desktop/blob/main/docs/INSTALL.md" target="_blank" rel="noopener noreferrer">Buka panduan instalasi.</a></p></details></div></section>
+  <noscript><p class="download-fallback"><a href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.6.3/Bito-0.6.3-macOS-x64.dmg">Mac Intel</a> · <a href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.6.3/Bito-0.6.3-Windows-x64-Setup.exe">Windows 64-bit</a></p></noscript>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq section-pad" data-entry="section" id="faq" aria-labelledby="faq-title">
+      <div class="faq-intro"><h2 id="faq-title">FAQs<span>.</span></h2><p>Yang mungkin masih <br />bikin kamu penasaran.</p></div>
+      <div class="faq-list">
+        <details open><summary>Bito bisa bantu apa aja?<span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></summary><p>Bito membantu menjelaskan bagian layar yang kamu tanyakan, menunjukkan langkah lewat petunjuk dan sorotan, serta menyusun rencana tugas yang bisa kamu tinjau. Kelola tugas, jadwal, dan progres dalam satu workspace. Kamu juga bisa ngobrol, membuat checklist, dan memasang timer atau pengingat.</p></details>
+        <details><summary>Siapa saja bisa pakai Bito?<span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></summary><p>Installer dan source code bisa kamu unduh. Untuk ngobrol dengan AI, versi demo saat ini memakai akun Google yang sudah diizinkan pemilik demo. Kamu tidak perlu memasukkan API key sendiri.</p></details>
+        <details><summary>Bito tersedia di perangkat apa?<span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></summary><p>Bito tersedia untuk Windows 64-bit, Mac dengan Apple Silicon, dan Mac Intel. Pilih installer yang cocok lewat <a href="#download">bagian download</a>, lalu ajak Bito ke desktopmu.</p></details>
+        <details><summary>Pengingatnya jalan kapan?<span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></summary><p>Bito mengingatkan saat aplikasinya berjalan. Jadi, biarkan Bito tetap terbuka kalau kamu sedang menunggu timer atau pengingat.</p></details>
+        <details><summary>Gimana dengan data dan obrolanku?<span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></summary><p>Profil dan riwayat tersimpan di perangkatmu. Saat kamu ngobrol, konteks percakapan dikirim ke layanan AI. Kamu bisa mengelola memori Bito dan menghapus percakapan.</p></details>
+        <details><summary>Bagaimana cara memasangnya?<span class="faq-toggle" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></summary><p>Unduh installer sesuai perangkatmu, lalu ikuti <a href="https://github.com/feboyfierlyan/bito-desktop/blob/main/docs/INSTALL.md" target="_blank" rel="noopener noreferrer">panduan instalasi</a>. Paket demo belum memiliki sertifikat penerbit atau notarization Apple, jadi sistem mungkin menampilkan peringatan.</p></details>
+      </div>
+    </section>
   </main>
-  <footer class="footer section-pad"><a class="logo" href="#main">bito<span class="logo-period">.</span></a><p>Teman kecil untuk menemani harimu.<span>Proyek kuliah. Terus tumbuh.</span></p><div><a href="https://github.com/feboyfierlyan/bito-desktop" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="credits.html">Artwork credits</a><button id="motion-toggle" aria-pressed="false">Kurangi gerakan</button><span>© 2026 Bito Project</span></div></footer>
+  <footer class="footer section-pad" data-entry="section"><a class="logo" href="#main">bito<span class="logo-period">.</span></a><div><a href="https://github.com/feboyfierlyan/bito-desktop" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="credits.html">Artwork credits</a><button id="motion-toggle" aria-pressed="false">Kurangi gerakan</button><span>© 2026 Bito Project</span></div></footer>
+  <dialog class="download-dialog" id="download-options" aria-labelledby="download-dialog-title">
+    <div class="download-dialog-header"><h2 id="download-dialog-title">Pilih perangkatmu</h2><button id="close-downloads" aria-label="Tutup pilihan download" autofocus><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+    <div class="download-dialog-list"><a class="download-row" href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.6.3/Bito-0.6.3-Windows-x64-Setup.exe"><span class="download-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5 10.5 3.3v8H2zm10-1.4L22 1.7v9.6H12zM2 12.8h8.5v8L2 19.6zm10 0h10v9.5L12 21z"/></svg></span><span class="download-row-copy"><strong>Windows</strong><span>64-bit · Installer .exe</span></span><svg class="download-row-end" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg></a>
+<a class="download-row" href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.6.3/Bito-0.6.3-macOS-arm64.dmg"><span class="download-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.7 12.7c0-2 1.6-3 1.7-3.1-1-1.5-2.6-1.7-3.2-1.7-1.4-.2-2.7.8-3.4.8s-1.8-.8-3-.8c-1.6 0-3 .9-3.8 2.2-1.6 2.8-.4 6.9 1.2 9.1.8 1.1 1.6 2.2 2.8 2.1 1.1 0 1.5-.7 2.9-.7s1.8.7 3 .7 2-1.1 2.7-2.1c.9-1.3 1.3-2.5 1.3-2.6-.1 0-2.2-.9-2.2-3.9ZM14.5 6.3c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.2 1.8-1.1 2.9 1.1.1 2.2-.5 2.9-1.3Z"/></svg></span><span class="download-row-copy"><strong>macOS</strong><span>Apple Silicon · M1 atau lebih baru</span></span><svg class="download-row-end" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg></a>
+<a class="download-row" href="https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.6.3/Bito-0.6.3-macOS-x64.dmg"><span class="download-row-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.7 12.7c0-2 1.6-3 1.7-3.1-1-1.5-2.6-1.7-3.2-1.7-1.4-.2-2.7.8-3.4.8s-1.8-.8-3-.8c-1.6 0-3 .9-3.8 2.2-1.6 2.8-.4 6.9 1.2 9.1.8 1.1 1.6 2.2 2.8 2.1 1.1 0 1.5-.7 2.9-.7s1.8.7 3 .7 2-1.1 2.7-2.1c.9-1.3 1.3-2.5 1.3-2.6-.1 0-2.2-.9-2.2-3.9ZM14.5 6.3c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.8 1.4-.6.7-1.2 1.8-1.1 2.9 1.1.1 2.2-.5 2.9-1.3Z"/></svg></span><span class="download-row-copy"><strong>macOS</strong><span>Intel · Installer .dmg</span></span><svg class="download-row-end" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg></a></div>
+    <p class="download-dialog-note">Bito v0.6.3 · macOS &amp; Windows</p>
+  </dialog>
+
   <noscript><p class="noscript-note">Animasi dan demo interaktif membutuhkan JavaScript. Semua informasi dan pilihan download tetap tersedia.</p></noscript>
+  <svg class="peek-glass-defs" width="0" height="0" aria-hidden="true" focusable="false"><defs><filter id="peek-refraction" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB"><feImage href="assets/peek-glass-displacement.png" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="lens"/><feDisplacementMap in="SourceGraphic" in2="lens" scale="12" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg>
 </body>
 </html>

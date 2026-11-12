@@ -30,15 +30,15 @@ assert.equal(chatPlacement({x:800,y:200,w:200,h:200},{w:1100,h:700},330,300,fals
 assert.equal(chatPlacement({x:50,y:200,w:200,h:200},{w:1100,h:700},330,300,false).side,'right');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Set(ids).size,ids.length,'Duplicate element IDs');
-assert.equal((html.match(/<canvas /g)||[]).length,2,'One presentation canvas and one hidden runtime canvas must persist through the scene');
-for(const ref of [...html.matchAll(/(?:src|href)="([^"#]+)"/g)].map(m=>m[1]))if(!/^(https?:|data:|mailto:)/.test(ref))assert(fs.existsSync(path.join(root,ref)),`Missing asset ${ref}`);
+assert.equal((html.match(/<canvas /g)||[]).length,4,'Hero and About each use a presentation canvas with an isolated hidden runtime canvas');
+for(const ref of [...html.matchAll(/(?:src|href)="([^"#]+)"/g)].map(m=>m[1]))if(!/^(https?:|data:|mailto:)/.test(ref))assert(fs.existsSync(path.join(root,ref.split('?')[0])),`Missing asset ${ref}`);
 for(const ref of [...html.matchAll(/href="#([^"]+)"/g)].map(m=>m[1]))assert(ids.includes(ref),`Missing anchor ${ref}`);
-const css=['style.css','desktop-paper.css','feature-stories.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');
-for(const [,ref]of css.matchAll(/url\(['"]?([^'"\)]+)['"]?\)/g))assert(fs.existsSync(path.join(root,ref)),`Missing CSS asset ${ref}`);
-for(const file of ['site.js','scene-math.js','desktop-stickers.js','rive-presentation.js','feature-stories.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
+const css=['style.css','desktop-paper.css','feature-stories.css','hero.css','download.css','faq.css','about.css','local-desktop.css','page-entry.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');
+for(const [,ref]of css.matchAll(/url\(['"]?([^'"\)]+)['"]?\)/g))assert(ref.startsWith('#') ? ids.includes(ref.slice(1)) : fs.existsSync(path.join(root,ref)),`Missing CSS asset ${ref}`);
+for(const file of ['site.js','scene-math.js','desktop-stickers.js','rive-presentation.js','feature-stories.js','peek-motion.js','peek-glass.js','page-entry.js','about.js','local-desktop.js'])new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
 assert(!/fetch\(|XMLHttpRequest|api[_-]?key/i.test(fs.readFileSync(path.join(root,'site.js'),'utf8')),'Demo must remain local');
 assert(css.includes('radial-gradient(circle, #d8dce2 1px'), 'Dotted white canvas missing');
-for(const id of ['hero-desk','hello-sticker','tentang'])assert(ids.includes(id));
+for(const id of ['hero-desk','mascot','tentang'])assert(ids.includes(id));
 const js=fs.readFileSync(path.join(root,'site.js'),'utf8');
 assert.equal((js.match(/new window\.rive\.Rive\(/g)||[]).length,1,'Keep exactly one Rive instance');
 assert(js.includes("canvas:$('#bito-runtime')"),'Rive must render only to the hidden buffer');
@@ -51,7 +51,11 @@ for(const [w,h]of [[320,800],[375,812],[430,932],[768,760],[1024,768],[1440,900]
 }
 assert(html.includes('get bito for mac')&&html.includes('get bito for windows'));
 assert.equal(JSON.parse(fs.readFileSync(path.join(__dirname,'../.openai/hosting.json'),'utf8')).project_id,'appgprj_6ade497ddd44819195b35aae3ee1d06a','Existing Site identity must be retained');
-console.log(`PASS: ${tests} corner/viewport placement cases, chat side switching, unique IDs, one persistent Rive instance and guarded presentation, local assets, section anchors, JS syntax, browser-local demo`);
+const about=fs.readFileSync(path.join(root,'about.js'),'utf8');
+assert.equal((about.match(/new window\.rive\.Rive\(/g)||[]).length,1,'About has one lazy Rive instance');
+assert(!html.includes('about-greeting'),'About must not show chat bubbles');
+assert(about.includes('window.BitoPresentation.createPresenter'),'About uses validated transparent frames');
+console.log(`PASS: ${tests} corner/viewport placement cases, chat side switching, unique IDs, isolated hero/About Rive instances and guarded presentation, local assets, section anchors, JS syntax, browser-local demo`);
 for(const [w,h]of [[320,800],[375,812],[768,760],[1440,900],[1920,1080]]){
   const frame={left:20,top:-120,right:w+20,bottom:h-120};
   for(const size of [30,64,190])for(const x of [-400,0,450])for(const y of [-300,0,500]){
@@ -72,7 +76,8 @@ for(const name of ['word.svg','excel.svg','notes.svg','compact-disc.png','flower
   else if(name.endsWith('.png'))assert.equal(file.subarray(1,4).toString(),'PNG');
   else assert.equal(file.subarray(0,3).toString(),'GIF');
 }
-assert((html.match(/data-sticker\b/g)||[]).length>=10);
+for(const name of ['jurnal-rujukan.pdf', 'data-riset.xlsx', 'revisi-bab-3.docx', 'Skripsi']) assert(html.includes(name));
+assert(!html.includes('assets/memes/') && !html.includes('meme-folder'));
 for(const tag of html.match(/<(?:a|button)\b[^>]*class="(?:floating-file [^"]+|scene-peek)"[^>]*>/g)||[]){assert(!tag.includes('data-sticker'),'Windows must not be draggable');assert(tag.includes('draggable="false"'),'Disable native window drag');}
 console.log('PASS: sticker bounds across 135 viewport/position cases; all requested icons, GIF and reduced-motion poster bundled');
 assert(!/id="(?:laptop-device|desktop-shell|play-scene)"/.test(html),'Laptop scroll scene must be removed');

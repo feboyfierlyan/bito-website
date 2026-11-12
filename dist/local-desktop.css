@@ -1,0 +1,116 @@
+/* Two small workspace examples frame the character. Files sit outside the title and download buttons. */
+.hero-copy { pointer-events: none; }
+.hero-copy a, .hero-copy button { pointer-events: auto; }
+.hero-bottom p { max-width: min(560px, 55vw); text-wrap: balance; }
+.hero-desk .student-window { width: clamp(148px, 14vw, 200px); top: 28%; }
+.hero-desk .student-revision-file { top: 30%; --window-origin: 100% 0%; }
+.student-window .mini-chrome { gap: 5px; color: #5f6c77; }
+.student-reminder, .student-revision { min-height: 122px; }
+.student-reminder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: #e9f1fc;
+  color: #31577e;
+  font-size: 11px;
+  padding: 14px 9px;
+}
+.student-clock {
+  display: grid;
+  place-items: center;
+  position: relative;
+  width: 23px;
+  height: 23px;
+  border: 1.5px solid #537eae;
+  border-radius: 50%;
+  color: #537eae;
+  margin-bottom: 3px;
+}
+.student-clock::before, .student-clock > span {
+  position: absolute;
+  left: calc(50% - .75px);
+  bottom: 50%;
+  width: 1.5px;
+  height: 7px;
+  background: currentColor;
+  border-radius: 2px;
+  transform-origin: center bottom;
+}
+.student-clock::before { content: ''; height: 5px; rotate: 110deg; }
+.student-reminder strong, .student-revision strong { font-size: 13px; font-weight: 600; line-height: 1.25; }
+.student-revision {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 12px;
+  background: #f3f7ef;
+  color: #3b5140;
+  text-align: left;
+}
+.student-revision > span { display: flex; align-items: center; gap: 6px; font-size: 10px; line-height: 1.25; }
+.revision-check {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #a2b29c;
+  border-radius: 4px;
+  color: #316444;
+  font: 600 9px/1 sans-serif;
+}
+.revision-check.checked { background: #dcebd6; border-color: #8fae88; }
+.revision-check.next > b { opacity: 0; }
+.stage[data-student-motion] .student-clock > span { animation: bimbingan-clock 12s linear infinite; }
+.stage[data-student-motion] .revision-check.next > b { animation: revisi-check 8s ease-in-out infinite; }
+@keyframes bimbingan-clock { to { rotate: 360deg; } }
+@keyframes revisi-check {
+  0%, 24%, 100% { opacity: 0; transform: scale(.6); }
+  33%, 88% { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage[data-student-motion] :is(.student-clock > span, .revision-check.next > b) { animation: none; }
+}
+.motion-paused .stage[data-student-motion] :is(.student-clock > span, .revision-check.next > b) { animation: none; }
+.stage:has(.student-window:is(:hover, :focus-visible)) .hero-desk { --sticker-visibility: 1; }
+.stage:has(.student-window:is(:hover, :focus-visible)) .mascot-art { opacity: 1; }
+.stage:has(.student-window:is(:hover, :focus-visible)) .hero-speech { filter: none; }
+.hero-desk { z-index: 9; }
+.hero-desk :is(.pdf-sticker, .excel-sticker, .word-sticker, .folder-sticker) { display: block; }
+.hero-desk .pdf-sticker { left: 29%; right: auto; top: 13%; width: 35px; rotate: -7deg; }
+.hero-desk .excel-sticker { right: 30%; top: 14%; width: 42px; rotate: 6deg; }
+.hero-desk .word-sticker { left: 13%; top: 61%; width: 43px; rotate: -5deg; }
+.hero-desk .folder-sticker { left: auto; right: 13%; top: 61%; width: 48px; rotate: 4deg; }
+.hero-desk .folder-sticker svg { width: 48px; height: 39px; }
+.hero-desk .sticker-filename, .hero-desk .folder-sticker .sticker-art > span {
+  color: #667178;
+  font-size: 9px;
+  margin: 7px -28px 0;
+  line-height: 1.25;
+}
+@media (min-width: 761px) and (max-width: 950px) {
+  .hero-desk .student-window { width: 124px; }
+  .student-revision { padding-inline: 8px; }
+  .student-revision > span { font-size: 9px; }
+  .student-reminder strong, .student-revision strong { font-size: 11px; }
+}
+@media (max-width: 760px) {
+  .hero-bottom p { max-width: min(290px, 82vw); }
+  .hero-desk .student-window { width: min(36vw, 154px); top: 112px; }
+  .hero-desk .student-window .mini-chrome { height: 22px; padding-inline: 6px; }
+  .student-reminder, .student-revision { min-height: 103px; }
+  .student-reminder strong, .student-revision strong { font-size: 11px; }
+  .student-revision { padding-inline: 7px; }
+  .student-revision > span { gap: 4px; font-size: 8px; }
+  .student-clock { scale: .85; margin-bottom: 0; }
+  .hero-desk .pdf-sticker { top: 249px; left: 24%; width: 29px; }
+  .hero-desk .excel-sticker { top: 249px; right: 24%; width: 34px; }
+  .hero-desk .word-sticker { top: 558px; left: 22%; width: 33px; }
+  .hero-desk .folder-sticker { top: 558px; right: 22%; width: 39px; }
+  .hero-desk .folder-sticker svg { width: 39px; height: 32px; }
+  .hero-desk .sticker-filename, .hero-desk .folder-sticker .sticker-art > span { font-size: 8px; }
+}

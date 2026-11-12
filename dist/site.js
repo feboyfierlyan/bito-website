@@ -2,18 +2,20 @@
 (() => {
   'use strict';
   const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-  const gsap=window.gsap, ScrollTrigger=window.ScrollTrigger;
+  const gsap=window.gsap;
   const stage=$('#stage'), sway=$('#actor-sway'), mascot=$('#mascot');
   const systemMotion=matchMedia('(prefers-reduced-motion: reduce)');
   let manualMotion=false;
   try{manualMotion=localStorage.getItem('bito-reduced-motion')==='true';}catch{}
-  let quiet=manualMotion||systemMotion.matches, context;
-  let disposed=false, introPlayed=false;
+  let quiet=manualMotion||systemMotion.matches;
+  let disposed=false, greetingTimer=0;
   let rive, rig, presenter, riveLoaded=false, dragging=false, talking=false, stageVisible=true;
   let gaze={active:false,x:.5,y:.5}, lastPointerX=0, lastPointerAt=0, waveAt=0;
   const motionButton=$('#motion-toggle');
+  const pageEntry=window.BitoEntry?.mount(window);
+  const peekMotion=window.BitoPeek?.create($('.scene-peek'));
   function boolean(name,value){try{const p=rive?.viewModelInstance?.boolean(name);if(p)p.value=value;}catch{}}
-  function wave(){if(quiet||performance.now()-waveAt<900)return;waveAt=performance.now();try{rive?.viewModelInstance?.trigger('wave')?.trigger();}catch{}if(gsap)gsap.fromTo(sway,{y:0},{y:-7,duration:.19,repeat:1,yoyo:true,ease:'power2.out',overwrite:'auto'});}
+  function wave(){const greeting=$('#hero-speech');greeting.classList.add('is-visible');clearTimeout(greetingTimer);greetingTimer=setTimeout(()=>greeting.classList.remove('is-visible'),2400);if(quiet||performance.now()-waveAt<900)return;waveAt=performance.now();try{rive?.viewModelInstance?.trigger('wave')?.trigger();}catch{}if(gsap)gsap.fromTo(sway,{y:0},{y:-7,duration:.19,repeat:1,yoyo:true,ease:'power2.out',overwrite:'auto'});}
   function fitRive(){
     if(!riveLoaded)return;
     const buffer=$('#bito-runtime'),dpr=Math.min(devicePixelRatio||1,2);
@@ -41,36 +43,42 @@
   document.addEventListener('pointermove',event=>{const rect=$('#bito-canvas').getBoundingClientRect();gaze={active:true,x:(event.clientX-rect.left)/rect.width,y:(event.clientY-rect.top)/rect.height};},{passive:true});
   const resetGaze=()=>{gaze.active=false;};document.documentElement.addEventListener('pointerleave',resetGaze);window.addEventListener('blur',resetGaze);document.addEventListener('visibilitychange',()=>{resetGaze();syncRive();});
   function configureHero(){
-    context?.revert();
     quiet=manualMotion||systemMotion.matches;
     window.BitoFeatures?.setReducedMotion(quiet);
+    window.BitoFeatureMedia?.setReducedMotion(quiet);
+    peekMotion?.setReducedMotion(quiet);
+    pageEntry?.setReducedMotion(quiet);
     document.documentElement.classList.toggle('motion-paused',quiet);
     motionButton.textContent=quiet?'Gerakan dikurangi':'Kurangi gerakan';
     motionButton.setAttribute('aria-pressed',String(quiet));
     syncRive();
-    if(!gsap||quiet)return;
-    if(ScrollTrigger)gsap.registerPlugin(ScrollTrigger);
-    context=gsap.context(()=>{
-      if(!introPlayed){
-        introPlayed=true;
-        gsap.from('.title-line>span',{yPercent:110,duration:1,ease:'power3.out',delay:.05});
-        gsap.from('.floating-file,.folder-sticker,.internet-sticker,.desktop-icon,.scene-peek',{y:18,opacity:0,duration:.75,ease:'power3.out',stagger:.035,delay:.15});
-        gsap.from('.hero-item',{y:12,opacity:0,duration:.65,ease:'power3.out',delay:.3});
-        gsap.from('#hero-speech',{scale:.7,opacity:0,duration:.6,ease:'back.out(1.1)',transformOrigin:'0 100%',delay:.75});
-      }
-      if(ScrollTrigger)gsap.from('.download-card',{y:40,opacity:0,duration:.9,ease:'power3.out',scrollTrigger:{trigger:'.download',start:'top 80%',once:true}});
-    });
+    pageEntry?.start(quiet);
   }
-  $('#hello-sticker').addEventListener('click',()=>{wave();const label=$('#hero-speech');label.textContent='heii, seneng ketemu kamu :)';if(gsap&&!quiet)gsap.fromTo(label,{scaleX:.9,scaleY:.94},{scaleX:1,scaleY:1,duration:.4,ease:'power3.out',overwrite:true});});
   motionButton.addEventListener('click',()=>{if(systemMotion.matches){motionButton.textContent='Mengikuti pengaturan perangkat';return;}manualMotion=!manualMotion;try{localStorage.setItem('bito-reduced-motion',String(manualMotion));}catch{}configureHero();});
 
   let stageObserver;
   if('IntersectionObserver' in window){stageObserver=new IntersectionObserver(entries=>{stageVisible=entries[0].isIntersecting;syncRive();});stageObserver.observe(stage);}
-  $('#other-downloads').addEventListener('click',()=>{const el=$('#download-options'),b=$('#other-downloads'),open=b.getAttribute('aria-expanded')!=='true';gsap?.killTweensOf(el);b.setAttribute('aria-expanded',String(open));if(open){el.hidden=false;if(gsap&&!quiet)gsap.fromTo(el,{height:0,opacity:0},{height:'auto',opacity:1,duration:.35,ease:'power3.out'});}else if(gsap&&!quiet){gsap.to(el,{height:0,opacity:0,duration:.23,onComplete:()=>{el.hidden=true;gsap.set(el,{clearProps:'height,opacity'});}});}else el.hidden=true;});
+  const downloadDialog=$('#download-options'), downloadTrigger=$('#other-downloads');
+  downloadTrigger.addEventListener('click',()=>{
+    downloadDialog.showModal();
+    downloadTrigger.setAttribute('aria-expanded','true');
+    document.documentElement.classList.add('download-modal-open');
+  });
+  $('#close-downloads').addEventListener('click',()=>downloadDialog.close());
+  downloadDialog.addEventListener('click',event=>{
+    if(event.target!==downloadDialog)return;
+    const r=downloadDialog.getBoundingClientRect();
+    if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)downloadDialog.close();
+  });
+  downloadDialog.addEventListener('close',()=>{
+    document.documentElement.classList.remove('download-modal-open');
+    downloadTrigger.setAttribute('aria-expanded','false');
+    downloadTrigger.focus({preventScroll:true});
+  });
   $$('details summary').forEach(summary=>summary.addEventListener('click',event=>{if(!gsap||quiet)return;event.preventDefault();const d=summary.parentElement,expand=!d.open||d.dataset.closing==='true',start=d.offsetHeight;gsap.killTweensOf(d);if(expand){delete d.dataset.closing;d.style.height='';d.open=true;const end=d.scrollHeight;gsap.fromTo(d,{height:start,overflow:'hidden'},{height:end,duration:.32,ease:'power3.out',onComplete:()=>gsap.set(d,{clearProps:'height,overflow'})});}else{d.dataset.closing='true';gsap.to(d,{height:summary.offsetHeight,overflow:'hidden',duration:.24,ease:'power2.inOut',onComplete:()=>{if(d.dataset.closing==='true'){d.open=false;delete d.dataset.closing;}gsap.set(d,{clearProps:'height,overflow'});}});}}));
-  if(/Windows/i.test(navigator.userAgent)){const a=$('#primary-download');a.href='https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.5.1/Bito-0.5.1-Windows-x64-Setup.exe';$('#primary-download-label').textContent='Download untuk Windows';}
+  if(/Windows/i.test(navigator.userAgent)){const a=$('#primary-download');a.href='https://github.com/feboyfierlyan/bito-desktop/releases/download/v0.6.3/Bito-0.6.3-Windows-x64-Setup.exe';$('#primary-download-label').textContent='Windows';$('#primary-download-detail').textContent='64-bit · Installer .exe';$('#primary-download-icon').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5 10.5 3.3v8H2zm10-1.4L22 1.7v9.6H12zM2 12.8h8.5v8L2 19.6zm10 0h10v9.5L12 21z"/></svg>';}
   let resizeFrame=0;window.addEventListener('resize',()=>{cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{fitRive();});},{passive:true});
-  window.addEventListener('pagehide',event=>{if(event.persisted)return;disposed=true;window.BitoFeatures?.dispose();presenter?.dispose();cancelAnimationFrame(resizeFrame);stageObserver?.disconnect();context?.revert();gsap?.killTweensOf(sway);rig?.restore();rive?.cleanup();});
+  window.addEventListener('pagehide',event=>{if(event.persisted)return;disposed=true;clearTimeout(greetingTimer);window.BitoFeatures?.dispose();peekMotion?.dispose();presenter?.dispose();cancelAnimationFrame(resizeFrame);stageObserver?.disconnect();pageEntry?.dispose();gsap?.killTweensOf(sway);rig?.restore();rive?.cleanup();});
   systemMotion.addEventListener('change',configureHero);
-  configureHero();document.fonts.ready.then(()=>{ScrollTrigger?.refresh();fitRive();}).catch(()=>{});startRive();
+  configureHero();document.fonts.ready.then(()=>{fitRive();}).catch(()=>{});startRive();
 })();

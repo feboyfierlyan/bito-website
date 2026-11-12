@@ -78,9 +78,15 @@ assert.equal(readingRow(bounds,900,1),0);
 assert.equal(readingRow([{top:1500,bottom:2200}],900),-1);
 assert.equal(readingRow([{top:-900,bottom:-200}],900),-1);
 assert.equal(readingRow([{top:-190,bottom:510},{top:510,bottom:1210}],1000,0),0, 'Keep current feature near boundary');
-const rows = [row(100),row(800),row(1500)];let callbacks, killed=false;
+const rows = [row(100),row(800),row(1500)];let nextFrame=0; const frames=new Map(), windowListeners={};
 const listeners = {};
-const scope = {gsap, innerHeight:900, matchMedia:()=>({matches:false}), document:{hidden:false, querySelectorAll:()=>rows.map(r=>r.root), addEventListener:(n,f)=>listeners[n]=f, removeEventListener:n=>delete listeners[n]}, ScrollTrigger:{create(options){callbacks=options;return{kill(){killed=true;}};}}};
+const scope = {gsap, innerHeight:900, matchMedia:()=>({matches:false}),
+  document:{hidden:false, querySelectorAll:()=>rows.map(r=>r.root), addEventListener:(n,f)=>listeners[n]=f, removeEventListener:n=>delete listeners[n]},
+  addEventListener:(n,f)=>windowListeners[n]=f, removeEventListener:n=>delete windowListeners[n],
+  requestAnimationFrame(fn){frames.set(++nextFrame,fn);return nextFrame;}, cancelAnimationFrame(id){frames.delete(id);},
+  scrollTo(){throw new Error('Feature reading must never change scroll position');}
+};
+function flushFrame(){const batch=[...frames.values()];frames.clear();batch.forEach(fn=>fn());}
 const controller = mount(scope);
 const focusMotion = tweens.filter(t=>rows.some(r=>r.surface===t.target)).slice(-3);
 assert.equal(focusMotion[0].values.scale,1.025,'Desktop highlight should grow only slightly above the compact layout');
@@ -88,11 +94,11 @@ assert.equal(focusMotion[1].values.scale,.91,'Neighboring features should remain
 assert.equal(focusMotion[1].values.opacity,.3);
 assert(focusMotion.every(t=>t.values.duration>=.6&&t.values.overwrite),'Scroll reversals should retarget smooth, interruptible motion');
 const active = timelines.at(-1), count=timelines.length;
-callbacks.onUpdate();callbacks.onRefresh();assert.equal(timelines.length,count,'Unchanged active row must not restart during scroll/refresh');
-rows.forEach(r=>r.root.top-=700);callbacks.onUpdate();assert(active.killed,'Switching rows must cancel previous sequence');
+windowListeners.scroll();windowListeners.scroll();windowListeners.resize();assert.equal(frames.size,1,'Scroll work coalesces into one frame');flushFrame();assert.equal(timelines.length,count,'Unchanged active row must not restart');
+rows.forEach(r=>r.root.top-=700);windowListeners.scroll();flushFrame();assert(active.killed,'Switching rows must cancel previous sequence');
 assert.notEqual(timelines.at(-1), active);
 controller.setReducedMotion(true);assert(rows.every(r=>r.surface.opacity===1&&r.surface.scale===1));assert(rows.every(r=>r.answerText.textContent.length>0));
-controller.dispose();assert(killed);assert(!listeners.visibilitychange);
+windowListeners.pageshow();controller.dispose();assert.equal(frames.size,0);assert.equal(Object.keys(windowListeners).length,0);assert(!listeners.visibilitychange);
 // A mobile highlight must not enlarge the layout past its safe side margins.
 scope.innerWidth=390;rows.forEach((r,i)=>r.root.top=100+i*700);
 const mobileController=mount(scope);
@@ -101,11 +107,17 @@ assert.equal(mobileMotion[0].values.scale,1);
 assert.equal(mobileMotion[1].values.scale,.91);
 mobileController.dispose();
 const html=fs.readFileSync(path.join(__dirname,'../dist/index.html'),'utf8');
+assert(!html.includes('src="assets/vendor/ScrollTrigger.min.js"'),'No scroll-restoring plugin should be loaded');
 assert.equal((html.match(/data-feature="/g)||[]).length,3);
 assert(!/class="(?:personality|help) section-pad"/.test(html));
 assert(!/01 — KEPRIBADIAN|02 — HAL KECIL/.test(html));
-assert.equal((html.match(/Video demo segera hadir/g)||[]).length,3);
-assert(!/<video\b/.test(html),'Do not ship fake demos or add video loads before videos exist');
+assert(!html.includes('Video demo segera hadir'));
+assert.equal((html.match(/<video\b/g)||[]).length,3);
+for (const slug of ['ask-on-screen','show-on-screen','project-management']) {
+  for (const ext of ['mp4','jpg']) assert(fs.existsSync(path.join(__dirname, '../dist/assets/demos', slug+'.'+ext)));
+}
+assert.equal((html.match(/preload="none"/g)||[]).length,3);
+
 const css=fs.readFileSync(path.join(__dirname,'../dist/feature-stories.css'),'utf8');
 assert(!css.includes('.feature-reverse .feature-dialogue { align-items: flex-end; }'),'Alternating columns must not mirror message ownership');
 assert(css.includes('.feature-prompt { right: 0;')&&css.includes('.feature-answer { left: 0;'));

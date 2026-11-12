@@ -3,7 +3,7 @@
 (function (scope, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
-  if (scope.document && scope.gsap && scope.ScrollTrigger) {
+  if (scope.document && scope.gsap) {
     scope.BitoFeatures = api.mount(scope);
   }
 })(typeof window === 'undefined' ? globalThis : window, function () {
@@ -129,12 +129,12 @@
   }
 
   function mount(scope) {
-    const {document, gsap, ScrollTrigger} = scope;
+    const {document, gsap} = scope;
     const rows = [...document.querySelectorAll('[data-feature]')];
     const surfaces = rows.map(row => row.querySelector('.feature-surface'));
     const sequences = rows.map(row => conversation(row, gsap));
     let active = -1, reduced = null, disposed = false;
-    gsap.registerPlugin(ScrollTrigger);
+
     const presentation = index => ({
       opacity: reduced || index === active ? 1 : .3,
       // Layout owns the compact base size. Scale changes only the inner
@@ -162,7 +162,16 @@
       if (active >= 0 && !document.hidden) sequences[active].start(reduced);
     }
     setReducedMotion(scope.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    const trigger = ScrollTrigger.create({trigger: '#gaya', start: 'top bottom', end: 'bottom top', onUpdate: sync, onRefresh: sync, onEnter: sync, onEnterBack: sync, onLeave: sync, onLeaveBack: sync});
+    // Reading highlights only need current geometry. Native scroll observation
+    // never resets scroll positions or takes over browser history restoration.
+    let scrollFrame = 0;
+    const scheduleSync = () => {
+      if (disposed || scrollFrame) return;
+      scrollFrame = scope.requestAnimationFrame(() => {scrollFrame = 0; sync();});
+    };
+    scope.addEventListener('scroll', scheduleSync, {passive: true});
+    scope.addEventListener('resize', scheduleSync, {passive: true});
+    scope.addEventListener('pageshow', scheduleSync);
     const visibility = () => {
       if (document.hidden) sequences.forEach(sequence => sequence.pause());
       else {sync(); if (active >= 0) sequences[active].resume();}
@@ -174,11 +183,15 @@
     }) : null;
     rows.forEach(row => resize?.observe(row.querySelector('.feature-dialogue')));
     // Width changes require fresh text measurement; fonts can change it too.
-    document.fonts?.ready.then(() => {if (!disposed) sequences.forEach(sequence => sequence.reflow());});
+    document.fonts?.ready.then(() => {if (!disposed) {sequences.forEach(sequence => sequence.reflow()); scheduleSync();}});
     sync();
     return {setReducedMotion, dispose() {
       disposed = true;
-      trigger.kill(); sequences.forEach(sequence => sequence.stop()); gsap.killTweensOf(surfaces);
+      scope.cancelAnimationFrame(scrollFrame);
+      scope.removeEventListener('scroll', scheduleSync);
+      scope.removeEventListener('resize', scheduleSync);
+      scope.removeEventListener('pageshow', scheduleSync);
+      sequences.forEach(sequence => sequence.stop()); gsap.killTweensOf(surfaces);
       resize?.disconnect();
       document.removeEventListener('visibilitychange', visibility);
     }};

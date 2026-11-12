@@ -72,13 +72,13 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
 .hello-sprout { position: absolute; right: -15px; top: -21px; font-size: 37px; color: #b5cc9b; rotate: 20deg; }
 .chat-file { width: clamp(150px, 15vw, 224px); right: 4%; top: 44%; }
 .mini-chat { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; background: #fff; padding: 17px 16px; text-align: left; }
-.mini-chat>span { padding: 8px 12px; border-radius: 13px; background: #edf0f4; color: #676b73; font-family: 'Bito Sans', Jakarta, sans-serif; font-size: 10px; line-height: 1.2; }
+.mini-chat>span { padding: 8px 12px; border-radius: 13px; background: #edf0f4; color: #676b73; font-family: 'Bito Web', Arial, sans-serif; font-size: 10px; line-height: 1.2; }
 .mini-chat>span:nth-child(odd) { margin-left: auto; align-self: flex-end; background: #2986ff; color: #fff; }
 .desk-sticker { position: absolute; display: grid; place-items: center; width: 52px; height: 54px; border-radius: 15px; }
 .desk-sticker svg { width: 31px; height: 31px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .heart-sticker { left: 6%; top: 51%; background: #f9dfeb; color: #b77694; rotate: -9deg; }
 .smile-sticker { right: 21%; top: 40%; background: #def2df; color: #659975; rotate: 10deg; }
-.desk-doodle { position: absolute; font-size: 18px; letter-spacing: .05em; color: #9299a4; font-family: 'Bito Sans', Jakarta, sans-serif; }
+.desk-doodle { position: absolute; font-size: 18px; letter-spacing: .05em; color: #9299a4; font-family: 'Bito Web', Arial, sans-serif; }
 .doodle-one { left: 25%; top: 40%; rotate: -8deg; }
 .doodle-two { right: 24%; top: 65%; font-size: 10px; rotate: 7deg; color: #9a9fa7; }
 .folder-sticker { position: absolute; left: 17%; top: 64%; width: 44px; rotate: -8deg; transition: transform .3s var(--ease); }
@@ -240,7 +240,7 @@ nav { gap: 30px; font-size: 12px; font-weight: 500; color: #7b7e84; }
 .internet-sticker img, .desktop-icon img { display: block; width: 100%; height: auto; object-fit: contain; }
 .internet-sticker:not(.flower-sticker) img { filter: drop-shadow(0 5px 4px #35446817); }
 .desktop-icon img, .desktop-icon svg { filter: drop-shadow(0 4px 3px #344a6920); }
-.sticker-filename { display: block; color: #8c939e; font-family: 'Bito Sans', Jakarta, sans-serif; font-size: 8px; line-height: 1.3; margin: 7px -16px 0; white-space: nowrap; }
+.sticker-filename { display: block; color: #8c939e; font-family: 'Bito Web', Arial, sans-serif; font-size: 8px; line-height: 1.3; margin: 7px -16px 0; white-space: nowrap; }
 .flower-sticker { left: 29%; top: 21%; width: 64px; rotate: -9deg; }
 .flower-sticker img { mix-blend-mode: multiply; }
 .flower-sticker .sticker-filename { color: #a5a8b0; font-size: 7px; }
