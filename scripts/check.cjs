@@ -31,7 +31,7 @@ assert.equal(chatPlacement({x:50,y:200,w:200,h:200},{w:1100,h:700},330,300,false
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Set(ids).size,ids.length,'Duplicate element IDs');
 assert.equal((html.match(/<canvas /g)||[]).length,4,'Hero and About each use a presentation canvas with an isolated hidden runtime canvas');
-for(const ref of [...html.matchAll(/(?:src|href)="([^"#]+)"/g)].map(m=>m[1]))if(!/^(https?:|data:|mailto:)/.test(ref))assert(fs.existsSync(path.join(root,ref.split('?')[0])),`Missing asset ${ref}`);
+for(const ref of [...html.matchAll(/(?:src|href)="([^"#]+)"/g)].map(m=>m[1]))if(!/^(https?:|data:|mailto:|\/+_vercel\/)/.test(ref))assert(fs.existsSync(path.join(root,ref.split('?')[0])),`Missing asset ${ref}`);
 for(const ref of [...html.matchAll(/href="#([^"]+)"/g)].map(m=>m[1]))assert(ids.includes(ref),`Missing anchor ${ref}`);
 const css=['style.css','desktop-paper.css','feature-stories.css','hero.css','download.css','faq.css','about.css','local-desktop.css','page-entry.css'].map(file=>fs.readFileSync(path.join(root,file),'utf8')).join('\n');
 for(const [,ref]of css.matchAll(/url\(['"]?([^'"\)]+)['"]?\)/g))assert(ref.startsWith('#') ? ids.includes(ref.slice(1)) : fs.existsSync(path.join(root,ref)),`Missing CSS asset ${ref}`);
