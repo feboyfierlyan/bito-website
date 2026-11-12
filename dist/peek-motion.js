@@ -66,7 +66,7 @@
       } else start();
     }
     function move(event) {
-      if (link.classList.contains('is-expanded')) { home(); return; }
+      if (link.classList?.contains('is-expanded')) { home(); return; }
       if (event.pointerType !== 'mouse' || !fine.matches || reduced || document.hidden ||
           link.matches(':focus-visible')) return;
       pointer = { x: event.clientX, y: event.clientY };

@@ -112,7 +112,8 @@ assert.equal((html.match(/data-feature="/g)||[]).length,3);
 assert(!/class="(?:personality|help) section-pad"/.test(html));
 assert(!/01 — KEPRIBADIAN|02 — HAL KECIL/.test(html));
 assert(!html.includes('Video demo segera hadir'));
-assert.equal((html.match(/<video\b/g)||[]).length,3);
+assert.equal((html.match(/class="feature-video"/g)||[]).length,3);
+assert.equal((html.match(/class="peek-video"/g)||[]).length,1);
 for (const slug of ['ask-on-screen','show-on-screen','project-management']) {
   for (const ext of ['mp4','jpg']) assert(fs.existsSync(path.join(__dirname, '../dist/assets/demos', slug+'.'+ext)));
 }

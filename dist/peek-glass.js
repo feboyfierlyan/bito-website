@@ -18,7 +18,7 @@
       copy.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
       copy.querySelectorAll('video, .feature-progress').forEach(node => node.remove());
       if (selector === '.peek-desktop') {
-        copy.style.background = "url('assets/demos/bito-in-action.jpg') center 26% / cover no-repeat";
+        copy.style.background = "url('assets/demos/bito-in-action.jpg') center center / cover no-repeat";
       }
       scene.append(copy);
     }

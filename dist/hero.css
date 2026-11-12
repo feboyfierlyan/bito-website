@@ -34,24 +34,102 @@ nav { font-size: 15px; }
 .hero-desk .folder-sticker { left: 27%; top: 66%; width: 40px; rotate: -4deg; }
 .hero-desk .folder-sticker svg { width: 40px; height: 33px; }
 .hero-desk .notes-sticker { left: auto; right: 27%; top: 66%; width: 38px; rotate: 4deg; }
-.stage { overflow-x: clip; overflow-y: visible; margin-bottom: var(--stage-peek-space, 0px); transition: margin-bottom .56s cubic-bezier(.22, 1, .36, 1); }
-.hero-desk .scene-peek { top: 76%; width: min(64vw, 900px); height: clamp(170px, 21vh, 220px); cursor: pointer; transition: height .56s cubic-bezier(.22, 1, .36, 1), box-shadow .35s, border-color .35s; }
-.hero-desk .scene-peek.is-expanded { height: var(--peek-open-height, calc(min(64vw, 900px) * 9 / 16 + 30px)); z-index: 12; }
+.stage {
+  --peek-w: min(68vw, 940px);
+  --peek-h: calc(var(--peek-w) * 9 / 16 + 30px);
+  overflow-x: clip;
+  overflow-y: visible;
+  margin-bottom: var(--stage-peek-space, calc(var(--peek-h) - 20svh + 56px));
+}
+.stage.is-peek-floating {
+  z-index: 50;
+}
+.hero-desk .scene-peek {
+  top: 74%;
+  width: var(--peek-w);
+  height: var(--peek-h);
+  cursor: pointer;
+  z-index: 8;
+}
+.hero-desk .scene-peek-home {
+  position: absolute;
+  left: 50%;
+  top: 74%;
+  width: var(--peek-w);
+  height: var(--peek-h);
+  transform: translateX(-50%);
+  pointer-events: none;
+  visibility: hidden;
+}
+.hero-desk .scene-peek.is-floating {
+  position: fixed;
+  margin: 0;
+  transform: none;
+  z-index: 120;
+  transition:
+    left .58s cubic-bezier(.22, 1, .36, 1),
+    top .58s cubic-bezier(.22, 1, .36, 1),
+    width .58s cubic-bezier(.22, 1, .36, 1),
+    height .58s cubic-bezier(.22, 1, .36, 1),
+    border-radius .58s cubic-bezier(.22, 1, .36, 1);
+  will-change: left, top, width, height;
+}
+.hero-desk .scene-peek.is-expanded {
+  border-radius: 20px;
+}
+.hero-desk .scene-peek.is-expanded > .sticker-art {
+  border-color: #7c8d9e;
+  box-shadow: 0 32px 90px #0d18264d, 0 8px 24px #0d182629;
+}
+.peek-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: rgb(15 23 34 / 46%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .48s cubic-bezier(.22, 1, .36, 1);
+}
+.peek-backdrop.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: zoom-out;
+}
+.peek-chrome-end {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
 .peek-chrome-tag { font-variant-numeric: tabular-nums; letter-spacing: .02em; color: #8c96a3; }
-.peek-video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 26%; background: #f5f7f9; pointer-events: none; transition: object-position .56s cubic-bezier(.22, 1, .36, 1); }
-.scene-peek.is-expanded .peek-video { object-position: center center; }
-.peek-progress { pointer-events: none; opacity: 0; }
-.scene-peek.is-expanded .peek-progress { pointer-events: auto; }
-.scene-peek.is-expanded:hover .peek-progress,
-.scene-peek.is-expanded:focus-within .peek-progress,
-.scene-peek.is-expanded:not(.is-playing) .peek-progress { opacity: 1; }
+.peek-chrome-action {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  color: #6e7b8b;
+  background: #e5ebf180;
+  transition: background .2s, color .2s;
+}
+.scene-peek:hover .peek-chrome-action { background: #dce5ef; color: #2b3948; }
+.peek-chrome-action svg { width: 11px; height: 11px; }
+.peek-icon-collapse { display: none; }
+.scene-peek.is-expanded .peek-icon-expand { display: none; }
+.scene-peek.is-expanded .peek-icon-collapse { display: block; }
+.peek-video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center center; background: #f5f7f9; pointer-events: none; }
+.peek-progress { pointer-events: auto; opacity: 0; }
+.scene-peek:hover .peek-progress,
+.scene-peek:focus-within .peek-progress { opacity: 1; }
 .hero-desk .peek-bito { width: 220px; height: 220px; top: -35px; }
 @media (min-width: 761px) and (max-width: 1100px) {
+  .stage { --peek-w: 76vw; }
   .hero-desk .feature-file { left: 4%; width: 154px; }
   .hero-desk .chat-file { right: 4%; width: 154px; }
   .hero-desk .flower-sticker, .hero-desk .disc-sticker { width: 40px; }
   .hero-desk .word-sticker, .hero-desk .excel-sticker { width: 36px; }
-  .hero-desk .scene-peek { width: 70vw; }
+  .hero-desk .scene-peek, .hero-desk .scene-peek-home { width: var(--peek-w); height: var(--peek-h); }
 }
 @media (max-width: 760px) {
   .site-header { padding-inline: 22px; }
@@ -64,7 +142,7 @@ nav { font-size: 15px; }
   .hero-downloads { flex-direction: column; width: 225px; gap: 10px; }
   .hero-downloads .button { width: 100%; font-size: 14px; min-height: 48px; padding: 12px 17px; justify-content: center; gap: 8px; }
   .hero-bottom .platform { font-size: 10px; }
-  .stage { min-height: 840px; }
+  .stage { --peek-w: calc(100vw - 36px); --peek-h: calc(var(--peek-w) * 9 / 16 + 26px); min-height: 840px; }
   .hero-desk .feature-file { left: 24px; top: 110px; width: 100px; }
   .hero-desk .chat-file { display: block; right: 24px; top: 110px; width: 100px; }
   .hero-desk .mini-chat { padding: 7px 9px; gap: 4px; }
@@ -75,8 +153,7 @@ nav { font-size: 15px; }
   .hero-desk .excel-sticker { right: 22%; top: 560px; width: 31px; }
   .hero-desk .folder-sticker, .hero-desk .notes-sticker { display: none; }
   .hero-desk .peek-bito { width: 180px; height: 180px; top: -20px; }
-  .hero-desk .scene-peek { top: 620px; width: calc(100% - 40px); height: 170px; }
-  .hero-desk .scene-peek.is-expanded { height: var(--peek-open-height, calc((100vw - 40px) * 9 / 16 + 26px)); }
+  .hero-desk .scene-peek, .hero-desk .scene-peek-home { top: 615px; width: var(--peek-w); height: var(--peek-h); }
 }
 @media (max-width: 380px) {
   .hero-copy h1 { font-size: 10.4vw; }
@@ -110,13 +187,19 @@ nav { font-size: 15px; }
   font-weight: 500;
   border-radius: 99px;
   text-shadow: 0 1px 2px #ffffffd9, 0 0 6px #ffffffb3;
+  opacity: 0;
   transition: opacity .22s ease;
 }
-.scene-peek.is-expanded.is-playing .peek-play {
+.scene-peek:hover:not(.is-expanded) .peek-play,
+.scene-peek:focus-visible:not(.is-expanded) .peek-play,
+.scene-peek:not(.is-playing):not(.is-expanded) .peek-play {
+  opacity: 1;
+}
+.scene-peek.is-expanded .peek-play {
   opacity: 0;
 }
 .scene-peek:hover .peek-play { padding-inline: 22px; }
-.scene-peek .peek-play > svg { fill: currentColor; }
+.scene-peek .peek-play > svg { fill: none; stroke: currentColor; }
 .peek-glass-defs { position: absolute; pointer-events: none; }
 .peek-glass {
   position: absolute; inset: 0; z-index: -1; pointer-events: none;
