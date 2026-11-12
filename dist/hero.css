@@ -35,101 +35,16 @@ nav { font-size: 15px; }
 .hero-desk .folder-sticker svg { width: 40px; height: 33px; }
 .hero-desk .notes-sticker { left: auto; right: 27%; top: 66%; width: 38px; rotate: 4deg; }
 .stage {
-  --peek-w: min(68vw, 940px);
-  --peek-h: calc(var(--peek-w) * 9 / 16 + 30px);
   overflow-x: clip;
   overflow-y: visible;
-  margin-bottom: var(--stage-peek-space, calc(var(--peek-h) - 20svh + 56px));
+  margin-bottom: 0;
 }
-.stage.is-peek-floating {
-  z-index: 50;
-}
-.hero-desk .scene-peek {
-  top: 74%;
-  width: var(--peek-w);
-  height: var(--peek-h);
-  cursor: pointer;
-  z-index: 8;
-}
-.hero-desk .scene-peek-home {
-  position: absolute;
-  left: 50%;
-  top: 74%;
-  width: var(--peek-w);
-  height: var(--peek-h);
-  transform: translateX(-50%);
-  pointer-events: none;
-  visibility: hidden;
-}
-.hero-desk .scene-peek.is-floating {
-  position: fixed;
-  margin: 0;
-  transform: none;
-  z-index: 120;
-  transition:
-    left .58s cubic-bezier(.22, 1, .36, 1),
-    top .58s cubic-bezier(.22, 1, .36, 1),
-    width .58s cubic-bezier(.22, 1, .36, 1),
-    height .58s cubic-bezier(.22, 1, .36, 1),
-    border-radius .58s cubic-bezier(.22, 1, .36, 1);
-  will-change: left, top, width, height;
-}
-.hero-desk .scene-peek.is-expanded {
-  border-radius: 20px;
-}
-.hero-desk .scene-peek.is-expanded > .sticker-art {
-  border-color: #7c8d9e;
-  box-shadow: 0 32px 90px #0d18264d, 0 8px 24px #0d182629;
-}
-.peek-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 110;
-  background: rgb(15 23 34 / 46%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .48s cubic-bezier(.22, 1, .36, 1);
-}
-.peek-backdrop.is-visible {
-  opacity: 1;
-  pointer-events: auto;
-  cursor: zoom-out;
-}
-.peek-chrome-end {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.peek-chrome-tag { font-variant-numeric: tabular-nums; letter-spacing: .02em; color: #8c96a3; }
-.peek-chrome-action {
-  display: inline-grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 5px;
-  color: #6e7b8b;
-  background: #e5ebf180;
-  transition: background .2s, color .2s;
-}
-.scene-peek:hover .peek-chrome-action { background: #dce5ef; color: #2b3948; }
-.peek-chrome-action svg { width: 11px; height: 11px; }
-.peek-icon-collapse { display: none; }
-.scene-peek.is-expanded .peek-icon-expand { display: none; }
-.scene-peek.is-expanded .peek-icon-collapse { display: block; }
-.peek-video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center center; background: #f5f7f9; pointer-events: none; }
-.peek-progress { pointer-events: auto; opacity: 0; }
-.scene-peek:hover .peek-progress,
-.scene-peek:focus-within .peek-progress { opacity: 1; }
 .hero-desk .peek-bito { width: 220px; height: 220px; top: -35px; }
 @media (min-width: 761px) and (max-width: 1100px) {
-  .stage { --peek-w: 76vw; }
   .hero-desk .feature-file { left: 4%; width: 154px; }
   .hero-desk .chat-file { right: 4%; width: 154px; }
   .hero-desk .flower-sticker, .hero-desk .disc-sticker { width: 40px; }
   .hero-desk .word-sticker, .hero-desk .excel-sticker { width: 36px; }
-  .hero-desk .scene-peek, .hero-desk .scene-peek-home { width: var(--peek-w); height: var(--peek-h); }
 }
 @media (max-width: 760px) {
   .site-header { padding-inline: 22px; }
@@ -142,7 +57,7 @@ nav { font-size: 15px; }
   .hero-downloads { flex-direction: column; width: 225px; gap: 10px; }
   .hero-downloads .button { width: 100%; font-size: 14px; min-height: 48px; padding: 12px 17px; justify-content: center; gap: 8px; }
   .hero-bottom .platform { font-size: 10px; }
-  .stage { --peek-w: calc(100vw - 36px); --peek-h: calc(var(--peek-w) * 9 / 16 + 26px); min-height: 840px; }
+  .stage { min-height: 840px; }
   .hero-desk .feature-file { left: 24px; top: 110px; width: 100px; }
   .hero-desk .chat-file { display: block; right: 24px; top: 110px; width: 100px; }
   .hero-desk .mini-chat { padding: 7px 9px; gap: 4px; }
@@ -153,7 +68,6 @@ nav { font-size: 15px; }
   .hero-desk .excel-sticker { right: 22%; top: 560px; width: 31px; }
   .hero-desk .folder-sticker, .hero-desk .notes-sticker { display: none; }
   .hero-desk .peek-bito { width: 180px; height: 180px; top: -20px; }
-  .hero-desk .scene-peek, .hero-desk .scene-peek-home { top: 615px; width: var(--peek-w); height: var(--peek-h); }
 }
 @media (max-width: 380px) {
   .hero-copy h1 { font-size: 10.4vw; }
@@ -162,89 +76,4 @@ nav { font-size: 15px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-heading .hero-speech { transition: none; }
-}
-
-/* The same pill becomes the cursor inside the preview; text never stretches. */
-.scene-peek .peek-play {
-  top: calc(50% + 15px);
-  z-index: 4;
-  pointer-events: none;
-  isolation: isolate;
-  white-space: nowrap;
-  background: none;
-  border-color: transparent;
-  box-shadow: none;
-  transition: none;
-  --peek-sx: 1;
-  --peek-sy: 1;
-  --peek-lift: 0;
-}
-/* Clear glass: a refracted scene, a neutral surface and a continuous capsule rim.
-   No broad blur: the center keeps the underlying artwork and dot grid visible. */
-.scene-peek .peek-play {
-  padding: 14px 22px;
-  color: #26343a;
-  font-weight: 500;
-  border-radius: 99px;
-  text-shadow: 0 1px 2px #ffffffd9, 0 0 6px #ffffffb3;
-  opacity: 0;
-  transition: opacity .22s ease;
-}
-.scene-peek:hover:not(.is-expanded) .peek-play,
-.scene-peek:focus-visible:not(.is-expanded) .peek-play,
-.scene-peek:not(.is-playing):not(.is-expanded) .peek-play {
-  opacity: 1;
-}
-.scene-peek.is-expanded .peek-play {
-  opacity: 0;
-}
-.scene-peek:hover .peek-play { padding-inline: 22px; }
-.scene-peek .peek-play > svg { fill: none; stroke: currentColor; }
-.peek-glass-defs { position: absolute; pointer-events: none; }
-.peek-glass {
-  position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  transform: scale(var(--peek-sx), var(--peek-sy));
-  filter: drop-shadow(0 2px 2px #24323c12)
-    drop-shadow(0 6px 9px #24323c1c);
-}
-.peek-glass-clip {
-  position: absolute; inset: 0;
-  -webkit-mask: url('assets/peek-glass-mask.svg') 0 0 / 100% 100% no-repeat;
-  mask: url('assets/peek-glass-mask.svg') 0 0 / 100% 100% no-repeat;
-  background: #ffffff18;
-}
-.peek-glass-lens { position: absolute; inset: 0; overflow: hidden; filter: url('#peek-refraction'); }
-.peek-glass-scene { display: block; position: absolute; top: 0; left: 0; background: #edf3f7; }
-.peek-glass-clip::after {
-  content: ''; position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse at var(--peek-light-x, 50%) -25%, #ffffffa8, #ffffff00 62%),
-    linear-gradient(180deg, #ffffff18 20%, #ffffff08 54%, #ffffff44 100%);
-  box-shadow: inset 0 2px 3px #ffffff99, inset 0 -2px 3px #ffffff8c;
-}
-.peek-glass::after {
-  content: ''; position: absolute; inset: 0;
-  background: url('assets/peek-glass-rim.svg') 0 0 / 100% 100% no-repeat;
-}
-@media (any-hover: hover) and (any-pointer: fine) {
-  .scene-peek[data-peek-following],
-  .scene-peek[data-peek-following] * { cursor: none; }
-}
-.scene-peek:focus-visible .peek-play { outline: 2px solid #4473ac; outline-offset: 3px; }
-@media (max-width: 760px) {
-  .scene-peek .peek-play, .scene-peek:hover .peek-play { padding: 12px 16px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .scene-peek[data-peek-following], .scene-peek[data-peek-following] * { cursor: pointer; }
-}
-.motion-paused .scene-peek[data-peek-following],
-.motion-paused .scene-peek[data-peek-following] * { cursor: pointer; }
-
-@media (prefers-contrast: more), (forced-colors: active) {
-  .scene-peek .peek-play { background: Canvas; color: CanvasText; border: 1px solid; text-shadow: none; }
-  .peek-glass { display: none; }
-}
-@media (prefers-reduced-transparency: reduce) {
-  .scene-peek .peek-play { background: #f7fafb; text-shadow: none; border: 1px solid #8b969d; }
-  .peek-glass { display: none; }
 }
